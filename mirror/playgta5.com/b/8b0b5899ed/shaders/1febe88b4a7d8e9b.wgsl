@@ -1,0 +1,59 @@
+diagnostic(off, derivative_uniformity);
+
+var<private> r0 : vec4<f32>;
+
+var<private> r1 : vec4<f32>;
+
+var<private> r2 : vec4<f32>;
+
+var<private> o0 : vec4<f32>;
+
+var<private> o1 : vec4<f32>;
+
+var<private> o2 : vec4<f32>;
+
+var<private> o3 : vec4<f32>;
+
+fn main_inner(v1 : vec4<f32>, v3 : vec4<f32>) {
+  r0 = vec4<f32>(((v1.xyz + vec3<f32>(0.05499999970197677612f))).xyz, r0.w);
+  let v = (r0.xyz * vec3<f32>(0.94786727428436279297f));
+  r0 = vec4<f32>(v.xyz, r0.w);
+  let v_1 = log2(r0.xyz);
+  r0 = vec4<f32>(v_1.xyz, r0.w);
+  let v_2 = (r0.xyz * vec3<f32>(2.40000009536743164062f));
+  r0 = vec4<f32>(v_2.xyz, r0.w);
+  let v_3 = exp2(r0.xyz);
+  r0 = vec4<f32>(v_3.xyz, r0.w);
+  let v_4 = bitcast<vec3<f32>>(select(vec3<u32>(), vec3<u32>(4294967295u), (vec3<f32>(0.04044999927282333374f) >= v1.xyz)));
+  r1 = vec4<f32>(v_4.xyz, r1.w);
+  r2 = vec4<f32>(((v1.xyz * vec3<f32>(0.07739938050508499146f))).xyz, r2.w);
+  let v_5 = bitcast<vec3<u32>>(r1.xyz);
+  let v_6 = r2.xyz;
+  let v_7 = select(r0.xyz, v_6, (v_5 != vec3<u32>()));
+  r0 = vec4<f32>(v_7.xyz, r0.w);
+  let v_8 = sqrt(r0.xyz);
+  o0 = vec4<f32>(v_8.xyz, o0.w);
+  o0.w = 0.0f;
+  let v_9 = fma(v3.xyz, vec3<f32>(0.5f), vec3<f32>(0.5f));
+  o1 = vec4<f32>(v_9.xyz, o1.w);
+  o1.w = 0.0f;
+  o2 = vec4<f32>(0.0f, 0.0f, 0.0f, 1.0f);
+  o3 = vec4<f32>(0.70710676908493041992f, 0.70710676908493041992f, 0.0f, 0.0f);
+}
+
+struct tint_symbol {
+  @location(0u)
+  o0 : vec4<f32>,
+  @location(1u)
+  o1 : vec4<f32>,
+  @location(2u)
+  o2 : vec4<f32>,
+  @location(3u)
+  o3 : vec4<f32>,
+}
+
+@fragment
+fn main(@location(1u) v1 : vec4<f32>, @location(3u) v3 : vec4<f32>) -> tint_symbol {
+  main_inner(v1, v3);
+  return tint_symbol(o0, o1, o2, o3);
+}

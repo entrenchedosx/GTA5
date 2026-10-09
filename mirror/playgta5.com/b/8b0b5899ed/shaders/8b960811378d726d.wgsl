@@ -1,0 +1,29 @@
+diagnostic(off, derivative_uniformity);
+
+struct cb3_struct {
+  tint_symbol : array<vec4<f32>, 3u>,
+}
+
+@group(1u) @binding(5u) var<uniform> cb5_5 : cb3_struct;
+
+var<private> o0 : vec4<f32>;
+
+var<private> o1 : vec4<f32>;
+
+fn main_inner() {
+  o0 = cb5_5.tint_symbol[2u];
+  o1 = cb5_5.tint_symbol[2u];
+}
+
+struct tint_symbol_1 {
+  @location(0u)
+  o0 : vec4<f32>,
+  @location(1u)
+  o1 : vec4<f32>,
+}
+
+@fragment
+fn main() -> tint_symbol_1 {
+  main_inner();
+  return tint_symbol_1(o0, o1);
+}

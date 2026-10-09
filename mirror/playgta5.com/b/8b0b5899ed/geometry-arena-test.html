@@ -1,0 +1,31 @@
+<!doctype html><meta charset="utf-8"><title>GPU buffer correctness test</title>
+<button id="run">Run GPU buffer correctness test</button><pre id="result">Ready</pre>
+<script src="geometry-buffer-arena.js"></script><script>
+document.querySelector('#run').onclick = async () => {
+  const output = document.querySelector('#result'); let device;
+  try {
+    const adapter = await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
+    device = await adapter.requestDevice(); device.pushErrorScope('validation');
+    const arena = new GeometryBufferArena(device, GPUBufferUsage.VERTEX|GPUBufferUsage.INDEX|GPUBufferUsage.COPY_SRC|GPUBufferUsage.COPY_DST);
+    const a = arena.allocate(1024), b = arena.allocate(512);
+    const first = new Uint8Array(1024).fill(73), second = new Uint8Array(512).fill(29);
+    device.queue.writeBuffer(a.buffer,a.offset,first); device.queue.writeBuffer(b.buffer,b.offset,second);
+    async function read(allocation,n) {
+      const rb=device.createBuffer({size:n,usage:GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ});
+      const enc=device.createCommandEncoder(); enc.copyBufferToBuffer(allocation.buffer,allocation.offset,rb,0,n); device.queue.submit([enc.finish()]);
+      await rb.mapAsync(GPUMapMode.READ); const bytes=new Uint8Array(rb.getMappedRange()).slice(); rb.unmap(); rb.destroy(); return bytes;
+    }
+    if (!(await read(a,1024)).every(x=>x===73) || !(await read(b,512)).every(x=>x===29)) throw Error('Shared upload offsets corrupted');
+    arena.retire(a); const enc=device.createCommandEncoder(), retired=arena.recordClears(enc);
+    device.queue.submit([enc.finish()]); await arena.submitted(retired);
+    if (!(await read(b,512)).every(x=>x===29)) throw Error('Neighbor corrupted by clear');
+    const c=arena.allocate(1024), d=arena.allocate(1024), recycled=c.offset===a.offset?c:d;
+    if (recycled.offset!==a.offset || !(await read(recycled,1024)).every(x=>x===0)) throw Error('Reused range was not zeroed');
+    for(const x of [b,c,d]) arena.retire(x);
+    const final=device.createCommandEncoder(), list=arena.recordClears(final); device.queue.submit([final.finish()]); await arena.submitted(list);
+    if(arena.snapshot().allocatedBytes!==0)throw Error('Empty allocations retained');
+    const error=await device.popErrorScope(); if(error)throw error;
+    output.textContent='PASS: real WebGPU shared uploads, neighboring ranges, deferred zeroed reuse, complete reclamation; zero validation errors.';
+  } catch(e) { output.textContent='FAIL: '+e.message; } finally { device?.destroy(); }
+};
+</script>

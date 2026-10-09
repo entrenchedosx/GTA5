@@ -1,0 +1,51 @@
+# Downloaded game data and runtime stay local. Browser code/shaders are tracked.
+/mirror/playgta5.com/data/
+/mirror/playgta5.com/b/8b0b5899ed/title/
+/mirror/playgta5.com/favicon.ico
+/runtime/
+/.downloads/
+/.installed-parts/
+/media/
+__pycache__/
+*.py[cod]
+*.log
+*.partial
+*.installing
+*.zip
+*.zip.part
+*.zip.sha256
+
+# Unserved copies from the original snapshot; canonical code is under mirror/.
+/homepage.html
+/headers.txt
+/game.js
+/loader.js
+/io_worker.js
+/wgpu_worker.js
+
+# Local profiling evidence, backups and generated collection state.
+/performance/*.json
+/performance/*.jsonl
+/performance/*.png
+/performance/original/
+/performance/.syntax-*.mjs
+/performance/gta5-installer-*/
+!/performance/benchmark-summary.json
+/snapshot/*
+!/snapshot/manifest-sha256.json
+!/snapshot/engine-evidence.json
+!/snapshot/asset-evidence.json
+!/snapshot/DISCOVERY_REPORT.md
+
+# Credentials, personal saves and machine-specific tooling.
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+.vscode/
+.idea/
+node_modules/
+userdata/
+savegames/

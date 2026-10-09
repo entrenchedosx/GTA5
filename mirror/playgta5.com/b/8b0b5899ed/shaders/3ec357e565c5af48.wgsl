@@ -1,0 +1,179 @@
+diagnostic(off, derivative_uniformity);
+
+var<private> r0 : vec4<f32>;
+
+var<private> r1 : vec4<f32>;
+
+var<private> r2 : vec4<f32>;
+
+var<private> r3 : vec4<f32>;
+
+var<private> r4 : vec4<f32>;
+
+var<private> r5 : vec4<f32>;
+
+struct cb17_struct {
+  tint_symbol : array<vec4<f32>, 17u>,
+}
+
+@group(1u) @binding(2u) var<uniform> cb2_2 : cb17_struct;
+
+struct cb1_struct {
+  tint_symbol_1 : array<vec4<f32>, 1u>,
+}
+
+@group(1u) @binding(3u) var<uniform> cb3_3 : cb1_struct;
+
+struct cb4_struct {
+  tint_symbol_2 : array<vec4<f32>, 4u>,
+}
+
+@group(1u) @binding(5u) var<uniform> cb5_5 : cb4_struct;
+
+struct cb5_struct {
+  tint_symbol_3 : array<vec4<f32>, 5u>,
+}
+
+@group(1u) @binding(12u) var<uniform> cb12_12 : cb5_struct;
+
+struct cb7_struct {
+  tint_symbol_4 : array<vec4<f32>, 7u>,
+}
+
+@group(1u) @binding(11u) var<uniform> cb11_11 : cb7_struct;
+
+@group(1u) @binding(16u) var s0 : sampler;
+
+@group(1u) @binding(19u) var s3 : sampler;
+
+@group(1u) @binding(20u) var s4 : sampler;
+
+@group(1u) @binding(32u) var t0 : texture_2d<f32>;
+
+@group(1u) @binding(35u) var t3 : texture_2d<f32>;
+
+@group(1u) @binding(36u) var t4 : texture_2d<f32>;
+
+var<private> icb0 : array<vec4<f32>, 4u> = array<vec4<f32>, 4u>(vec4<f32>(1.0f, 0.0f, 0.0f, 0.0f), vec4<f32>(0.0f, 1.0f, 0.0f, 0.0f), vec4<f32>(0.0f, 0.0f, 1.0f, 0.0f), vec4<f32>(0.0f, 0.0f, 0.0f, 1.0f));
+
+var<private> v0 : vec4<f32>;
+
+var<private> o0 : vec4<f32>;
+
+fn main_inner(v : vec4<f32>, v1 : vec4<f32>, v2 : vec4<f32>, v3 : vec4<f32>, v4 : vec4<f32>) {
+  var v_1 : vec4<f32> = v;
+  v_1.w = (1.0f / v.w);
+  v0 = v_1;
+  let v_2 = max(v0.xy, vec2<f32>());
+  let v_3 = bitcast<vec2<f32>>(select(vec2<u32>(v_2), vec2<u32>(4294967295u), (v_2 >= vec2<f32>(4294967296.0f))));
+  r0 = vec4<f32>(v_3.xy, r0.zw);
+  let v_4 = bitcast<vec2<f32>>((bitcast<vec2<u32>>(r0.xy) & vec2<u32>(1u)));
+  r0 = vec4<f32>(v_4.xy, r0.zw);
+  r0.y = bitcast<f32>((bitcast<i32>(r0.y) << 1u));
+  r0.x = bitcast<f32>((bitcast<i32>(r0.x) + bitcast<i32>(r0.y)));
+  r0.x = dot(cb2_2.tint_symbol[0u], icb0[bitcast<i32>(r0.x)]);
+  r0.x = bitcast<f32>(select(0u, 4294967295u, (r0.x < 1.0f)));
+  v_5((bitcast<u32>(r0.x) != 0u));
+  r0 = textureSample(t0, s0, v1.xyxx.xy);
+  r1.x = dot(v2.xyz, v2.xyz);
+  r1.x = inverseSqrt(r1.x);
+  let v_6 = (r1.xxx * v2.xyz);
+  r1 = vec4<f32>(r1.x, v_6.xyz);
+  r2 = textureSample(t4, s4, v1.xyxx.xy);
+  let v_7 = (r2.xy * r2.xy);
+  r2 = vec4<f32>(v_7.xy, r2.zw);
+  let v_8 = (r0.xyz * cb11_11.tint_symbol_4[0u].xyz);
+  r0 = vec4<f32>(v_8.xyz, r0.w);
+  r0 = (r0 * v3.xxxw);
+  r3.x = (v3.x * cb2_2.tint_symbol[15u].z);
+  r3.y = (v3.x * cb11_11.tint_symbol_4[4u].y);
+  r3.y = (r3.y * v2.w);
+  let v_9 = ((-(cb11_11.tint_symbol_4[2u].zzzz)).zw + vec2<f32>(1.0f, 2.0f));
+  r3 = vec4<f32>(r3.xy, v_9.xy);
+  r4.x = (r3.z * v3.z);
+  let v_10 = (r3.ww * v1.zw);
+  let v_11 = r4;
+  r4 = vec4<f32>(v_11.x, v_10.xy, v_11.w);
+  r5 = textureSample(t3, s3, r4.yzyy.xy);
+  r3.w = (cb5_5.tint_symbol_2[3u].z * cb11_11.tint_symbol_4[2u].z);
+  r4.y = ((-(r5.xxxx)).y + r5.z);
+  r5.x = fma(r3.w, r4.y, r5.x);
+  let v_12 = (r5.xy * cb11_11.tint_symbol_4[2u].xx);
+  let v_13 = r4;
+  r4 = vec4<f32>(v_13.x, v_12.xy, v_13.w);
+  r3.w = fma(v3.z, r3.z, -1.0f);
+  r3.z = fma(r3.z, r3.w, 1.0f);
+  r3.w = (r3.z * r4.y);
+  let v_14 = -(r0.xyxz);
+  let v_15 = fma(cb11_11.tint_symbol_4[3u].xyz, cb11_11.tint_symbol_4[2u].yyy, v_14.xyw);
+  r5 = vec4<f32>(v_15.xy, r5.z, v_15.z);
+  let v_16 = fma(r3.www, r5.xyw, r0.xyz);
+  r0 = vec4<f32>(v_16.xyz, r0.w);
+  r3.w = (r4.x * cb11_11.tint_symbol_4[2u].x);
+  let v_17 = ((-(r0.xyxz)).xyw + r5.zzz);
+  r4 = vec4<f32>(v_17.xy, r4.z, v_17.z);
+  let v_18 = fma(r3.www, r4.xyw, r0.xyz);
+  r0 = vec4<f32>(v_18.xyz, r0.w);
+  r3.z = fma((-(r4.zzzz)).z, r3.z, 1.0f);
+  r3.y = (r3.z * r3.y);
+  r3.z = (v3.x * cb11_11.tint_symbol_4[2u].w);
+  r3.z = (r3.z * 0.75f);
+  r2.x = dot(r2.xyz, cb11_11.tint_symbol_4[5u].xyz);
+  r2.x = (r2.x * r3.z);
+  r2.y = dot(v4.xyz, v4.xyz);
+  r2.y = inverseSqrt(r2.y);
+  let v_19 = ((-(cb3_3.tint_symbol_1[0u].xyzx)).xyz + vec3<f32>(0.0f, 0.0f, -1.0f));
+  r4 = vec4<f32>(v_19.xyz, r4.w);
+  let v_20 = fma(cb11_11.tint_symbol_4[6u].www, r4.xyz, cb3_3.tint_symbol_1[0u].xyz);
+  r4 = vec4<f32>(v_20.xyz, r4.w);
+  let v_21 = (r2.xxx * cb11_11.tint_symbol_4[6u].xyz);
+  r5 = vec4<f32>(v_21.xyz, r5.w);
+  let v_22 = -(r4.xyzx);
+  let v_23 = fma(v4.xyz, r2.yyy, v_22.xyz);
+  r2 = vec4<f32>(v_23.xyz, r2.w);
+  r3.z = dot(r2.xyz, r2.xyz);
+  r3.z = inverseSqrt(r3.z);
+  let v_24 = (r2.xyz * r3.zzz);
+  r2 = vec4<f32>(v_24.xyz, r2.w);
+  r1.y = dot(r1.yzw, r2.xyz);
+  r1.y = clamp(((r1.yyyy + vec4<f32>(0.00000000999999993923f))).y, 0.0f, 1.0f);
+  r1.z = fma(r2.w, 15.0f, 0.00000000999999993923f);
+  r1.y = log2(r1.y);
+  r1.y = (r1.y * r1.z);
+  r1.y = exp2(r1.y);
+  let v_25 = fma(r5.xyz, r1.yyy, r0.xyz);
+  r0 = vec4<f32>(v_25.xyz, r0.w);
+  let v_26 = min(r0.xyz, vec3<f32>(240.0f));
+  r0 = vec4<f32>(v_26.xyz, r0.w);
+  r2.w = (r0.w * cb2_2.tint_symbol[15u].x);
+  r0.w = fma(v2.z, r1.x, -0.34999999403953552246f);
+  r0.w = clamp(((r0.wwww * vec4<f32>(1.53846156597137451172f))).w, 0.0f, 1.0f);
+  r0.w = (r0.w * cb5_5.tint_symbol_2[3u].z);
+  r1.x = ((-(cb2_2.tint_symbol[16u].zzzz)).x + 1.0f);
+  r0.w = (r0.w * r1.x);
+  r0.w = (r3.x * r0.w);
+  r1.x = fma((-(r3.yyyy)).x, 0.5f, 1.0f);
+  r0.w = (r0.w * r1.x);
+  r0.w = fma(r0.w, -0.5f, 1.0f);
+  let v_27 = (r0.www * r0.xyz);
+  r2 = vec4<f32>(v_27.xyz, r2.w);
+  r0.x = bitcast<f32>((bitcast<u32>(cb12_12.tint_symbol_3[4u].x) | bitcast<u32>(cb12_12.tint_symbol_3[4u].y)));
+  let v_28 = bitcast<vec4<u32>>(r0.xxxx);
+  r0 = select(r2, v3, (v_28 != vec4<u32>()));
+  r1.x = bitcast<f32>(select(0u, 4294967295u, (0.0039215688593685627f >= r0.w)));
+  v_5((bitcast<u32>(r1.x) != 0u));
+  o0 = r0;
+}
+
+fn v_5(v_29 : bool) {
+  if (v_29) {
+    discard;
+    return;
+  }
+}
+
+@fragment
+fn main(@builtin(position) v_30 : vec4<f32>, @location(1u) v1 : vec4<f32>, @location(2u) v2 : vec4<f32>, @location(3u) v3 : vec4<f32>, @location(4u) v4 : vec4<f32>) -> @location(0u) vec4<f32> {
+  main_inner(v_30, v1, v2, v3, v4);
+  return o0;
+}

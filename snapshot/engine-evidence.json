@@ -1,0 +1,5307 @@
+{
+  "files": {
+    "game.wasm": {
+      "bytes": 63201802,
+      "sha256": "11ca8d2c04c5e843d18ff4aea4899d72c86973c6b031df334e67c446b2ae83e0",
+      "magic": "0061736d",
+      "version_le_u32": 1
+    },
+    "game.js": {
+      "bytes": 124240,
+      "sha256": "81a7d6e912238de3d89bcafb1b01450671c6793167babb0ec970f308f454bcf0"
+    }
+  },
+  "sections": [
+    {
+      "id": 1,
+      "name": "type",
+      "offset": 8,
+      "payload_offset": 12,
+      "payload_bytes": 21379,
+      "end_offset": 21391
+    },
+    {
+      "id": 2,
+      "name": "import",
+      "offset": 21391,
+      "payload_offset": 21394,
+      "payload_bytes": 2350,
+      "end_offset": 23744
+    },
+    {
+      "id": 3,
+      "name": "function",
+      "offset": 23744,
+      "payload_offset": 23748,
+      "payload_bytes": 95486,
+      "end_offset": 119234
+    },
+    {
+      "id": 4,
+      "name": "table",
+      "offset": 119234,
+      "payload_offset": 119236,
+      "payload_bytes": 9,
+      "end_offset": 119245
+    },
+    {
+      "id": 6,
+      "name": "global",
+      "offset": 119245,
+      "payload_offset": 119248,
+      "payload_bytes": 334,
+      "end_offset": 119582
+    },
+    {
+      "id": 7,
+      "name": "export",
+      "offset": 119582,
+      "payload_offset": 119585,
+      "payload_bytes": 551,
+      "end_offset": 120136
+    },
+    {
+      "id": 8,
+      "name": "start",
+      "offset": 120136,
+      "payload_offset": 120138,
+      "payload_bytes": 1,
+      "end_offset": 120139
+    },
+    {
+      "id": 9,
+      "name": "element",
+      "offset": 120139,
+      "payload_offset": 120143,
+      "payload_bytes": 237057,
+      "end_offset": 357200
+    },
+    {
+      "id": 12,
+      "name": "data_count",
+      "offset": 357200,
+      "payload_offset": 357202,
+      "payload_bytes": 2,
+      "end_offset": 357204
+    },
+    {
+      "id": 10,
+      "name": "code",
+      "offset": 357204,
+      "payload_offset": 357209,
+      "payload_bytes": 48192941,
+      "end_offset": 48550150
+    },
+    {
+      "id": 11,
+      "name": "data",
+      "offset": 48550150,
+      "payload_offset": 48550155,
+      "payload_bytes": 7828019,
+      "end_offset": 56378174
+    },
+    {
+      "id": 0,
+      "name": "custom",
+      "offset": 56378174,
+      "payload_offset": 56378179,
+      "payload_bytes": 6823623,
+      "end_offset": 63201802
+    }
+  ],
+  "custom_sections": [
+    {
+      "name": "name",
+      "section_offset": 56378174,
+      "payload_offset": 56378184,
+      "payload_bytes": 6823618
+    }
+  ],
+  "imports": [
+    {
+      "module": "env",
+      "field": "memory",
+      "kind": 2,
+      "offset": 21406,
+      "limits": true
+    },
+    {
+      "module": "env",
+      "field": "wasm_now_ms",
+      "kind": 0,
+      "offset": 21430,
+      "type_index": 246
+    },
+    {
+      "module": "env",
+      "field": "wasm_hang_line_js",
+      "kind": 0,
+      "offset": 21455,
+      "type_index": 1
+    },
+    {
+      "module": "env",
+      "field": "wasm_audio_publish_js",
+      "kind": 0,
+      "offset": 21483,
+      "type_index": 7
+    },
+    {
+      "module": "env",
+      "field": "wasm_httpfs_io_start_js",
+      "kind": 0,
+      "offset": 21513,
+      "type_index": 1
+    },
+    {
+      "module": "env",
+      "field": "wasm_httpfs_manifest_js",
+      "kind": 0,
+      "offset": 21543,
+      "type_index": 10
+    },
+    {
+      "module": "env",
+      "field": "wasm_userdata_page_js",
+      "kind": 0,
+      "offset": 21571,
+      "type_index": 21
+    },
+    {
+      "module": "env",
+      "field": "wasm_userdata_put_js",
+      "kind": 0,
+      "offset": 21598,
+      "type_index": 790
+    },
+    {
+      "module": "env",
+      "field": "wasm_userdata_delete_js",
+      "kind": 0,
+      "offset": 21629,
+      "type_index": 1
+    },
+    {
+      "module": "env",
+      "field": "wgpu_start_worker",
+      "kind": 0,
+      "offset": 21653,
+      "type_index": 6
+    },
+    {
+      "module": "env",
+      "field": "wasm_has_page_js",
+      "kind": 0,
+      "offset": 21676,
+      "type_index": 21
+    },
+    {
+      "module": "env",
+      "field": "wasm_input_publish_js",
+      "kind": 0,
+      "offset": 21704,
+      "type_index": 1
+    },
+    {
+      "module": "env",
+      "field": "wasm_module_int_js",
+      "kind": 0,
+      "offset": 21729,
+      "type_index": 10
+    },
+    {
+      "module": "env",
+      "field": "emscripten_get_now",
+      "kind": 0,
+      "offset": 21754,
+      "type_index": 246
+    },
+    {
+      "module": "env",
+      "field": "wasm_print_line_js",
+      "kind": 0,
+      "offset": 21780,
+      "type_index": 1
+    },
+    {
+      "module": "env",
+      "field": "emscripten_stack_snapshot",
+      "kind": 0,
+      "offset": 21812,
+      "type_index": 12
+    },
+    {
+      "module": "env",
+      "field": "emscripten_stack_unwind_buffer",
+      "kind": 0,
+      "offset": 21849,
+      "type_index": 27
+    },
+    {
+      "module": "env",
+      "field": "emscripten_asm_const_int",
+      "kind": 0,
+      "offset": 21880,
+      "type_index": 22
+    },
+    {
+      "module": "env",
+      "field": "emscripten_get_heap_max",
+      "kind": 0,
+      "offset": 21910,
+      "type_index": 12
+    },
+    {
+      "module": "env",
+      "field": "exit",
+      "kind": 0,
+      "offset": 21921,
+      "type_index": 13
+    },
+    {
+      "module": "env",
+      "field": "invoke_vjj",
+      "kind": 0,
+      "offset": 21938,
+      "type_index": 6
+    },
+    {
+      "module": "env",
+      "field": "invoke_ij",
+      "kind": 0,
+      "offset": 21954,
+      "type_index": 2
+    },
+    {
+      "module": "env",
+      "field": "invoke_vj",
+      "kind": 0,
+      "offset": 21970,
+      "type_index": 3
+    },
+    {
+      "module": "env",
+      "field": "invoke_vjij",
+      "kind": 0,
+      "offset": 21988,
+      "type_index": 17
+    },
+    {
+      "module": "env",
+      "field": "invoke_jjij",
+      "kind": 0,
+      "offset": 22006,
+      "type_index": 101
+    },
+    {
+      "module": "env",
+      "field": "invoke_vjii",
+      "kind": 0,
+      "offset": 22024,
+      "type_index": 33
+    },
+    {
+      "module": "env",
+      "field": "invoke_iji",
+      "kind": 0,
+      "offset": 22041,
+      "type_index": 27
+    },
+    {
+      "module": "env",
+      "field": "invoke_vjjii",
+      "kind": 0,
+      "offset": 22060,
+      "type_index": 82
+    },
+    {
+      "module": "env",
+      "field": "invoke_jjiiijij",
+      "kind": 0,
+      "offset": 22082,
+      "type_index": 791
+    },
+    {
+      "module": "env",
+      "field": "invoke_ijji",
+      "kind": 0,
+      "offset": 22101,
+      "type_index": 42
+    },
+    {
+      "module": "env",
+      "field": "invoke_ijjiii",
+      "kind": 0,
+      "offset": 22121,
+      "type_index": 216
+    },
+    {
+      "module": "env",
+      "field": "emscripten_asm_const_int_sync_on_main_thread",
+      "kind": 0,
+      "offset": 22173,
+      "type_index": 22
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "field": "proc_exit",
+      "kind": 0,
+      "offset": 22208,
+      "type_index": 13
+    },
+    {
+      "module": "env",
+      "field": "_tzset_js",
+      "kind": 0,
+      "offset": 22224,
+      "type_index": 9
+    },
+    {
+      "module": "env",
+      "field": "_abort_js",
+      "kind": 0,
+      "offset": 22240,
+      "type_index": 5
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "field": "clock_time_get",
+      "kind": 0,
+      "offset": 22280,
+      "type_index": 104
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "field": "fd_close",
+      "kind": 0,
+      "offset": 22314,
+      "type_index": 18
+    },
+    {
+      "module": "env",
+      "field": "emscripten_date_now",
+      "kind": 0,
+      "offset": 22340,
+      "type_index": 246
+    },
+    {
+      "module": "env",
+      "field": "_emscripten_thread_set_strongref",
+      "kind": 0,
+      "offset": 22380,
+      "type_index": 1
+    },
+    {
+      "module": "env",
+      "field": "emscripten_exit_with_live_runtime",
+      "kind": 0,
+      "offset": 22420,
+      "type_index": 5
+    },
+    {
+      "module": "env",
+      "field": "__syscall_fcntl64",
+      "kind": 0,
+      "offset": 22444,
+      "type_index": 128
+    },
+    {
+      "module": "env",
+      "field": "__syscall_openat",
+      "kind": 0,
+      "offset": 22468,
+      "type_index": 393
+    },
+    {
+      "module": "env",
+      "field": "__syscall_ioctl",
+      "kind": 0,
+      "offset": 22491,
+      "type_index": 128
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "field": "fd_write",
+      "kind": 0,
+      "offset": 22526,
+      "type_index": 217
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "field": "fd_read",
+      "kind": 0,
+      "offset": 22560,
+      "type_index": 217
+    },
+    {
+      "module": "env",
+      "field": "__syscall_fstat64",
+      "kind": 0,
+      "offset": 22585,
+      "type_index": 60
+    },
+    {
+      "module": "env",
+      "field": "__syscall_stat64",
+      "kind": 0,
+      "offset": 22608,
+      "type_index": 2
+    },
+    {
+      "module": "env",
+      "field": "__syscall_newfstatat",
+      "kind": 0,
+      "offset": 22635,
+      "type_index": 294
+    },
+    {
+      "module": "env",
+      "field": "__syscall_lstat64",
+      "kind": 0,
+      "offset": 22660,
+      "type_index": 2
+    },
+    {
+      "module": "env",
+      "field": "__syscall_ftruncate64",
+      "kind": 0,
+      "offset": 22688,
+      "type_index": 60
+    },
+    {
+      "module": "env",
+      "field": "__syscall_getcwd",
+      "kind": 0,
+      "offset": 22711,
+      "type_index": 2
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "field": "environ_sizes_get",
+      "kind": 0,
+      "offset": 22754,
+      "type_index": 2
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "field": "environ_get",
+      "kind": 0,
+      "offset": 22791,
+      "type_index": 2
+    },
+    {
+      "module": "env",
+      "field": "_emscripten_init_main_thread_js",
+      "kind": 0,
+      "offset": 22829,
+      "type_index": 1
+    },
+    {
+      "module": "env",
+      "field": "_emscripten_thread_mailbox_await",
+      "kind": 0,
+      "offset": 22868,
+      "type_index": 1
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "field": "fd_seek",
+      "kind": 0,
+      "offset": 22901,
+      "type_index": 393
+    },
+    {
+      "module": "env",
+      "field": "__syscall_mkdirat",
+      "kind": 0,
+      "offset": 22926,
+      "type_index": 119
+    },
+    {
+      "module": "env",
+      "field": "_mktime_js",
+      "kind": 0,
+      "offset": 22943,
+      "type_index": 0
+    },
+    {
+      "module": "env",
+      "field": "_localtime_js",
+      "kind": 0,
+      "offset": 22963,
+      "type_index": 2
+    },
+    {
+      "module": "env",
+      "field": "_gmtime_js",
+      "kind": 0,
+      "offset": 22980,
+      "type_index": 2
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "field": "fd_pread",
+      "kind": 0,
+      "offset": 23014,
+      "type_index": 265
+    },
+    {
+      "module": "env",
+      "field": "_emscripten_receive_on_main_thread_js",
+      "kind": 0,
+      "offset": 23059,
+      "type_index": 792
+    },
+    {
+      "module": "env",
+      "field": "emscripten_check_blocking_allowed",
+      "kind": 0,
+      "offset": 23100,
+      "type_index": 5
+    },
+    {
+      "module": "env",
+      "field": "__pthread_create_js",
+      "kind": 0,
+      "offset": 23126,
+      "type_index": 28
+    },
+    {
+      "module": "env",
+      "field": "_emscripten_thread_cleanup",
+      "kind": 0,
+      "offset": 23159,
+      "type_index": 1
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "field": "fd_pwrite",
+      "kind": 0,
+      "offset": 23194,
+      "type_index": 265
+    },
+    {
+      "module": "env",
+      "field": "__syscall_getdents64",
+      "kind": 0,
+      "offset": 23222,
+      "type_index": 104
+    },
+    {
+      "module": "env",
+      "field": "__syscall_unlinkat",
+      "kind": 0,
+      "offset": 23247,
+      "type_index": 119
+    },
+    {
+      "module": "env",
+      "field": "__syscall_rmdir",
+      "kind": 0,
+      "offset": 23269,
+      "type_index": 4
+    },
+    {
+      "module": "env",
+      "field": "__syscall_renameat",
+      "kind": 0,
+      "offset": 23294,
+      "type_index": 393
+    },
+    {
+      "module": "env",
+      "field": "__syscall_poll",
+      "kind": 0,
+      "offset": 23316,
+      "type_index": 24
+    },
+    {
+      "module": "env",
+      "field": "__syscall_statfs64",
+      "kind": 0,
+      "offset": 23341,
+      "type_index": 22
+    },
+    {
+      "module": "env",
+      "field": "emscripten_num_logical_cores",
+      "kind": 0,
+      "offset": 23376,
+      "type_index": 21
+    },
+    {
+      "module": "env",
+      "field": "_emscripten_system",
+      "kind": 0,
+      "offset": 23401,
+      "type_index": 4
+    },
+    {
+      "module": "env",
+      "field": "_emscripten_notify_mailbox_postmessage",
+      "kind": 0,
+      "offset": 23446,
+      "type_index": 3
+    },
+    {
+      "module": "env",
+      "field": "emscripten_resize_heap",
+      "kind": 0,
+      "offset": 23475,
+      "type_index": 4
+    },
+    {
+      "module": "env",
+      "field": "_emscripten_throw_longjmp",
+      "kind": 0,
+      "offset": 23507,
+      "type_index": 5
+    },
+    {
+      "module": "env",
+      "field": "__syscall_accept4",
+      "kind": 0,
+      "offset": 23531,
+      "type_index": 394
+    },
+    {
+      "module": "env",
+      "field": "__syscall_connect",
+      "kind": 0,
+      "offset": 23556,
+      "type_index": 395
+    },
+    {
+      "module": "env",
+      "field": "__syscall_getsockname",
+      "kind": 0,
+      "offset": 23585,
+      "type_index": 394
+    },
+    {
+      "module": "env",
+      "field": "__syscall_getsockopt",
+      "kind": 0,
+      "offset": 23613,
+      "type_index": 793
+    },
+    {
+      "module": "env",
+      "field": "__syscall_recvfrom",
+      "kind": 0,
+      "offset": 23639,
+      "type_index": 794
+    },
+    {
+      "module": "env",
+      "field": "__syscall_sendto",
+      "kind": 0,
+      "offset": 23663,
+      "type_index": 795
+    },
+    {
+      "module": "env",
+      "field": "__syscall_setsockopt",
+      "kind": 0,
+      "offset": 23691,
+      "type_index": 562
+    },
+    {
+      "module": "env",
+      "field": "__syscall_shutdown",
+      "kind": 0,
+      "offset": 23717,
+      "type_index": 218
+    },
+    {
+      "module": "env",
+      "field": "__syscall_socket",
+      "kind": 0,
+      "offset": 23741,
+      "type_index": 218
+    }
+  ],
+  "exports": [
+    {
+      "name": "__wasm_call_ctors",
+      "kind": 0,
+      "index": 85
+    },
+    {
+      "name": "__indirect_function_table",
+      "kind": 1,
+      "index": 0
+    },
+    {
+      "name": "__main_argc_argv",
+      "kind": 0,
+      "index": 103
+    },
+    {
+      "name": "pthread_self",
+      "kind": 0,
+      "index": 90897
+    },
+    {
+      "name": "fflush",
+      "kind": 0,
+      "index": 90764
+    },
+    {
+      "name": "htons",
+      "kind": 0,
+      "index": 90793
+    },
+    {
+      "name": "ntohs",
+      "kind": 0,
+      "index": 90793
+    },
+    {
+      "name": "_emscripten_tls_init",
+      "kind": 0,
+      "index": 90693
+    },
+    {
+      "name": "__funcs_on_exit",
+      "kind": 0,
+      "index": 90715
+    },
+    {
+      "name": "_emscripten_thread_init",
+      "kind": 0,
+      "index": 91110
+    },
+    {
+      "name": "__set_thread_state",
+      "kind": 0,
+      "index": 90740
+    },
+    {
+      "name": "_emscripten_thread_crashed",
+      "kind": 0,
+      "index": 90742
+    },
+    {
+      "name": "_emscripten_run_js_on_main_thread_done",
+      "kind": 0,
+      "index": 90855
+    },
+    {
+      "name": "_emscripten_run_js_on_main_thread",
+      "kind": 0,
+      "index": 90856
+    },
+    {
+      "name": "_emscripten_thread_free_data",
+      "kind": 0,
+      "index": 90881
+    },
+    {
+      "name": "_emscripten_thread_exit",
+      "kind": 0,
+      "index": 90882
+    },
+    {
+      "name": "_emscripten_check_mailbox",
+      "kind": 0,
+      "index": 90969
+    },
+    {
+      "name": "setThrew",
+      "kind": 0,
+      "index": 91014
+    },
+    {
+      "name": "emscripten_stack_set_limits",
+      "kind": 0,
+      "index": 91024
+    },
+    {
+      "name": "_emscripten_stack_restore",
+      "kind": 0,
+      "index": 91107
+    },
+    {
+      "name": "_emscripten_stack_alloc",
+      "kind": 0,
+      "index": 91108
+    },
+    {
+      "name": "emscripten_stack_get_current",
+      "kind": 0,
+      "index": 91109
+    }
+  ],
+  "defined_memory_sections": [],
+  "targeted_printable_string_hits": [
+    {
+      "offset": 21419,
+      "text": "wasm_now_ms"
+    },
+    {
+      "offset": 21438,
+      "text": "wasm_hang_line_js"
+    },
+    {
+      "offset": 21462,
+      "text": "wasm_audio_publish_js"
+    },
+    {
+      "offset": 21490,
+      "text": "wasm_httpfs_io_start_js"
+    },
+    {
+      "offset": 21520,
+      "text": "wasm_httpfs_manifest_js"
+    },
+    {
+      "offset": 21550,
+      "text": "wasm_userdata_page_js"
+    },
+    {
+      "offset": 21578,
+      "text": "wasm_userdata_put_js"
+    },
+    {
+      "offset": 21606,
+      "text": "wasm_userdata_delete_js"
+    },
+    {
+      "offset": 21660,
+      "text": "wasm_has_page_js"
+    },
+    {
+      "offset": 21683,
+      "text": "wasm_input_publish_js"
+    },
+    {
+      "offset": 21711,
+      "text": "wasm_module_int_js"
+    },
+    {
+      "offset": 21736,
+      "text": "emscripten_get_now"
+    },
+    {
+      "offset": 21762,
+      "text": "wasm_print_line_js"
+    },
+    {
+      "offset": 21787,
+      "text": "emscripten_stack_snapshot"
+    },
+    {
+      "offset": 21819,
+      "text": "emscripten_stack_unwind_buffer"
+    },
+    {
+      "offset": 21856,
+      "text": "emscripten_asm_const_int"
+    },
+    {
+      "offset": 21887,
+      "text": "emscripten_get_heap_max"
+    },
+    {
+      "offset": 22125,
+      "text": "env,emscripten_asm_const_int_sync_on_main_thread"
+    },
+    {
+      "offset": 22321,
+      "text": "emscripten_date_now"
+    },
+    {
+      "offset": 22344,
+      "text": "env _emscripten_thread_set_strongref"
+    },
+    {
+      "offset": 22383,
+      "text": "env!emscripten_exit_with_live_runtime"
+    },
+    {
+      "offset": 22798,
+      "text": "_emscripten_init_main_thread_js"
+    },
+    {
+      "offset": 22832,
+      "text": "env _emscripten_thread_mailbox_await"
+    },
+    {
+      "offset": 23018,
+      "text": "env%_emscripten_receive_on_main_thread_js"
+    },
+    {
+      "offset": 23063,
+      "text": "env!emscripten_check_blocking_allowed"
+    },
+    {
+      "offset": 23133,
+      "text": "_emscripten_thread_cleanup"
+    },
+    {
+      "offset": 23348,
+      "text": "emscripten_num_logical_cores"
+    },
+    {
+      "offset": 23383,
+      "text": "_emscripten_system"
+    },
+    {
+      "offset": 23404,
+      "text": "env&_emscripten_notify_mailbox_postmessage"
+    },
+    {
+      "offset": 23453,
+      "text": "emscripten_resize_heap"
+    },
+    {
+      "offset": 23482,
+      "text": "_emscripten_throw_longjmp"
+    },
+    {
+      "offset": 119587,
+      "text": "__wasm_call_ctors"
+    },
+    {
+      "offset": 119702,
+      "text": "_emscripten_tls_init"
+    },
+    {
+      "offset": 119747,
+      "text": "_emscripten_thread_init"
+    },
+    {
+      "offset": 119798,
+      "text": "_emscripten_thread_crashed"
+    },
+    {
+      "offset": 119828,
+      "text": "&_emscripten_run_js_on_main_thread_done"
+    },
+    {
+      "offset": 119871,
+      "text": "!_emscripten_run_js_on_main_thread"
+    },
+    {
+      "offset": 119910,
+      "text": "_emscripten_thread_free_data"
+    },
+    {
+      "offset": 119943,
+      "text": "_emscripten_thread_exit"
+    },
+    {
+      "offset": 119971,
+      "text": "_emscripten_check_mailbox"
+    },
+    {
+      "offset": 120014,
+      "text": "emscripten_stack_set_limits"
+    },
+    {
+      "offset": 120046,
+      "text": "_emscripten_stack_restore"
+    },
+    {
+      "offset": 120076,
+      "text": "_emscripten_stack_alloc"
+    },
+    {
+      "offset": 120104,
+      "text": "emscripten_stack_get_current"
+    },
+    {
+      "offset": 9953143,
+      "text": "j\", .H"
+    },
+    {
+      "offset": 12275488,
+      "text": "\", .H"
+    },
+    {
+      "offset": 12275568,
+      "text": "\", .H"
+    },
+    {
+      "offset": 18555269,
+      "text": "x:/gta5/art/anim"
+    },
+    {
+      "offset": 30136801,
+      "text": "j\") .H"
+    },
+    {
+      "offset": 48551571,
+      "text": "{ \"GTA5Env\" : \"%s\" }"
+    },
+    {
+      "offset": 48551592,
+      "text": "{ \"GTA5\" : \"%s\" }"
+    },
+    {
+      "offset": 48554492,
+      "text": "|                       |               Scaleform Internal               | |                        Rage Resource Memory                       |"
+    },
+    {
+      "offset": 48554696,
+      "text": "|  Rage heap = %6dk, peak = %6dk.                        |"
+    },
+    {
+      "offset": 48556290,
+      "text": "gta5_liberty"
+    },
+    {
+      "offset": 48559015,
+      "text": "Garage is Empty"
+    },
+    {
+      "offset": 48577185,
+      "text": "Amount to modify the impulse when kicking while using the rage special ability"
+    },
+    {
+      "offset": 48577324,
+      "text": "DRR_RageSpecialAbility"
+    },
+    {
+      "offset": 48584705,
+      "text": "rage__fwTextDatabaseEntry"
+    },
+    {
+      "offset": 48585946,
+      "text": "RAGE Audio - disable RAVE category telemetry"
+    },
+    {
+      "offset": 48588390,
+      "text": "Unable to create DXGI factory"
+    },
+    {
+      "offset": 48590763,
+      "text": "[RAGE Audio] Assert if any sounds are in the base category"
+    },
+    {
+      "offset": 48591874,
+      "text": "CGenericGameStorage UpdatePhotoGallery"
+    },
+    {
+      "offset": 48591913,
+      "text": "GenericGameStoragePhotoGallery"
+    },
+    {
+      "offset": 48602853,
+      "text": "MatchmakingFlags::MMF_RockstarCreatedOnly"
+    },
+    {
+      "offset": 48620101,
+      "text": "rage__SCamcorderOverlay"
+    },
+    {
+      "offset": 48622217,
+      "text": "ragenet_relay"
+    },
+    {
+      "offset": 48627432,
+      "text": "WasmSandbox"
+    },
+    {
+      "offset": 48627987,
+      "text": "CGarage__Box"
+    },
+    {
+      "offset": 48635996,
+      "text": "rage__clothBridgeSimGfx"
+    },
+    {
+      "offset": 48642055,
+      "text": "Garage Index"
+    },
+    {
+      "offset": 48642095,
+      "text": "Garage Instance Index"
+    },
+    {
+      "offset": 48678833,
+      "text": "CNetObjVehicle::ProcessBadging bVehicleBadge[%d] index[%d]--rage_new"
+    },
+    {
+      "offset": 48680931,
+      "text": "RAGE pfDraw"
+    },
+    {
+      "offset": 48681214,
+      "text": "rage - Profile Draw"
+    },
+    {
+      "offset": 48683907,
+      "text": "isrockstardev"
+    },
+    {
+      "offset": 48684079,
+      "text": "RemoteIsRockstarDev"
+    },
+    {
+      "offset": 48684099,
+      "text": "InviteFlags::IF_IsRockstarDev"
+    },
+    {
+      "offset": 48684177,
+      "text": "Is Rockstar Dev"
+    },
+    {
+      "offset": 48684193,
+      "text": "RageNetRecv"
+    },
+    {
+      "offset": 48684222,
+      "text": "gtav"
+    },
+    {
+      "offset": 48684558,
+      "text": "gta5mkt_ru"
+    },
+    {
+      "offset": 48692515,
+      "text": "CRTStructureDataToBeSaved_SinglePlayer::CreatePsoStructure :: AddChildObject(Garages) sizeDifference=%u beforeSize=%u afterSize=%u"
+    },
+    {
+      "offset": 48701966,
+      "text": "Object map bin max entries %u, average entries %u"
+    },
+    {
+      "offset": 48704879,
+      "text": "[RAGE] netKxThrPool %u"
+    },
+    {
+      "offset": 48704902,
+      "text": "[RAGE] netThrPool %u"
+    },
+    {
+      "offset": 48711135,
+      "text": "[wasm] streaming flush has waited 20 s for %s (%d): %s; streaming status %d, file status %u, placed %u, finished %u"
+    },
+    {
+      "offset": 48732245,
+      "text": "netTimeSync::Dump - AverageRTT: %u"
+    },
+    {
+      "offset": 48735752,
+      "text": "Session Players On Entry (Rolling Average): %u"
+    },
+    {
+      "offset": 48735800,
+      "text": "Matchmaking Matchmaking Count (Rolling Average): %u"
+    },
+    {
+      "offset": 48735853,
+      "text": "Matchmaking Sc Matchmaking Count (Rolling Average): %u"
+    },
+    {
+      "offset": 48735909,
+      "text": "Matchmaking Attempts (Rolling Average): %u"
+    },
+    {
+      "offset": 48735953,
+      "text": "Matchmaking Migration Churn (Rolling Average): %u"
+    },
+    {
+      "offset": 48736004,
+      "text": "Matchmaking Matchmaking Player Count Avg (Rolling Average): %u"
+    },
+    {
+      "offset": 48736068,
+      "text": "Matchmaking Sc Matchmaking Player Count Avg (Rolling Average): %u"
+    },
+    {
+      "offset": 48736135,
+      "text": "Matchmaking Migration Candidate (Rolling Average): %u"
+    },
+    {
+      "offset": 48739545,
+      "text": "Couldn't open x:gta5/tools/bin/MACS_SynchronizeList.txt"
+    },
+    {
+      "offset": 48739601,
+      "text": "Writing sync list to: x:gta5/tools/bin/MACS_SynchronizeList.txt"
+    },
+    {
+      "offset": 48740382,
+      "text": "%s%srageEmailer -to %s -from %s -subject \"%s\" -body %s %s%s >> c:\\_rageemaillog.txt"
+    },
+    {
+      "offset": 48740568,
+      "text": "c:\\_rageemailtemp%d.txt"
+    },
+    {
+      "offset": 48744994,
+      "text": "RAGE Audio - Don't initialise any audio hardware for output"
+    },
+    {
+      "offset": 48745868,
+      "text": "[RAGE Audio] MIDI device id to use for input"
+    },
+    {
+      "offset": 48747299,
+      "text": "rage__ControlInput__Keyboard__Layout"
+    },
+    {
+      "offset": 48750798,
+      "text": "Average out"
+    },
+    {
+      "offset": 48752046,
+      "text": "Enable Hack Garage Shut"
+    },
+    {
+      "offset": 48754076,
+      "text": "AverageLuminanceOut"
+    },
+    {
+      "offset": 48755167,
+      "text": "%s, Estimated Packet Overhead In, Estimated Packet Overhead Out, Estimated Rage Headers In, Estimated Rage Headers Out"
+    },
+    {
+      "offset": 48761786,
+      "text": "rage__tcInstBoxInst"
+    },
+    {
+      "offset": 48761825,
+      "text": "rage__NMBehaviorInst"
+    },
+    {
+      "offset": 48763883,
+      "text": "gta5playlist"
+    },
+    {
+      "offset": 48768372,
+      "text": "rage__ControlInput__InputList"
+    },
+    {
+      "offset": 48768683,
+      "text": "rage__ControlInput__ConflictList"
+    },
+    {
+      "offset": 48768917,
+      "text": "rage__cutfEventArgsList"
+    },
+    {
+      "offset": 48769541,
+      "text": "rage__ControlInput__Gamepad__DefinitionList"
+    },
+    {
+      "offset": 48769941,
+      "text": "rage__ControlInput__DynamicMappingList"
+    },
+    {
+      "offset": 48769980,
+      "text": "rage__ControlInput__MappingList"
+    },
+    {
+      "offset": 48770096,
+      "text": "rage__parAttributeList"
+    },
+    {
+      "offset": 48770119,
+      "text": "rage__cutfAttributeList"
+    },
+    {
+      "offset": 48770732,
+      "text": "CGarages__CGarageInitDataList"
+    },
+    {
+      "offset": 48770762,
+      "text": "rage__fiDeviceInstaller__InitDataList"
+    },
+    {
+      "offset": 48779346,
+      "text": "ragebuilder_unittest"
+    },
+    {
+      "offset": 48802435,
+      "text": "gta5mkt_pt"
+    },
+    {
+      "offset": 48803552,
+      "text": "[RAGE] Set default asset path root"
+    },
+    {
+      "offset": 48813625,
+      "text": "RockstarAccount"
+    },
+    {
+      "offset": 48824503,
+      "text": "rage__crJointRotationLimit__JointControlPoint"
+    },
+    {
+      "offset": 48827018,
+      "text": "ImportTo :: Received message with old style gta5.game.event"
+    },
+    {
+      "offset": 48828923,
+      "text": "rage__cutfObjectIdListEvent"
+    },
+    {
+      "offset": 48830486,
+      "text": "rage__cutfEvent"
+    },
+    {
+      "offset": 48831338,
+      "text": "CRockstarCrewMsgPresenceEvent"
+    },
+    {
+      "offset": 48831368,
+      "text": "CRockstarMsgPresenceEvent"
+    },
+    {
+      "offset": 48832279,
+      "text": "rage__cutfObjectIdEvent"
+    },
+    {
+      "offset": 48842108,
+      "text": "rage__ControlInput__InputMapperAssignment"
+    },
+    {
+      "offset": 48849799,
+      "text": "nethttpuseragent"
+    },
+    {
+      "offset": 48851711,
+      "text": "AverageFrontSpringConstant"
+    },
+    {
+      "offset": 48855884,
+      "text": "rage__NMValueInt"
+    },
+    {
+      "offset": 48857079,
+      "text": "minMaxAverageResult"
+    },
+    {
+      "offset": 48858980,
+      "text": "[RAGE] output a float4 position from Edge instead of float3 by default"
+    },
+    {
+      "offset": 48865924,
+      "text": "storagePkt->GetPacket() == pkt"
+    },
+    {
+      "offset": 48865955,
+      "text": "storagePktCompressed->GetPacket() == pkt"
+    },
+    {
+      "offset": 48872309,
+      "text": "rage__crJointRotationLimit"
+    },
+    {
+      "offset": 48872429,
+      "text": "rage__crJointTranslationLimit"
+    },
+    {
+      "offset": 48873151,
+      "text": "rage__crJointScaleLimit"
+    },
+    {
+      "offset": 48876832,
+      "text": "gta5mkt_it"
+    },
+    {
+      "offset": 48878781,
+      "text": "The vehicle is within a hideout garage that can save it"
+    },
+    {
+      "offset": 48881142,
+      "text": "-wasmtestflight"
+    },
+    {
+      "offset": 48886211,
+      "text": "AverageSimHeight"
+    },
+    {
+      "offset": 48910676,
+      "text": "rage__fragTuneBreakPreset"
+    },
+    {
+      "offset": 48916674,
+      "text": "ragenet"
+    },
+    {
+      "offset": 48917966,
+      "text": "__rage_drawbucket"
+    },
+    {
+      "offset": 48918625,
+      "text": "ragenet_socket"
+    },
+    {
+      "offset": 48927969,
+      "text": "FirstPersonRoadRageClipSet"
+    },
+    {
+      "offset": 48931197,
+      "text": "rage__fragTuneStruct"
+    },
+    {
+      "offset": 48937342,
+      "text": "rage__cutfOverlayObject"
+    },
+    {
+      "offset": 48937422,
+      "text": "rage__cutfEventObject"
+    },
+    {
+      "offset": 48937470,
+      "text": "rage__cutfLightObject"
+    },
+    {
+      "offset": 48937492,
+      "text": "rage__cutfAnimatedLightObject"
+    },
+    {
+      "offset": 48937522,
+      "text": "rage__cutfParticleEffectObject"
+    },
+    {
+      "offset": 48937553,
+      "text": "rage__cutfAnimatedParticleEffectObject"
+    },
+    {
+      "offset": 48937708,
+      "text": "rage__cutfRemovalBoundsObject"
+    },
+    {
+      "offset": 48937738,
+      "text": "rage__cutfBlockingBoundsObject"
+    },
+    {
+      "offset": 48937788,
+      "text": "rage__cutfAssetManagerObject"
+    },
+    {
+      "offset": 48937817,
+      "text": "rage__cutfAnimationManagerObject"
+    },
+    {
+      "offset": 48937922,
+      "text": "rage__cutfAudioObject"
+    },
+    {
+      "offset": 48937966,
+      "text": "rage__cutfFixupModelObject"
+    },
+    {
+      "offset": 48937993,
+      "text": "rage__cutfPropModelObject"
+    },
+    {
+      "offset": 48938019,
+      "text": "rage__cutfWeaponModelObject"
+    },
+    {
+      "offset": 48938047,
+      "text": "rage__cutfHiddenModelObject"
+    },
+    {
+      "offset": 48938075,
+      "text": "rage__cutfModelObject"
+    },
+    {
+      "offset": 48938097,
+      "text": "rage__cutfVehicleModelObject"
+    },
+    {
+      "offset": 48938126,
+      "text": "rage__cutfFindModelObject"
+    },
+    {
+      "offset": 48938152,
+      "text": "rage__cutfPedModelObject"
+    },
+    {
+      "offset": 48938177,
+      "text": "rage__cutfDecalObject"
+    },
+    {
+      "offset": 48938287,
+      "text": "rage__cutfObject"
+    },
+    {
+      "offset": 48938452,
+      "text": "rage__cutfRayfireObject"
+    },
+    {
+      "offset": 48938511,
+      "text": "rage__cutfSubtitleObject"
+    },
+    {
+      "offset": 48938579,
+      "text": "rage__cutfScreenFadeObject"
+    },
+    {
+      "offset": 48938635,
+      "text": "rage__cutfNamedAnimatedObject"
+    },
+    {
+      "offset": 48938678,
+      "text": "rage__cutfNamedAnimatedStreamedObject"
+    },
+    {
+      "offset": 48938716,
+      "text": "rage__cutfNamedStreamedObject"
+    },
+    {
+      "offset": 48938746,
+      "text": "rage__cutfFinalNamedObject"
+    },
+    {
+      "offset": 48938773,
+      "text": "rage__cutfNamedObject"
+    },
+    {
+      "offset": 48938852,
+      "text": "rage__cutfCameraObject"
+    },
+    {
+      "offset": 48946526,
+      "text": "rage__NMValueFloat"
+    },
+    {
+      "offset": 48947912,
+      "text": "ragenet_textchat"
+    },
+    {
+      "offset": 48947939,
+      "text": "ragenet_voicechat"
+    },
+    {
+      "offset": 48951832,
+      "text": "common:/data/levels/gta5/AudioWorldSectorsInfo.dat"
+    },
+    {
+      "offset": 48960342,
+      "text": "hideRockstarDevs"
+    },
+    {
+      "offset": 48960744,
+      "text": "Set Is Rockstar Dev status"
+    },
+    {
+      "offset": 48964892,
+      "text": "alphaCoverageCompensationRadius"
+    },
+    {
+      "offset": 48968715,
+      "text": "Session Entry Time Taken (Rolling Average): %us"
+    },
+    {
+      "offset": 48968764,
+      "text": "Matchmaking Migration Time Taken (Rolling Average): %us"
+    },
+    {
+      "offset": 48968821,
+      "text": "Matchmaking Time Taken (Rolling Average): %us"
+    },
+    {
+      "offset": 48969789,
+      "text": "rage__ControlInput__RelatedInputs"
+    },
+    {
+      "offset": 48975068,
+      "text": "[RAGE Audio] Run synthCore asset tests"
+    },
+    {
+      "offset": 48979012,
+      "text": "[RAGE Audio] Don't allocate any wave slots"
+    },
+    {
+      "offset": 48980298,
+      "text": "Rage Screen Shots"
+    },
+    {
+      "offset": 48985902,
+      "text": "rage__cutfChildEvents"
+    },
+    {
+      "offset": 48987613,
+      "text": "[wasmtest] detached glass of %d components"
+    },
+    {
+      "offset": 49003813,
+      "text": "[RAGE Audio] Trace mixer command packets"
+    },
+    {
+      "offset": 49006096,
+      "text": "rage - Debug Channels/Create debug channel widgets"
+    },
+    {
+      "offset": 49007919,
+      "text": "FirstPersonRoadRageClipSets"
+    },
+    {
+      "offset": 49009931,
+      "text": "Clear selected garage of objects"
+    },
+    {
+      "offset": 49014802,
+      "text": "K:\\streamGTA5\\stats\\memjunctionstats"
+    },
+    {
+      "offset": 49014839,
+      "text": "K:\\streamGTA5\\stats\\memstats"
+    },
+    {
+      "offset": 49014882,
+      "text": "K:\\streamGTA5\\stats\\perfstats"
+    },
+    {
+      "offset": 49031955,
+      "text": "RageInstBehvrs"
+    },
+    {
+      "offset": 49033912,
+      "text": "[RAGE Audio] Suppress on-screen waveslot size errors"
+    },
+    {
+      "offset": 49051038,
+      "text": "rage__bgShaderVars"
+    },
+    {
+      "offset": 49058474,
+      "text": "[RAGE Audio] Disable warning on long audio frame gaps"
+    },
+    {
+      "offset": 49059370,
+      "text": "Rockstar Editor Photos"
+    },
+    {
+      "offset": 49060640,
+      "text": "Create garage at camera pos"
+    },
+    {
+      "offset": 49061199,
+      "text": "platform:/movies/rockstar_logos"
+    },
+    {
+      "offset": 49068405,
+      "text": "[RAGE Audio] Connect to RAVE for the specified metadata types; comma delimited (eg -rave=Sounds,Curves,Weapons"
+    },
+    {
+      "offset": 49068558,
+      "text": "g_Rage_Tessellation_Epsilons"
+    },
+    {
+      "offset": 49076935,
+      "text": "[wasm] Leave the main loop after this many iterations"
+    },
+    {
+      "offset": 49077077,
+      "text": "alphaCoverageCompensationIterations"
+    },
+    {
+      "offset": 49077622,
+      "text": "rage__InputCalibration__Calibrations"
+    },
+    {
+      "offset": 49080170,
+      "text": "Destroying memory arena index = %d, id = %d with %Idk preallocated storage and %Idk extra allocations"
+    },
+    {
+      "offset": 49081024,
+      "text": "sc_UseRockstarCandidateMissions"
+    },
+    {
+      "offset": 49084775,
+      "text": "rage__ropeReins"
+    },
+    {
+      "offset": 49086088,
+      "text": "Impulse tuning for rage ragdolls including animals and humans"
+    },
+    {
+      "offset": 49093561,
+      "text": "rage__cutfCameraCutCharacterLightParams"
+    },
+    {
+      "offset": 49093893,
+      "text": "g_Rage_Tessellation_ScreenSpaceErrorParams"
+    },
+    {
+      "offset": 49094302,
+      "text": "rage__fwTextureConversionParams"
+    },
+    {
+      "offset": 49100821,
+      "text": "Impulse multipliers for initial hits to rage ragdolls"
+    },
+    {
+      "offset": 49100875,
+      "text": "Only use rage ragdolls"
+    },
+    {
+      "offset": 49100898,
+      "text": "The maximum number of simultaneous allowed rage ragdolls"
+    },
+    {
+      "offset": 49101186,
+      "text": "MaxRageRagdolls"
+    },
+    {
+      "offset": 49102695,
+      "text": "rage__SAttachmentDetails"
+    },
+    {
+      "offset": 49102748,
+      "text": "rage__SLightDetails"
+    },
+    {
+      "offset": 49102768,
+      "text": "rage__SFixupObjectDetails"
+    },
+    {
+      "offset": 49102794,
+      "text": "rage__SHiddenObjectDetails"
+    },
+    {
+      "offset": 49102821,
+      "text": "rage__SEffectsDetails"
+    },
+    {
+      "offset": 49102843,
+      "text": "rage__SPropDetails"
+    },
+    {
+      "offset": 49102889,
+      "text": "rage__SVariationDetails"
+    },
+    {
+      "offset": 49102913,
+      "text": "rage__SModelDetails"
+    },
+    {
+      "offset": 49102933,
+      "text": "rage__SBlockDetails"
+    },
+    {
+      "offset": 49102969,
+      "text": "rage__SVehicleDetails"
+    },
+    {
+      "offset": 49102991,
+      "text": "rage__SDrawDistanceDetails"
+    },
+    {
+      "offset": 49103018,
+      "text": "rage__STextIdDetails"
+    },
+    {
+      "offset": 49104462,
+      "text": "rage - Debug Channels"
+    },
+    {
+      "offset": 49109026,
+      "text": "ragesecengine_tasks"
+    },
+    {
+      "offset": 49109304,
+      "text": "RageVerletWaitForTasks"
+    },
+    {
+      "offset": 49110534,
+      "text": "[RAGE Audio] Automatically skips a hard coded list of metadata chunks"
+    },
+    {
+      "offset": 49115064,
+      "text": "g_Rage_Tessellation_CameraZAxis"
+    },
+    {
+      "offset": 49120322,
+      "text": "rage__cutfCascadeShadowEventArgs"
+    },
+    {
+      "offset": 49120355,
+      "text": "rage__cutfCameraCutEventArgs"
+    },
+    {
+      "offset": 49120384,
+      "text": "rage__cutfObjectIdListEventArgs"
+    },
+    {
+      "offset": 49120486,
+      "text": "rage__cutfAttachmentEventArgs"
+    },
+    {
+      "offset": 49120516,
+      "text": "rage__cutfTriggerLightEffectEventArgs"
+    },
+    {
+      "offset": 49120554,
+      "text": "rage__cutfPlayParticleEffectEventArgs"
+    },
+    {
+      "offset": 49120592,
+      "text": "rage__cutfTwoFloatValuesEventArgs"
+    },
+    {
+      "offset": 49120637,
+      "text": "rage__cutfObjectVariationEventArgs"
+    },
+    {
+      "offset": 49120672,
+      "text": "rage__cutfVehicleVariationEventArgs"
+    },
+    {
+      "offset": 49120708,
+      "text": "rage__cutfDecalEventArgs"
+    },
+    {
+      "offset": 49120733,
+      "text": "rage__cutfObjectIdPartialHashEventArgs"
+    },
+    {
+      "offset": 49120772,
+      "text": "rage__cutfEventArgs"
+    },
+    {
+      "offset": 49120792,
+      "text": "rage__cutfFloatValueEventArgs"
+    },
+    {
+      "offset": 49120822,
+      "text": "rage__cutfFloatBoolValueEventArgs"
+    },
+    {
+      "offset": 49120856,
+      "text": "rage__cutfBoolValueEventArgs"
+    },
+    {
+      "offset": 49120885,
+      "text": "rage__cutfLoadSceneEventArgs"
+    },
+    {
+      "offset": 49120914,
+      "text": "rage__cutfFinalNameEventArgs"
+    },
+    {
+      "offset": 49120943,
+      "text": "rage__cutfNameEventArgs"
+    },
+    {
+      "offset": 49120967,
+      "text": "rage__cutfObjectIdNameEventArgs"
+    },
+    {
+      "offset": 49120999,
+      "text": "rage__cutfSubtitleEventArgs"
+    },
+    {
+      "offset": 49121027,
+      "text": "rage__cutfScreenFadeEventArgs"
+    },
+    {
+      "offset": 49121057,
+      "text": "rage__cutfObjectIdEventArgs"
+    },
+    {
+      "offset": 49121085,
+      "text": "rage__cutfVehicleExtraEventArgs"
+    },
+    {
+      "offset": 49123335,
+      "text": "rage__ControlInput__InputSettings"
+    },
+    {
+      "offset": 49124460,
+      "text": "rage__ptxgpuDropEmitterSettings"
+    },
+    {
+      "offset": 49124540,
+      "text": "rage__ptxgpuDropRenderSettings"
+    },
+    {
+      "offset": 49125644,
+      "text": "rage__ControlInput__ControlSettings"
+    },
+    {
+      "offset": 49126226,
+      "text": "rage__ControlInput__MappingSettings"
+    },
+    {
+      "offset": 49126794,
+      "text": "rage__ControlInput__MouseSettings"
+    },
+    {
+      "offset": 49128439,
+      "text": "rage__ControlInput__DeviceSettings"
+    },
+    {
+      "offset": 49131473,
+      "text": "rage__ControlInput__SteamController__AxisMappings"
+    },
+    {
+      "offset": 49131540,
+      "text": "rage__ControlInput__SteamController__SingleMappings"
+    },
+    {
+      "offset": 49131592,
+      "text": "rage__ControlInput__DynamicMappings"
+    },
+    {
+      "offset": 49131783,
+      "text": "[RAGE Audio] output file to write synth core profile timings"
+    },
+    {
+      "offset": 49138819,
+      "text": "rage__cutfEventDefs"
+    },
+    {
+      "offset": 49139152,
+      "text": "Draw garage bboxes"
+    },
+    {
+      "offset": 49141029,
+      "text": "Controls the average of all angular velocity squared damping values"
+    },
+    {
+      "offset": 49141097,
+      "text": "Controls the average of all linear velocity squared damping values"
+    },
+    {
+      "offset": 49145665,
+      "text": "AddRsInvite :: Reject - Script cannot process Rockstar invites"
+    },
+    {
+      "offset": 49151612,
+      "text": "Rage Profile Draw Aliases"
+    },
+    {
+      "offset": 49153210,
+      "text": "The average spacing of the objects the objects will be placed on average of 1 object every n square metres"
+    },
+    {
+      "offset": 49155557,
+      "text": "rage__fwMapTypes"
+    },
+    {
+      "offset": 49163096,
+      "text": "[GenericGameStorage] Skips the playeriscreator check when loading XBox360 save games"
+    },
+    {
+      "offset": 49166339,
+      "text": "[GenericGameStorage] don't print the script values read from loaded MP save files"
+    },
+    {
+      "offset": 49167298,
+      "text": "rage__fwExtraTextFiles"
+    },
+    {
+      "offset": 49173214,
+      "text": "Clear selected garage of Vehicles"
+    },
+    {
+      "offset": 49178408,
+      "text": "CTaskRageRagdoll__Tunables"
+    },
+    {
+      "offset": 49182926,
+      "text": "ms_bSaveGarageVariables"
+    },
+    {
+      "offset": 49184068,
+      "text": "MaxDifferenceToAverageBrakes"
+    },
+    {
+      "offset": 49187746,
+      "text": "[RAGE Audio] Warn if sounds are playing from invalid categories"
+    },
+    {
+      "offset": 49189197,
+      "text": "[RAGE Audio] warn when playing large sound hierarchies"
+    },
+    {
+      "offset": 49194819,
+      "text": "common:/data/garages"
+    },
+    {
+      "offset": 49194840,
+      "text": "Draw garages"
+    },
+    {
+      "offset": 49194853,
+      "text": "Save garages"
+    },
+    {
+      "offset": 49194866,
+      "text": "Reload garages"
+    },
+    {
+      "offset": 49194881,
+      "text": "Dont Allow extra vehicle HD in MP garages"
+    }
+  ],
+  "priority_string_hits": {
+    "game_version": [
+      {
+        "offset": 18555272,
+        "text": "gta5/art/anim"
+      },
+      {
+        "offset": 48551574,
+        "text": "GTA5Env\" : \"%s\" }"
+      },
+      {
+        "offset": 48551595,
+        "text": "GTA5\" : \"%s\" }"
+      },
+      {
+        "offset": 48556290,
+        "text": "gta5_liberty"
+      },
+      {
+        "offset": 48684222,
+        "text": "gtav"
+      },
+      {
+        "offset": 48684558,
+        "text": "gta5mkt_ru"
+      },
+      {
+        "offset": 48739561,
+        "text": "gta5/tools/bin/MACS_SynchronizeList.txt"
+      },
+      {
+        "offset": 48739625,
+        "text": "gta5/tools/bin/MACS_SynchronizeList.txt"
+      },
+      {
+        "offset": 48763883,
+        "text": "gta5playlist"
+      },
+      {
+        "offset": 48802435,
+        "text": "gta5mkt_pt"
+      },
+      {
+        "offset": 48827062,
+        "text": "gta5.game.event"
+      },
+      {
+        "offset": 48876832,
+        "text": "gta5mkt_it"
+      },
+      {
+        "offset": 48951852,
+        "text": "gta5/AudioWorldSectorsInfo.dat"
+      },
+      {
+        "offset": 49014811,
+        "text": "GTA5\\stats\\memjunctionstats"
+      },
+      {
+        "offset": 49014848,
+        "text": "GTA5\\stats\\memstats"
+      },
+      {
+        "offset": 49014891,
+        "text": "GTA5\\stats\\perfstats"
+      },
+      {
+        "offset": 49223717,
+        "text": "gta5/mpchars/%d%s.dds"
+      },
+      {
+        "offset": 49238097,
+        "text": "Grand Theft Auto V%s%s"
+      },
+      {
+        "offset": 49253793,
+        "text": "gta5/titleupdate/dev_ng/x64/data/errorcodes/%s"
+      },
+      {
+        "offset": 49254686,
+        "text": "gta5/ugc/missions5/%s"
+      },
+      {
+        "offset": 49266408,
+        "text": "gta5/tools_ng\\script\\misc\\p4_add_or_edit_frag_tune_file.bat %s"
+      },
+      {
+        "offset": 49302439,
+        "text": "GTAV x64 BankRelease %s"
+      },
+      {
+        "offset": 49414887,
+        "text": "gtav/pc/tutorials/editor"
+      },
+      {
+        "offset": 49441989,
+        "text": "gta5mkt_fr"
+      },
+      {
+        "offset": 49535828,
+        "text": "gta5/assets/recordings/car"
+      },
+      {
+        "offset": 49547892,
+        "text": "gtav.constants.PauseMenuLookup"
+      },
+      {
+        "offset": 49551290,
+        "text": "gta5mkt_sp"
+      },
+      {
+        "offset": 49553064,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT\\RAGEMISC\\_UNITY\\../../../../rage/suite/src/snet/party.cpp"
+      },
+      {
+        "offset": 49553160,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT_NETWORK\\_UNITY\\../../network/Party/NetworkParty.cpp"
+      },
+      {
+        "offset": 49553250,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../audio/vehiclereflectionsaudioentity.cpp"
+      },
+      {
+        "offset": 49553346,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../audio/collisionaudioentity.cpp"
+      },
+      {
+        "offset": 49553433,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../audio/speechaudioentity.cpp"
+      },
+      {
+        "offset": 49553517,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../audio/vehicleaudioentity.cpp"
+      },
+      {
+        "offset": 49553602,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../audio/pedaudioentity.cpp"
+      },
+      {
+        "offset": 49553683,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/commands_entity.cpp"
+      },
+      {
+        "offset": 49553766,
+        "text": "GTA5\\SRC\\DEV_NG\\RAGE\\FRAMEWORK\\SRC\\VCPROJ\\RAGEFRAMEWORK\\_UNITY\\../../../entity/entity.cpp"
+      },
+      {
+        "offset": 49553862,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/handlers/GameScriptEntity.cpp"
+      },
+      {
+        "offset": 49553955,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../Cutscene/AnimatedModelEntity.cpp"
+      },
+      {
+        "offset": 49554044,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT_NETWORK\\_UNITY\\../../network/Objects/Entities/NetObjEntity.cpp"
+      },
+      {
+        "offset": 49554145,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT_NETWORK\\_UNITY\\../../network/Objects/Entities/NetObjDynamicEntity.cpp"
+      },
+      {
+        "offset": 49554253,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/commands_security.cpp"
+      },
+      {
+        "offset": 49554338,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT2_LIB\\_UNITY\\../../Peds/PlayerSpecialAbility.cpp"
+      },
+      {
+        "offset": 49554424,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../task/Combat/Subtasks/TaskDraggingToSafety.cpp"
+      },
+      {
+        "offset": 49554526,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../task/Physics/TaskNMDraggingToSafety.cpp"
+      },
+      {
+        "offset": 49554622,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../task/Combat/Subtasks/TaskDraggedToSafety.cpp"
+      },
+      {
+        "offset": 49554723,
+        "text": "GTA5\\SRC\\DEV_NG\\RAGE\\BASE\\SRC\\VCPROJ\\RAGENET\\_UNITY\\../../../rline/rltelemetry.cpp"
+      },
+      {
+        "offset": 49554812,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT_NETWORK\\_UNITY\\../../network/Live/NetworkTelemetry.cpp"
+      },
+      {
+        "offset": 49554905,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT_NETWORK\\_UNITY\\../../network/Live/NetworkDebugTelemetry.cpp"
+      },
+      {
+        "offset": 49555003,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT4_LIB\\_UNITY\\../../vehicles/VehicleFactory.cpp"
+      },
+      {
+        "offset": 49555087,
+        "text": "GTA5\\SRC\\DEV_NG\\RAGE\\BASE\\SRC\\VCPROJ\\RAGENET\\_UNITY\\../../../rline/presence/rlpresencequery.cpp"
+      },
+      {
+        "offset": 49555189,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/commands_ny.cpp"
+      },
+      {
+        "offset": 49555268,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT4_LIB\\_UNITY\\../../vfx/sky/Sky.cpp"
+      },
+      {
+        "offset": 49555340,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/commands_money.cpp"
+      },
+      {
+        "offset": 49555422,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/commands_lobby.cpp"
+      },
+      {
+        "offset": 49555504,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT2_LIB\\_UNITY\\../../renderer/RenderPhases/RenderPhaseDebugOverlay.cpp"
+      },
+      {
+        "offset": 49555610,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/commands_replay.cpp"
+      },
+      {
+        "offset": 49555693,
+        "text": "GTA5\\SRC\\DEV_NG\\RAGE\\BASE\\SRC\\VCPROJ\\RAGENET\\_UNITY\\../../../net/relay.cpp"
+      },
+      {
+        "offset": 49555774,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../task/Weapons/Gun/TaskVehicleDriveBy.cpp"
+      },
+      {
+        "offset": 49555870,
+        "text": "GTA5\\SRC\\DEV_NG\\RAGE\\BASE\\SRC\\VCPROJ\\RAGENET\\_UNITY\\../../../rline/inbox/rlinbox.cpp"
+      },
+      {
+        "offset": 49555961,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../task/Movement/TaskMoveWithinAttackWindow.cpp"
+      },
+      {
+        "offset": 49556062,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/commands_law.cpp"
+      },
+      {
+        "offset": 49556142,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../frontend/CSettingsMenu.cpp"
+      },
+      {
+        "offset": 49556225,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../frontend/PauseMenu.cpp"
+      },
+      {
+        "offset": 49556304,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT4_LIB\\_UNITY\\../../text/PagedText.cpp"
+      },
+      {
+        "offset": 49556379,
+        "text": "GTA5\\SRC\\DEV_NG\\RAGE\\BASE\\SRC\\VCPROJ\\RAGEPHYSICS\\_UNITY\\../../../pheffects/mouseinput.cpp"
+      },
+      {
+        "offset": 49556475,
+        "text": "GTA5\\SRC\\DEV_NG\\RAGE\\BASE\\SRC\\VCPROJ\\RAGEGRAPHICS\\_UNITY\\../../../input/input.cpp"
+      },
+      {
+        "offset": 49556563,
+        "text": "GTA5\\SRC\\DEV_NG\\RAGE\\BASE\\SRC\\VCPROJ\\RAGEPHYSICS\\_UNITY\\../../../pheffects/clothverletinst.cpp"
+      },
+      {
+        "offset": 49556664,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT2_LIB\\_UNITY\\../../physics/gtaInst.cpp"
+      },
+      {
+        "offset": 49556740,
+        "text": "GTA5\\SRC\\DEV_NG\\RAGE\\FRAMEWORK\\SRC\\VCPROJ\\RAGEFRAMEWORK\\_UNITY\\../../../fwdrawlist/drawlist.cpp"
+      },
+      {
+        "offset": 49556842,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/commands_shapetest.cpp"
+      },
+      {
+        "offset": 49556928,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT2_LIB\\_UNITY\\../../physics/WorldProbe/shapetest.cpp"
+      },
+      {
+        "offset": 49557017,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT4_LIB\\_UNITY\\../../tools/SmokeTest.cpp"
+      },
+      {
+        "offset": 49557093,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../camera/viewports/Viewport.cpp"
+      },
+      {
+        "offset": 49557179,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/commands_script.cpp"
+      },
+      {
+        "offset": 49557262,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/script.cpp"
+      },
+      {
+        "offset": 49557336,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../task/Weapons/Gun/TaskAimGunOnFoot.cpp"
+      },
+      {
+        "offset": 49557430,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../task/Physics/TaskNMShot.cpp"
+      },
+      {
+        "offset": 49557514,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../task/Response/TaskConfront.cpp"
+      },
+      {
+        "offset": 49557601,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../task/Movement/TaskGoToPoint.cpp"
+      },
+      {
+        "offset": 49557689,
+        "text": "GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT3_LIB\\_UNITY\\../../script/commands_event.cpp"
+      }
+    ],
+    "rockstar_or_rage": [
+      {
+        "offset": 48554592,
+        "text": "Rage Resource Memory                       |"
+      },
+      {
+        "offset": 48554699,
+        "text": "Rage heap = %6dk, peak = %6dk.                        |"
+      },
+      {
+        "offset": 48559017,
+        "text": "rage is Empty"
+      },
+      {
+        "offset": 48577243,
+        "text": "rage special ability"
+      },
+      {
+        "offset": 48577328,
+        "text": "RageSpecialAbility"
+      },
+      {
+        "offset": 48584705,
+        "text": "rage__fwTextDatabaseEntry"
+      },
+      {
+        "offset": 48585946,
+        "text": "RAGE Audio - disable RAVE category telemetry"
+      },
+      {
+        "offset": 48590764,
+        "text": "RAGE Audio] Assert if any sounds are in the base category"
+      },
+      {
+        "offset": 48591889,
+        "text": "rage UpdatePhotoGallery"
+      },
+      {
+        "offset": 48591927,
+        "text": "ragePhotoGallery"
+      },
+      {
+        "offset": 48602875,
+        "text": "RockstarCreatedOnly"
+      },
+      {
+        "offset": 48620101,
+        "text": "rage__SCamcorderOverlay"
+      },
+      {
+        "offset": 48622217,
+        "text": "ragenet_relay"
+      },
+      {
+        "offset": 48627990,
+        "text": "rage__Box"
+      },
+      {
+        "offset": 48635996,
+        "text": "rage__clothBridgeSimGfx"
+      },
+      {
+        "offset": 48642057,
+        "text": "rage Index"
+      },
+      {
+        "offset": 48642097,
+        "text": "rage Instance Index"
+      },
+      {
+        "offset": 48678893,
+        "text": "rage_new"
+      },
+      {
+        "offset": 48680931,
+        "text": "RAGE pfDraw"
+      },
+      {
+        "offset": 48681214,
+        "text": "rage - Profile Draw"
+      },
+      {
+        "offset": 48683909,
+        "text": "rockstardev"
+      },
+      {
+        "offset": 48684087,
+        "text": "RockstarDev"
+      },
+      {
+        "offset": 48684117,
+        "text": "RockstarDev"
+      },
+      {
+        "offset": 48684180,
+        "text": "Rockstar Dev"
+      },
+      {
+        "offset": 48684193,
+        "text": "RageNetRecv"
+      },
+      {
+        "offset": 48692594,
+        "text": "rages) sizeDifference=%u beforeSize=%u afterSize=%u"
+      },
+      {
+        "offset": 48702000,
+        "text": "rage entries %u"
+      },
+      {
+        "offset": 48704880,
+        "text": "RAGE] netKxThrPool %u"
+      },
+      {
+        "offset": 48704903,
+        "text": "RAGE] netThrPool %u"
+      },
+      {
+        "offset": 48732268,
+        "text": "rageRTT: %u"
+      },
+      {
+        "offset": 48735789,
+        "text": "rage): %u"
+      },
+      {
+        "offset": 48735842,
+        "text": "rage): %u"
+      },
+      {
+        "offset": 48735898,
+        "text": "rage): %u"
+      },
+      {
+        "offset": 48735942,
+        "text": "rage): %u"
+      },
+      {
+        "offset": 48735993,
+        "text": "rage): %u"
+      },
+      {
+        "offset": 48736057,
+        "text": "rage): %u"
+      },
+      {
+        "offset": 48736124,
+        "text": "rage): %u"
+      },
+      {
+        "offset": 48736179,
+        "text": "rage): %u"
+      },
+      {
+        "offset": 48740386,
+        "text": "rageEmailer -to %s -from %s -subject \"%s\" -body %s %s%s >> c:\\_rageemaillog.txt"
+      },
+      {
+        "offset": 48740572,
+        "text": "rageemailtemp%d.txt"
+      },
+      {
+        "offset": 48744994,
+        "text": "RAGE Audio - Don't initialise any audio hardware for output"
+      },
+      {
+        "offset": 48745869,
+        "text": "RAGE Audio] MIDI device id to use for input"
+      },
+      {
+        "offset": 48747299,
+        "text": "rage__ControlInput__Keyboard__Layout"
+      },
+      {
+        "offset": 48750801,
+        "text": "rage out"
+      },
+      {
+        "offset": 48752060,
+        "text": "rage Shut"
+      },
+      {
+        "offset": 48754079,
+        "text": "rageLuminanceOut"
+      },
+      {
+        "offset": 48755242,
+        "text": "Rage Headers In, Estimated Rage Headers Out"
+      },
+      {
+        "offset": 48761786,
+        "text": "rage__tcInstBoxInst"
+      },
+      {
+        "offset": 48761825,
+        "text": "rage__NMBehaviorInst"
+      },
+      {
+        "offset": 48768372,
+        "text": "rage__ControlInput__InputList"
+      },
+      {
+        "offset": 48768683,
+        "text": "rage__ControlInput__ConflictList"
+      },
+      {
+        "offset": 48768917,
+        "text": "rage__cutfEventArgsList"
+      },
+      {
+        "offset": 48769541,
+        "text": "rage__ControlInput__Gamepad__DefinitionList"
+      },
+      {
+        "offset": 48769941,
+        "text": "rage__ControlInput__DynamicMappingList"
+      },
+      {
+        "offset": 48769980,
+        "text": "rage__ControlInput__MappingList"
+      },
+      {
+        "offset": 48770096,
+        "text": "rage__parAttributeList"
+      },
+      {
+        "offset": 48770119,
+        "text": "rage__cutfAttributeList"
+      },
+      {
+        "offset": 48770735,
+        "text": "rages__CGarageInitDataList"
+      },
+      {
+        "offset": 48770762,
+        "text": "rage__fiDeviceInstaller__InitDataList"
+      },
+      {
+        "offset": 48779346,
+        "text": "ragebuilder_unittest"
+      },
+      {
+        "offset": 48803553,
+        "text": "RAGE] Set default asset path root"
+      },
+      {
+        "offset": 48813625,
+        "text": "RockstarAccount"
+      },
+      {
+        "offset": 48824503,
+        "text": "rage__crJointRotationLimit__JointControlPoint"
+      },
+      {
+        "offset": 48828923,
+        "text": "rage__cutfObjectIdListEvent"
+      },
+      {
+        "offset": 48830486,
+        "text": "rage__cutfEvent"
+      },
+      {
+        "offset": 48831339,
+        "text": "RockstarCrewMsgPresenceEvent"
+      },
+      {
+        "offset": 48831369,
+        "text": "RockstarMsgPresenceEvent"
+      },
+      {
+        "offset": 48832279,
+        "text": "rage__cutfObjectIdEvent"
+      },
+      {
+        "offset": 48842108,
+        "text": "rage__ControlInput__InputMapperAssignment"
+      },
+      {
+        "offset": 48849809,
+        "text": "ragent"
+      },
+      {
+        "offset": 48851714,
+        "text": "rageFrontSpringConstant"
+      },
+      {
+        "offset": 48855884,
+        "text": "rage__NMValueInt"
+      },
+      {
+        "offset": 48857088,
+        "text": "rageResult"
+      },
+      {
+        "offset": 48858981,
+        "text": "RAGE] output a float4 position from Edge instead of float3 by default"
+      },
+      {
+        "offset": 48865927,
+        "text": "ragePkt->GetPacket() == pkt"
+      },
+      {
+        "offset": 48865958,
+        "text": "ragePktCompressed->GetPacket() == pkt"
+      },
+      {
+        "offset": 48872309,
+        "text": "rage__crJointRotationLimit"
+      },
+      {
+        "offset": 48872429,
+        "text": "rage__crJointTranslationLimit"
+      },
+      {
+        "offset": 48873151,
+        "text": "rage__crJointScaleLimit"
+      },
+      {
+        "offset": 48878815,
+        "text": "rage that can save it"
+      }
+    ],
+    "source_paths": [
+      {
+        "offset": 49819137,
+        "text": "x:\\rage\\assets\\tune\\sh"
+      },
+      {
+        "offset": 50800032,
+        "text": "X:\\gta5\\assets\\metadata\\ch"
+      },
+      {
+        "offset": 51165021,
+        "text": "E:\\P1\\GTA5\\SRC\\DEV_NG\\RAGE\\BASE\\SRC\\PH"
+      }
+    ],
+    "compiler_markers": [
+      {
+        "offset": 21736,
+        "text": "emscripten_get_now"
+      },
+      {
+        "offset": 21787,
+        "text": "emscripten_stack_snapshot"
+      },
+      {
+        "offset": 21819,
+        "text": "emscripten_stack_unwind_buffer"
+      },
+      {
+        "offset": 21856,
+        "text": "emscripten_asm_const_int"
+      },
+      {
+        "offset": 21887,
+        "text": "emscripten_get_heap_max"
+      },
+      {
+        "offset": 22129,
+        "text": "emscripten_asm_const_int_sync_on_main_thread"
+      },
+      {
+        "offset": 22321,
+        "text": "emscripten_date_now"
+      },
+      {
+        "offset": 22349,
+        "text": "emscripten_thread_set_strongref"
+      },
+      {
+        "offset": 22387,
+        "text": "emscripten_exit_with_live_runtime"
+      },
+      {
+        "offset": 22799,
+        "text": "emscripten_init_main_thread_js"
+      },
+      {
+        "offset": 22837,
+        "text": "emscripten_thread_mailbox_await"
+      },
+      {
+        "offset": 23023,
+        "text": "emscripten_receive_on_main_thread_js"
+      },
+      {
+        "offset": 23067,
+        "text": "emscripten_check_blocking_allowed"
+      },
+      {
+        "offset": 23134,
+        "text": "emscripten_thread_cleanup"
+      },
+      {
+        "offset": 23348,
+        "text": "emscripten_num_logical_cores"
+      },
+      {
+        "offset": 23384,
+        "text": "emscripten_system"
+      },
+      {
+        "offset": 23409,
+        "text": "emscripten_notify_mailbox_postmessage"
+      },
+      {
+        "offset": 23453,
+        "text": "emscripten_resize_heap"
+      },
+      {
+        "offset": 23483,
+        "text": "emscripten_throw_longjmp"
+      },
+      {
+        "offset": 119703,
+        "text": "emscripten_tls_init"
+      },
+      {
+        "offset": 119748,
+        "text": "emscripten_thread_init"
+      },
+      {
+        "offset": 119799,
+        "text": "emscripten_thread_crashed"
+      },
+      {
+        "offset": 119830,
+        "text": "emscripten_run_js_on_main_thread_done"
+      },
+      {
+        "offset": 119873,
+        "text": "emscripten_run_js_on_main_thread"
+      },
+      {
+        "offset": 119911,
+        "text": "emscripten_thread_free_data"
+      },
+      {
+        "offset": 119944,
+        "text": "emscripten_thread_exit"
+      },
+      {
+        "offset": 119972,
+        "text": "emscripten_check_mailbox"
+      },
+      {
+        "offset": 120014,
+        "text": "emscripten_stack_set_limits"
+      },
+      {
+        "offset": 120047,
+        "text": "emscripten_stack_restore"
+      },
+      {
+        "offset": 120077,
+        "text": "emscripten_stack_alloc"
+      },
+      {
+        "offset": 120104,
+        "text": "emscripten_stack_get_current"
+      },
+      {
+        "offset": 49583644,
+        "text": "emscripten/system/lib/libcxxabi/src/private_typeinfo.cpp"
+      },
+      {
+        "offset": 56378461,
+        "text": "emscripten_get_now"
+      },
+      {
+        "offset": 56378501,
+        "text": "emscripten_stack_snapshot"
+      },
+      {
+        "offset": 56378528,
+        "text": "emscripten_stack_unwind_buffer"
+      },
+      {
+        "offset": 56378560,
+        "text": "emscripten_asm_const_int"
+      },
+      {
+        "offset": 56378586,
+        "text": "emscripten_get_heap_max"
+      },
+      {
+        "offset": 56378761,
+        "text": "emscripten_asm_const_int_sync_on_main_thread"
+      },
+      {
+        "offset": 56378887,
+        "text": "emscripten_date_now% _emscripten_thread_set_strongref&!emscripten_exit_with_live_runtime'"
+      },
+      {
+        "offset": 56379230,
+        "text": "emscripten_init_main_thread_js5 _emscripten_thread_mailbox_await6"
+      },
+      {
+        "offset": 56379388,
+        "text": "emscripten_receive_on_main_thread_js=!emscripten_check_blocking_allowed>"
+      },
+      {
+        "offset": 56379483,
+        "text": "emscripten_thread_cleanup@"
+      },
+      {
+        "offset": 56379643,
+        "text": "emscripten_num_logical_coresH"
+      },
+      {
+        "offset": 56379674,
+        "text": "emscripten_systemI&_emscripten_notify_mailbox_postmessageJ"
+      },
+      {
+        "offset": 56379733,
+        "text": "emscripten_resize_heapK"
+      },
+      {
+        "offset": 56379758,
+        "text": "emscripten_throw_longjmpL"
+      },
+      {
+        "offset": 57027614,
+        "text": "cLanguage, bool)"
+      },
+      {
+        "offset": 57027731,
+        "text": "cLanguage, bool, int&)"
+      },
+      {
+        "offset": 57027898,
+        "text": "cLanguage)"
+      },
+      {
+        "offset": 57028007,
+        "text": "cLanguage, int&)"
+      },
+      {
+        "offset": 57028352,
+        "text": "cLanguage, int&)"
+      },
+      {
+        "offset": 57028515,
+        "text": "cLanguage)"
+      },
+      {
+        "offset": 57028625,
+        "text": "cLanguage, int&)"
+      },
+      {
+        "offset": 57458341,
+        "text": "cLanguage, char*, rage::netStatus*)"
+      },
+      {
+        "offset": 57492961,
+        "text": "cLanguageToString(rage::rlScLanguage)"
+      },
+      {
+        "offset": 57495007,
+        "text": "cLanguage, char const*, bool, rage::rlUgcMetadata*, rage::sysMemAllocator*, rage::netStatus*)"
+      },
+      {
+        "offset": 57495414,
+        "text": "cLanguage, char const*, bool, rage::rlUgcMetadata*, bool)"
+      },
+      {
+        "offset": 57496841,
+        "text": "cLanguage, char*, unsigned int)"
+      },
+      {
+        "offset": 57498315,
+        "text": "cLanguage, bool const*, char const*, rage::RsonWriter&) const"
+      },
+      {
+        "offset": 58999550,
+        "text": "CLanguageSelect::Render()"
+      },
+      {
+        "offset": 59688358,
+        "text": "cLanguage const&)"
+      },
+      {
+        "offset": 59756118,
+        "text": "cLanguage, char const*, bool)"
+      },
+      {
+        "offset": 60475881,
+        "text": "ClanGetPlayerClanEmblemTXDName(int&, char (*) [128])"
+      },
+      {
+        "offset": 60476232,
+        "text": "ClanGetUiFormattedTag(scrClanDesc*, int, char (*) [32])"
+      },
+      {
+        "offset": 60476323,
+        "text": "ClanGetLocalMembershipsCount()"
+      },
+      {
+        "offset": 60476389,
+        "text": "ClanGetMembershipDesc(scrClanDesc*, int)"
+      },
+      {
+        "offset": 60476761,
+        "text": "ClanGetMembershipValid(int&, int)"
+      },
+      {
+        "offset": 60476830,
+        "text": "ClanGetMembership(int&, scrClanDesc*, int)"
+      },
+      {
+        "offset": 60476908,
+        "text": "ClanGetMembershipCount(int&)"
+      },
+      {
+        "offset": 62171556,
+        "text": "cLanguageFromCurrentLanguageSetting()"
+      },
+      {
+        "offset": 62171675,
+        "text": "cLanguageSupported(rage::rlScLanguage)"
+      },
+      {
+        "offset": 62603806,
+        "text": "cLanguage, unsigned int, unsigned int)"
+      },
+      {
+        "offset": 62613927,
+        "text": "cLanguage, bool)"
+      },
+      {
+        "offset": 63132221,
+        "text": "emscripten_tls_init"
+      },
+      {
+        "offset": 63132727,
+        "text": "emscripten_futex_wake"
+      },
+      {
+        "offset": 63132753,
+        "text": "emscripten_thread_notify"
+      },
+      {
+        "offset": 63132781,
+        "text": "emscripten_get_heap_size"
+      },
+      {
+        "offset": 63132840,
+        "text": "emscripten_thread_crashed"
+      },
+      {
+        "offset": 63132870,
+        "text": "emscripten_yield"
+      },
+      {
+        "offset": 63133602,
+        "text": "emscripten_thread_is_valid"
+      }
+    ],
+    "version_or_build_markers": [
+      {
+        "offset": 48558967,
+        "text": "Builder::ProcessCurrentState() - Queue is Empty"
+      },
+      {
+        "offset": 48611497,
+        "text": "version of this already"
+      },
+      {
+        "offset": 48614063,
+        "text": "BuildRenderListsFromPVS Dependency"
+      },
+      {
+        "offset": 48634369,
+        "text": "build prefix"
+      },
+      {
+        "offset": 48652634,
+        "text": "version Delay Ms Emergency Refresh Max"
+      },
+      {
+        "offset": 48652715,
+        "text": "version Delay Ms Civ Refresh Max"
+      },
+      {
+        "offset": 48656965,
+        "text": "VersionAndType=0x%08x, Address=0x%08x, Value=0x%08x"
+      },
+      {
+        "offset": 48658871,
+        "text": "VersionAndType: 0x%08x, Address: 0x%08x, Size: 0x%08x, Value: 0x%08x, Flags: 0x%08x"
+      },
+      {
+        "offset": 48661656,
+        "text": "Build: %s, Rolling: 0x%08x"
+      },
+      {
+        "offset": 48663050,
+        "text": "Version: %d, Disc: 0x%08x"
+      },
+      {
+        "offset": 48663170,
+        "text": "Version: %d, Disc: 0x%08x"
+      },
+      {
+        "offset": 48663922,
+        "text": "version is: %s, 0x%08x"
+      },
+      {
+        "offset": 48664523,
+        "text": "Version: %08x"
+      },
+      {
+        "offset": 48666767,
+        "text": "BuildMuteListForGamer :: %s, Local: 0x%x -> 0x%x, Remote: 0x%x -> 0x%x"
+      },
+      {
+        "offset": 48667133,
+        "text": "BuildJoinRequest :: Matchmaking Group: %s, Spectator: %s, CrewId: %ld, Pool: %s, Aim: %d, JoinFlags: 0x%x"
+      },
+      {
+        "offset": 48687105,
+        "text": "BuildState:Gameplay=%Iu"
+      },
+      {
+        "offset": 48687129,
+        "text": "BuildState:Script=%Iu"
+      },
+      {
+        "offset": 48687151,
+        "text": "BuildState:Default=%Iu"
+      },
+      {
+        "offset": 48687174,
+        "text": "BuildState:GH Left=%Iu"
+      },
+      {
+        "offset": 48687197,
+        "text": "BuildState:Physics=%Iu"
+      },
+      {
+        "offset": 48687220,
+        "text": "BuildState:Audio=%Iu"
+      },
+      {
+        "offset": 48687241,
+        "text": "BuildState:Animation=%Iu"
+      },
+      {
+        "offset": 48687266,
+        "text": "BuildState:Scaleform=%Iu"
+      },
+      {
+        "offset": 48687291,
+        "text": "BuildState:System=%Iu"
+      },
+      {
+        "offset": 48687313,
+        "text": "BuildState:GH Total=%Iu"
+      },
+      {
+        "offset": 48687337,
+        "text": "BuildState:Network=%Iu"
+      },
+      {
+        "offset": 48687360,
+        "text": "BuildState:Debug=%Iu"
+      },
+      {
+        "offset": 48687381,
+        "text": "BuildState:Rendering=%Iu"
+      },
+      {
+        "offset": 48687406,
+        "text": "BuildState:Streaming=%Iu"
+      },
+      {
+        "offset": 48687431,
+        "text": "BuildState:Resource=%Iu"
+      },
+      {
+        "offset": 48687455,
+        "text": "BuildState:World=%Iu"
+      },
+      {
+        "offset": 48687476,
+        "text": "BuildState:GH Used=%Iu"
+      },
+      {
+        "offset": 48687499,
+        "text": "BuildState:FX=%Iu"
+      },
+      {
+        "offset": 48691700,
+        "text": "version=%u"
+      },
+      {
+        "offset": 48696353,
+        "text": "version\":%u"
+      },
+      {
+        "offset": 48704660,
+        "text": "version %u"
+      },
+      {
+        "offset": 48705289,
+        "text": "building inter interior paths for path depth %u"
+      },
+      {
+        "offset": 48705346,
+        "text": "building intra interior paths for path depth %u"
+      },
+      {
+        "offset": 48721773,
+        "text": "Building: %d numBuildings: %d numTrees: %u"
+      },
+      {
+        "offset": 48723319,
+        "text": "Version: %u"
+      },
+      {
+        "offset": 48724157,
+        "text": "build echos.  Context: %s Line: %s LineNum: %u"
+      },
+      {
+        "offset": 48724246,
+        "text": "build sounds.  Context: %s Line: %s LineNum: %u"
+      },
+      {
+        "offset": 48740189,
+        "text": "version.txt"
+      },
+      {
+        "offset": 48764093,
+        "text": "Build Drawlist"
+      },
+      {
+        "offset": 48764337,
+        "text": "build_render_list"
+      },
+      {
+        "offset": 48769338,
+        "text": "BuildRenderList"
+      },
+      {
+        "offset": 48769585,
+        "text": "BuildContentChangeSetActionList"
+      },
+      {
+        "offset": 48770012,
+        "text": "BuildingList"
+      },
+      {
+        "offset": 48770560,
+        "text": "BuildList"
+      },
+      {
+        "offset": 48772299,
+        "text": "Build List"
+      },
+      {
+        "offset": 48775789,
+        "text": "version request"
+      },
+      {
+        "offset": 48779350,
+        "text": "builder_unittest"
+      },
+      {
+        "offset": 48794193,
+        "text": "BuildStart"
+      },
+      {
+        "offset": 48798452,
+        "text": "building the asset will need to be changed if its going to be created by script"
+      },
+      {
+        "offset": 48798532,
+        "text": "building, need asset fixed to be created by script"
+      },
+      {
+        "offset": 48799864,
+        "text": "Building: Cannot create in script"
+      },
+      {
+        "offset": 48817409,
+        "text": "Version Count"
+      },
+      {
+        "offset": 48820814,
+        "text": "Version Footprint"
+      },
+      {
+        "offset": 48826385,
+        "text": "BuildingTint"
+      },
+      {
+        "offset": 48841814,
+        "text": "version' not found in TargetEnvironment"
+      },
+      {
+        "offset": 48847505,
+        "text": "Version' element"
+      },
+      {
+        "offset": 48863404,
+        "text": "BuildingImpulseMult"
+      },
+      {
+        "offset": 48870067,
+        "text": "Versions::Init"
+      },
+      {
+        "offset": 48870394,
+        "text": "BuildRenderLists Init"
+      },
+      {
+        "offset": 48911344,
+        "text": "Versioned Changeset"
+      },
+      {
+        "offset": 48961841,
+        "text": "Build Status"
+      },
+      {
+        "offset": 48972295,
+        "text": "BuildRenderLists"
+      },
+      {
+        "offset": 48972536,
+        "text": "Build Mute Lists"
+      },
+      {
+        "offset": 48984295,
+        "text": "version events"
+      },
+      {
+        "offset": 49002286,
+        "text": "Versioned Changesets"
+      },
+      {
+        "offset": 49014997,
+        "text": "builder_stats"
+      },
+      {
+        "offset": 49033990,
+        "text": "builds when loaded for possible errors"
+      },
+      {
+        "offset": 49044948,
+        "text": "version %d, discarding markers"
+      },
+      {
+        "offset": 49047533,
+        "text": "version for the front/backbuffers"
+      },
+      {
+        "offset": 49081901,
+        "text": "versions"
+      },
+      {
+        "offset": 49081941,
+        "text": "versions"
+      },
+      {
+        "offset": 49081965,
+        "text": "versions"
+      },
+      {
+        "offset": 49082017,
+        "text": "versions"
+      },
+      {
+        "offset": 49082069,
+        "text": "versions"
+      },
+      {
+        "offset": 49082090,
+        "text": "versions"
+      }
+    ]
+  },
+  "name_section_symbol_summary": {
+    "rage_native": {
+      "count": 41244,
+      "samples": [
+        {
+          "function_index": 108,
+          "name": "rage::CheckpointSystemMemory(char const*, int)"
+        },
+        {
+          "function_index": 109,
+          "name": "rage::sysCriticalSectionToken::sysCriticalSectionToken(int)"
+        },
+        {
+          "function_index": 110,
+          "name": "rage::sysCriticalSectionToken::~sysCriticalSectionToken()"
+        },
+        {
+          "function_index": 111,
+          "name": "rage::sysCriticalSectionToken::Lock()"
+        },
+        {
+          "function_index": 112,
+          "name": "rage::sysCriticalSectionToken::TryLock()"
+        },
+        {
+          "function_index": 113,
+          "name": "rage::sysCriticalSectionToken::Unlock()"
+        },
+        {
+          "function_index": 114,
+          "name": "rage::sysIpcCreateSema(int)"
+        },
+        {
+          "function_index": 115,
+          "name": "rage::sysIpcPollSema(rage::sysIpcSemaTag*)"
+        },
+        {
+          "function_index": 116,
+          "name": "rage::sysIpcWaitSema(rage::sysIpcSemaTag*, unsigned int)"
+        },
+        {
+          "function_index": 117,
+          "name": "rage::SemaTakeUntil(rage::sysIpcSemaTag*, double)"
+        },
+        {
+          "function_index": 118,
+          "name": "rage::sysIpcWaitSemaTimed(rage::sysIpcSemaTag*, unsigned int)"
+        },
+        {
+          "function_index": 119,
+          "name": "rage::sysIpcSignalSema(rage::sysIpcSemaTag*, unsigned int)"
+        },
+        {
+          "function_index": 120,
+          "name": "rage::sysIpcCreateMutex()"
+        },
+        {
+          "function_index": 121,
+          "name": "rage::sysIpcLockMutexCommand(rage::sysIpcMutexTag*)"
+        },
+        {
+          "function_index": 122,
+          "name": "rage::sysIpcUnlockMutex(rage::sysIpcMutexTag*)"
+        },
+        {
+          "function_index": 123,
+          "name": "rage::sysIpcDeleteMutex(rage::sysIpcMutexTag*)"
+        },
+        {
+          "function_index": 124,
+          "name": "rage::sysIpcCreateEvent()"
+        },
+        {
+          "function_index": 125,
+          "name": "rage::sysIpcWaitEvent(rage::sysIpcEventTag*)"
+        },
+        {
+          "function_index": 126,
+          "name": "rage::sysIpcPollEvent(rage::sysIpcEventTag*)"
+        },
+        {
+          "function_index": 127,
+          "name": "rage::sysIpcSetEvent(rage::sysIpcEventTag*)"
+        },
+        {
+          "function_index": 128,
+          "name": "rage::sysIpcCreateThread(void (*)(void*), void*, unsigned int, rage::sysIpcPriority, char const*, int, char const*)"
+        },
+        {
+          "function_index": 129,
+          "name": "rage::HangWatchdog(void*)"
+        },
+        {
+          "function_index": 130,
+          "name": "rage::sysIpcThreadWrapper(void*)"
+        },
+        {
+          "function_index": 131,
+          "name": "rage::sysIpcWaitThreadExit(rage::sysIpcThreadId__*)"
+        },
+        {
+          "function_index": 132,
+          "name": "rage::sysIpcGetProcessorCount()"
+        },
+        {
+          "function_index": 133,
+          "name": "rage::sysIpcSetThreadPriority(rage::sysIpcThreadId__*, rage::sysIpcPriority)"
+        },
+        {
+          "function_index": 134,
+          "name": "rage::sysIpcYield(int)"
+        },
+        {
+          "function_index": 135,
+          "name": "rage::sysIpcSleep(unsigned int)"
+        },
+        {
+          "function_index": 136,
+          "name": "rage::sysIpcEstimateStackUsage(unsigned int&, unsigned int&)"
+        },
+        {
+          "function_index": 140,
+          "name": "rage::Append(char*, int, int, char const*, ...)"
+        }
+      ]
+    },
+    "version_or_build": {
+      "count": 1005,
+      "samples": [
+        {
+          "function_index": 510,
+          "name": "wasm_null_d3d::NullContext::Dispatch(unsigned int, unsigned int, unsigned int)"
+        },
+        {
+          "function_index": 511,
+          "name": "wasm_null_d3d::NullContext::DispatchIndirect(ID3D11Buffer*, unsigned int)"
+        },
+        {
+          "function_index": 636,
+          "name": "ZSTD_buildFSETable"
+        },
+        {
+          "function_index": 637,
+          "name": "ZSTD_buildSeqTable"
+        },
+        {
+          "function_index": 775,
+          "name": "rage::bkManager::Rebuild()"
+        },
+        {
+          "function_index": 776,
+          "name": "rage::bkWidget::Rebuild()"
+        },
+        {
+          "function_index": 1182,
+          "name": "rage::datCompressionData::BuildHeader(unsigned char*, int) const"
+        },
+        {
+          "function_index": 2037,
+          "name": "rage::pgRscBuilder::ConstructName(char*, int, char const*, char const*, bool)"
+        },
+        {
+          "function_index": 2039,
+          "name": "rage::rscbuilder_signal_callback(void*, void*, unsigned int, unsigned int)"
+        },
+        {
+          "function_index": 2040,
+          "name": "rage::pgRscBuilder::AllocateMap(rage::datResourceMap&)"
+        },
+        {
+          "function_index": 2042,
+          "name": "rage::pgRscBuilder::FreeMemory(rage::datResourceMap const&)"
+        },
+        {
+          "function_index": 2044,
+          "name": "rage::pgRscBuilder::ComputeLeafSize(unsigned long, bool)"
+        },
+        {
+          "function_index": 2046,
+          "name": "rage::pgRscBuilder::Cleanup(rage::datResourceMap&, bool)"
+        },
+        {
+          "function_index": 2047,
+          "name": "rage::pgRscBuilder::LoadBuild(char const*, char const*, int, rage::datResourceMap&, rage::datResourceInfo&)"
+        },
+        {
+          "function_index": 2164,
+          "name": "rage::parManager::LoadPatchFile(char const*, char const*, rage::parParsableStructure*, rage::parStructure*) const"
+        },
+        {
+          "function_index": 2169,
+          "name": "rage::parManager::BuildTreeNodeFromStructure(rage::parStructure&, rage::parParsableStructure const*, char const*, rage::parSettings const*) const"
+        },
+        {
+          "function_index": 2170,
+          "name": "rage::parBuildTreeVisitor::BeginToplevelStruct(rage::parParsableStructure*, rage::parStructure&)"
+        },
+        {
+          "function_index": 2171,
+          "name": "rage::parBuildTreeVisitor::~parBuildTreeVisitor()"
+        },
+        {
+          "function_index": 2228,
+          "name": "rage::psoIffToRscConversion::ConvertToNewFormat(rage::psoStructureMapData const&, rage::psoStructureData*, rage::psoResourceData&, char)"
+        },
+        {
+          "function_index": 2244,
+          "name": "rage::psoDebugMismatchedFiles::BuildNewSchemasOnlyResourceFromParManager(rage::psoResourceData&)"
+        },
+        {
+          "function_index": 2245,
+          "name": "rage::psoBuildSchemaFromStructure(rage::psoRscBuilder&, rage::parStructure&)"
+        },
+        {
+          "function_index": 2246,
+          "name": "rage::psoRscBuilder::ConstructResourceData()"
+        },
+        {
+          "function_index": 2247,
+          "name": "rage::psoRscBuilderInstanceDataCatalog::~psoRscBuilderInstanceDataCatalog()"
+        },
+        {
+          "function_index": 2248,
+          "name": "rage::psoRscBuilderSchemaCatalog::~psoRscBuilderSchemaCatalog()"
+        },
+        {
+          "function_index": 2250,
+          "name": "AddMemberToSchema(rage::psoRscBuilder&, rage::psoRscBuilderStructSchema&, rage::parMember&, bool, bool, bool)"
+        },
+        {
+          "function_index": 2251,
+          "name": "rage::psoRscBuilderInstanceDataCatalog::AddStringsToResource(rage::psoPtr<char>&, rage::atMap<unsigned int, char const*, rage::atMapHashFn<unsigned int>, rage::atMapEquals<unsigned int>, rage::atMapMemory<unsigned int, char const*>>&, bool)"
+        },
+        {
+          "function_index": 2272,
+          "name": "rage::psoObjectFixup::BuildFromStructure(rage::parStructure&, unsigned int)"
+        },
+        {
+          "function_index": 2274,
+          "name": "rage::psoObjectFixup::BuildFromMember(rage::parStructure&, rage::parMember&, unsigned int)"
+        },
+        {
+          "function_index": 2281,
+          "name": "rage::psoIffToRscConversion::ConvertToNewFormat(rage::psoSchemaCatalogData const&, rage::psoResourceData&, char)"
+        },
+        {
+          "function_index": 2290,
+          "name": "rage::psoRscBuilderStructSchema::FindMemberTraits(rage::psoRscMemberSchemaData const&, unsigned long&, unsigned long&)"
+        }
+      ]
+    },
+    "product_id": {
+      "count": 8,
+      "samples": [
+        {
+          "function_index": 14985,
+          "name": "rage::rlUgcGta5PhotoMetadataData::GetStagingUrl() const"
+        },
+        {
+          "function_index": 14986,
+          "name": "rage::rlUgcGta5PhotoMetadataData::GetStagingAuthToken() const"
+        },
+        {
+          "function_index": 18888,
+          "name": "CGameLogic::IsRunningGTA5Map()"
+        },
+        {
+          "function_index": 75615,
+          "name": "CCreekHackHelperGTAV::IsAffected(CVehicle const&)"
+        },
+        {
+          "function_index": 84943,
+          "name": "CLiveManager::InitSinglePlayerCloudSaves()::GTA5CloudSaveTitleConfiguration::QueryInterface(rgsc::_RGSC_RGSC_IID const&, void**)"
+        },
+        {
+          "function_index": 84944,
+          "name": "CLiveManager::InitSinglePlayerCloudSaves()::GTA5CloudSaveTitleConfiguration::GetTitleName()"
+        },
+        {
+          "function_index": 84945,
+          "name": "CLiveManager::InitSinglePlayerCloudSaves()::GTA5CloudSaveTitleConfiguration::GetFileName(unsigned int)"
+        },
+        {
+          "function_index": 84946,
+          "name": "CLiveManager::InitSinglePlayerCloudSaves()::GTA5CloudSaveTitleConfiguration::GetSaveDirectory()"
+        }
+      ]
+    },
+    "pc_dx11": {
+      "count": 478,
+      "samples": [
+        {
+          "function_index": 224,
+          "name": "wasm_null_d3d::NullCom<ID3D11ShaderReflection>::QueryInterface(_GUID const&, void**)"
+        },
+        {
+          "function_index": 225,
+          "name": "wasm_null_d3d::NullCom<ID3D11ShaderReflection>::AddRef()"
+        },
+        {
+          "function_index": 226,
+          "name": "wasm_null_d3d::NullCom<ID3D11ShaderReflection>::Release()"
+        },
+        {
+          "function_index": 227,
+          "name": "wasm_null_d3d::Reflector::GetDesc(_D3D11_SHADER_DESC*)"
+        },
+        {
+          "function_index": 228,
+          "name": "wasm_null_d3d::Stub_ID3D11ShaderReflection::GetConstantBufferByIndex(unsigned int)"
+        },
+        {
+          "function_index": 229,
+          "name": "wasm_null_d3d::Stub_ID3D11ShaderReflection::GetResourceBindingDesc(unsigned int, _D3D11_SHADER_INPUT_BIND_DESC*)"
+        },
+        {
+          "function_index": 230,
+          "name": "wasm_null_d3d::Reflector::GetInputParameterDesc(unsigned int, _D3D11_SIGNATURE_PARAMETER_DESC*)"
+        },
+        {
+          "function_index": 231,
+          "name": "wasm_null_d3d::Reflector::GetOutputParameterDesc(unsigned int, _D3D11_SIGNATURE_PARAMETER_DESC*)"
+        },
+        {
+          "function_index": 232,
+          "name": "wasm_null_d3d::Stub_ID3D11ShaderReflection::GetThreadGroupSize(unsigned int*, unsigned int*, unsigned int*)"
+        },
+        {
+          "function_index": 233,
+          "name": "wasm_null_d3d::Stub_ID3D11ShaderReflection::GetRequiresFlags()"
+        },
+        {
+          "function_index": 236,
+          "name": "wasm_null_d3d::Stub_ID3D11ShaderReflection::Supports(_GUID const&) const"
+        },
+        {
+          "function_index": 245,
+          "name": "wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Buffer, D3D11_BUFFER_DESC>::StorageSize() const"
+        },
+        {
+          "function_index": 246,
+          "name": "non-virtual thunk to wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Buffer, D3D11_BUFFER_DESC>::StorageSize() const"
+        },
+        {
+          "function_index": 247,
+          "name": "wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Buffer, D3D11_BUFFER_DESC>::SubLayout(unsigned int) const"
+        },
+        {
+          "function_index": 248,
+          "name": "non-virtual thunk to wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Buffer, D3D11_BUFFER_DESC>::SubLayout(unsigned int) const"
+        },
+        {
+          "function_index": 249,
+          "name": "wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Buffer, D3D11_BUFFER_DESC>::GetType(D3D11_RESOURCE_DIMENSION*)"
+        },
+        {
+          "function_index": 250,
+          "name": "wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture1D, D3D11_TEXTURE1D_DESC>::StorageSize() const"
+        },
+        {
+          "function_index": 251,
+          "name": "wasm_null_d3d::GetFormatInfo(DXGI_FORMAT)"
+        },
+        {
+          "function_index": 252,
+          "name": "non-virtual thunk to wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture1D, D3D11_TEXTURE1D_DESC>::StorageSize() const"
+        },
+        {
+          "function_index": 253,
+          "name": "wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture1D, D3D11_TEXTURE1D_DESC>::SubLayout(unsigned int) const"
+        },
+        {
+          "function_index": 254,
+          "name": "non-virtual thunk to wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture1D, D3D11_TEXTURE1D_DESC>::SubLayout(unsigned int) const"
+        },
+        {
+          "function_index": 255,
+          "name": "wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture1D, D3D11_TEXTURE1D_DESC>::GetType(D3D11_RESOURCE_DIMENSION*)"
+        },
+        {
+          "function_index": 256,
+          "name": "wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture2D, D3D11_TEXTURE2D_DESC>::StorageSize() const"
+        },
+        {
+          "function_index": 257,
+          "name": "non-virtual thunk to wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture2D, D3D11_TEXTURE2D_DESC>::StorageSize() const"
+        },
+        {
+          "function_index": 258,
+          "name": "wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture2D, D3D11_TEXTURE2D_DESC>::SubLayout(unsigned int) const"
+        },
+        {
+          "function_index": 259,
+          "name": "non-virtual thunk to wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture2D, D3D11_TEXTURE2D_DESC>::SubLayout(unsigned int) const"
+        },
+        {
+          "function_index": 260,
+          "name": "wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture2D, D3D11_TEXTURE2D_DESC>::GetType(D3D11_RESOURCE_DIMENSION*)"
+        },
+        {
+          "function_index": 261,
+          "name": "wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture3D, D3D11_TEXTURE3D_DESC>::StorageSize() const"
+        },
+        {
+          "function_index": 262,
+          "name": "non-virtual thunk to wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture3D, D3D11_TEXTURE3D_DESC>::StorageSize() const"
+        },
+        {
+          "function_index": 263,
+          "name": "wasm_null_d3d::NullResource<wasm_null_d3d::Stub_ID3D11Texture3D, D3D11_TEXTURE3D_DESC>::SubLayout(unsigned int) const"
+        }
+      ]
+    },
+    "console_backend": {
+      "count": 8,
+      "samples": [
+        {
+          "function_index": 39080,
+          "name": "CVehicleXenonLightColor::parser_Register()"
+        },
+        {
+          "function_index": 39081,
+          "name": "rage::parStructure* rage::parCguGetStructureCB<CVehicleXenonLightColor>(rage::parParsableStructure const*)"
+        },
+        {
+          "function_index": 39235,
+          "name": "CVehicleVariationInstance::SetXenonLightColor(unsigned char)"
+        },
+        {
+          "function_index": 61543,
+          "name": "vehicle_commands::CommandSetVehicleXenonLightColorIdx(int, int)"
+        },
+        {
+          "function_index": 61544,
+          "name": "vehicle_commands::CommandGetVehicleXenonLightColorIdx(int)"
+        },
+        {
+          "function_index": 62325,
+          "name": "vehicle_commands::SetupScriptCommands()::scrWrapped_SET_VEHICLE_XENON_LIGHT_COLOR_INDEX::Call(rage::scrThread::Info&)"
+        },
+        {
+          "function_index": 62326,
+          "name": "vehicle_commands::SetupScriptCommands()::scrWrapped_GET_VEHICLE_XENON_LIGHT_COLOR_INDEX::Call(rage::scrThread::Info&)"
+        },
+        {
+          "function_index": 65057,
+          "name": "PrintXenonBuckets()"
+        }
+      ]
+    },
+    "browser_port": {
+      "count": 2217,
+      "samples": [
+        {
+          "function_index": 0,
+          "name": "wasm_now_ms"
+        },
+        {
+          "function_index": 1,
+          "name": "wasm_hang_line_js"
+        },
+        {
+          "function_index": 2,
+          "name": "wasm_audio_publish_js"
+        },
+        {
+          "function_index": 3,
+          "name": "wasm_httpfs_io_start_js"
+        },
+        {
+          "function_index": 4,
+          "name": "wasm_httpfs_manifest_js"
+        },
+        {
+          "function_index": 5,
+          "name": "wasm_userdata_page_js"
+        },
+        {
+          "function_index": 6,
+          "name": "wasm_userdata_put_js"
+        },
+        {
+          "function_index": 7,
+          "name": "wasm_userdata_delete_js"
+        },
+        {
+          "function_index": 8,
+          "name": "wgpu_start_worker"
+        },
+        {
+          "function_index": 9,
+          "name": "wasm_has_page_js"
+        },
+        {
+          "function_index": 10,
+          "name": "wasm_input_publish_js"
+        },
+        {
+          "function_index": 11,
+          "name": "wasm_module_int_js"
+        },
+        {
+          "function_index": 12,
+          "name": "emscripten_get_now"
+        },
+        {
+          "function_index": 13,
+          "name": "wasm_print_line_js"
+        },
+        {
+          "function_index": 14,
+          "name": "emscripten_stack_snapshot"
+        },
+        {
+          "function_index": 15,
+          "name": "emscripten_stack_unwind_buffer"
+        },
+        {
+          "function_index": 16,
+          "name": "emscripten_asm_const_int"
+        },
+        {
+          "function_index": 17,
+          "name": "emscripten_get_heap_max"
+        },
+        {
+          "function_index": 30,
+          "name": "emscripten_asm_const_int_sync_on_main_thread"
+        },
+        {
+          "function_index": 36,
+          "name": "emscripten_date_now"
+        },
+        {
+          "function_index": 37,
+          "name": "_emscripten_thread_set_strongref"
+        },
+        {
+          "function_index": 38,
+          "name": "emscripten_exit_with_live_runtime"
+        },
+        {
+          "function_index": 52,
+          "name": "_emscripten_init_main_thread_js"
+        },
+        {
+          "function_index": 53,
+          "name": "_emscripten_thread_mailbox_await"
+        },
+        {
+          "function_index": 60,
+          "name": "_emscripten_receive_on_main_thread_js"
+        },
+        {
+          "function_index": 61,
+          "name": "emscripten_check_blocking_allowed"
+        },
+        {
+          "function_index": 63,
+          "name": "_emscripten_thread_cleanup"
+        },
+        {
+          "function_index": 71,
+          "name": "emscripten_num_logical_cores"
+        },
+        {
+          "function_index": 72,
+          "name": "_emscripten_system"
+        },
+        {
+          "function_index": 73,
+          "name": "_emscripten_notify_mailbox_postmessage"
+        }
+      ]
+    }
+  },
+  "data_section_summary": {
+    "payload_offset": 48550155,
+    "payload_bytes": 7828019,
+    "categories": {
+      "source_paths": {
+        "count": 766,
+        "samples": [
+          {
+            "offset": 48682035,
+            "text": "c:/logmemory.csv"
+          },
+          {
+            "offset": 48682455,
+            "text": "c:\\rtlog.csv"
+          },
+          {
+            "offset": 48682468,
+            "text": "c:\\streamlog.csv"
+          },
+          {
+            "offset": 48739360,
+            "text": "C:\\list.txt"
+          },
+          {
+            "offset": 48739717,
+            "text": "C:/AudioCollisionDefault.txt"
+          },
+          {
+            "offset": 48739746,
+            "text": "C:/AudioCollisionLocalDefault.txt"
+          },
+          {
+            "offset": 48739950,
+            "text": "x:\\ped_shader_settings.txt"
+          },
+          {
+            "offset": 48739977,
+            "text": "C:\\VehicleLaunchSettings.txt"
+          },
+          {
+            "offset": 48740506,
+            "text": "C:/AudioCollisionNewMoveable.txt"
+          },
+          {
+            "offset": 48740539,
+            "text": "C:/AudioCollisionChanged.txt"
+          },
+          {
+            "offset": 48740568,
+            "text": "c:\\_rageemailtemp%d.txt"
+          },
+          {
+            "offset": 48740592,
+            "text": "C:/AudioCollisionNewStatic.txt"
+          },
+          {
+            "offset": 48740642,
+            "text": "c:/dump/texconvlog_%s_%08X.txt"
+          },
+          {
+            "offset": 48740711,
+            "text": "X:\\MLO.txt"
+          },
+          {
+            "offset": 48754882,
+            "text": "x:/procdataOut"
+          },
+          {
+            "offset": 48807522,
+            "text": "c:/autoscreenshot"
+          },
+          {
+            "offset": 48810276,
+            "text": "c:\\rasterizerGraph.dot"
+          },
+          {
+            "offset": 48951803,
+            "text": "C:/AudioWorldSectorsInfo.dat"
+          },
+          {
+            "offset": 48970710,
+            "text": "C:\\Windows\\System32\\drivers\\etc\\hosts"
+          },
+          {
+            "offset": 49014802,
+            "text": "K:\\streamGTA5\\stats\\memjunctionstats"
+          },
+          {
+            "offset": 49014839,
+            "text": "K:\\streamGTA5\\stats\\memstats"
+          },
+          {
+            "offset": 49014882,
+            "text": "K:\\streamGTA5\\stats\\perfstats"
+          },
+          {
+            "offset": 49223561,
+            "text": "x:/reflection_%04d_4x3cross.dds"
+          },
+          {
+            "offset": 49223683,
+            "text": "x:/scene_cubemap_%04d%s.dds"
+          },
+          {
+            "offset": 49224250,
+            "text": "x:/reflection_%04d_cube.dds"
+          },
+          {
+            "offset": 49224341,
+            "text": "x:/reflection_%04d_face[%d].dds"
+          },
+          {
+            "offset": 49239461,
+            "text": "X:\\%s_%s"
+          },
+          {
+            "offset": 49240379,
+            "text": "c:\\%s"
+          },
+          {
+            "offset": 49253679,
+            "text": "x:/dumps/%s"
+          },
+          {
+            "offset": 49253790,
+            "text": "X:/gta5/titleupdate/dev_ng/x64/data/errorcodes/%s"
+          },
+          {
+            "offset": 49254332,
+            "text": "c:/dump/dtm/%s"
+          },
+          {
+            "offset": 49266402,
+            "text": "E:/P1/gta5/tools_ng\\script\\misc\\p4_add_or_edit_frag_tune_file.bat %s"
+          },
+          {
+            "offset": 49535825,
+            "text": "x:/gta5/assets/recordings/car"
+          },
+          {
+            "offset": 49553058,
+            "text": "E:\\P1\\GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT\\RAGEMISC\\_UNITY\\../../../../rage/suite/src/snet/party.cpp"
+          },
+          {
+            "offset": 49553154,
+            "text": "E:\\P1\\GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT_NETWORK\\_UNITY\\../../network/Party/NetworkParty.cpp"
+          },
+          {
+            "offset": 49553244,
+            "text": "E:\\P1\\GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../audio/vehiclereflectionsaudioentity.cpp"
+          },
+          {
+            "offset": 49553340,
+            "text": "E:\\P1\\GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../audio/collisionaudioentity.cpp"
+          },
+          {
+            "offset": 49553427,
+            "text": "E:\\P1\\GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../audio/speechaudioentity.cpp"
+          },
+          {
+            "offset": 49553511,
+            "text": "E:\\P1\\GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../audio/vehicleaudioentity.cpp"
+          },
+          {
+            "offset": 49553596,
+            "text": "E:\\P1\\GTA5\\SRC\\DEV_NG\\GAME\\VS_PROJECT1_LIB\\_UNITY\\../../audio/pedaudioentity.cpp"
+          }
+        ]
+      },
+      "version_or_build_values": {
+        "count": 34,
+        "samples": [
+          {
+            "offset": 48661632,
+            "text": "GenerateCRC :: Japanese Build: %s, Rolling: 0x%08x"
+          },
+          {
+            "offset": 48662950,
+            "text": "OnRequest [%ld] :: Received Request - From: %s, Addr: %s, ID: 0x%08x, Token: 0x%016lx, Flags: 0x%x, Version: %d, Disc: 0x%08x"
+          },
+          {
+            "offset": 48663076,
+            "text": "%s[%Iu:%u]: Querying Host [%ld] - EndpointId: [%d], ID: 0x%08x, Token: 0x%016lx, Flags: 0x%x, Version: %d, Disc: 0x%08x"
+          },
+          {
+            "offset": 48663894,
+            "text": "         Pause Menu current version is: %s, 0x%08x"
+          },
+          {
+            "offset": 48664478,
+            "text": "BailOnMultiplayer :: Bailing! PauseMenu: %s, Version: %08x"
+          },
+          {
+            "offset": 50053189,
+            "text": "platform:/patch/levels/gta5/script/script.rpf"
+          },
+          {
+            "offset": 50702412,
+            "text": "Adobe APP14 marker: version %d, flags 0x%04x 0x%04x, transform %d"
+          },
+          {
+            "offset": 50783158,
+            "text": "JFIF APP0 marker: version %d.%02d, density %dx%d  %d"
+          },
+          {
+            "offset": 50950906,
+            "text": "Applied weapon patch from %s, replacing %s, originalHash = 0x%X, updatedHash = 0x%X"
+          },
+          {
+            "offset": 51571308,
+            "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+          },
+          {
+            "offset": 51571347,
+            "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+          },
+          {
+            "offset": 51632884,
+            "text": "Menu Version to Open 2"
+          },
+          {
+            "offset": 51645478,
+            "text": "Menu Version to Open 1"
+          },
+          {
+            "offset": 51661360,
+            "text": "Game header version must be > 0"
+          },
+          {
+            "offset": 51886562,
+            "text": "Loading mesh file version %d, latest version is 12."
+          },
+          {
+            "offset": 51944931,
+            "text": "{\"version\":1,"
+          },
+          {
+            "offset": 51958648,
+            "text": "    Version        = %d (0x%08x)"
+          },
+          {
+            "offset": 51958681,
+            "text": "    Build          = %d (0x%08x)"
+          },
+          {
+            "offset": 52037500,
+            "text": "%s AT %s [%d] (version %04d.%02d built on %s)"
+          },
+          {
+            "offset": 52228075,
+            "text": "bb.WriteUns(version, sizeof(version) << 3)"
+          },
+          {
+            "offset": 52229865,
+            "text": "Loading mesh file version %d, which is not supported (max is 12)"
+          },
+          {
+            "offset": 52237670,
+            "text": "[vehicles] Disable vehicle mods (temp disabled as patch for BS#1017717, BS#1022990, etc.)"
+          },
+          {
+            "offset": 52250493,
+            "text": "LoadMemoryChecks :: Skipping entry with version: 0x%08x (SKU %d, version %d) (Expected 0x%08x (SKU %d, version %d))"
+          },
+          {
+            "offset": 52263692,
+            "text": "!CFileMgr::IsValidFileHandle(CFileMgr::OpenFile(\"platform:/patch/levels/gta5/script/script.rpf\"))"
+          },
+          {
+            "offset": 52557302,
+            "text": "Error: GFxLoader read failed - incompatible GFX file, version 3-4.x expected"
+          },
+          {
+            "offset": 52581077,
+            "text": "<?xml version=\"%.1f\"?>"
+          },
+          {
+            "offset": 52581101,
+            "text": "<?xml version = \"1.0\"?>"
+          },
+          {
+            "offset": 52582233,
+            "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><d:multistatus xmlns:d='DAV:'>"
+          },
+          {
+            "offset": 52584752,
+            "text": "Build timestamp is: 09:29:05 Oct  5 2026"
+          },
+          {
+            "offset": 52584794,
+            "text": "version: 1.10"
+          },
+          {
+            "offset": 52584942,
+            "text": "version: 100"
+          },
+          {
+            "offset": 52627817,
+            "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+          },
+          {
+            "offset": 52631958,
+            "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+          },
+          {
+            "offset": 55097436,
+            "text": "Bink is not available on the WebAssembly build (no binkw64 for wasm; movies cannot be played)"
+          }
+        ]
+      },
+      "product_identifiers": {
+        "count": 918,
+        "samples": [
+          {
+            "offset": 48551571,
+            "text": "{ \"GTA5Env\" : \"%s\" }"
+          },
+          {
+            "offset": 48551592,
+            "text": "{ \"GTA5\" : \"%s\" }"
+          },
+          {
+            "offset": 48556290,
+            "text": "gta5_liberty"
+          },
+          {
+            "offset": 48602853,
+            "text": "MatchmakingFlags::MMF_RockstarCreatedOnly"
+          },
+          {
+            "offset": 48683907,
+            "text": "isrockstardev"
+          },
+          {
+            "offset": 48684079,
+            "text": "RemoteIsRockstarDev"
+          },
+          {
+            "offset": 48684099,
+            "text": "InviteFlags::IF_IsRockstarDev"
+          },
+          {
+            "offset": 48684177,
+            "text": "Is Rockstar Dev"
+          },
+          {
+            "offset": 48684222,
+            "text": "gtav"
+          },
+          {
+            "offset": 48684558,
+            "text": "gta5mkt_ru"
+          },
+          {
+            "offset": 48739545,
+            "text": "Couldn't open x:gta5/tools/bin/MACS_SynchronizeList.txt"
+          },
+          {
+            "offset": 48739601,
+            "text": "Writing sync list to: x:gta5/tools/bin/MACS_SynchronizeList.txt"
+          },
+          {
+            "offset": 48763883,
+            "text": "gta5playlist"
+          },
+          {
+            "offset": 48802435,
+            "text": "gta5mkt_pt"
+          },
+          {
+            "offset": 48813625,
+            "text": "RockstarAccount"
+          },
+          {
+            "offset": 48827018,
+            "text": "ImportTo :: Received message with old style gta5.game.event"
+          },
+          {
+            "offset": 48831338,
+            "text": "CRockstarCrewMsgPresenceEvent"
+          },
+          {
+            "offset": 48831368,
+            "text": "CRockstarMsgPresenceEvent"
+          },
+          {
+            "offset": 48876832,
+            "text": "gta5mkt_it"
+          },
+          {
+            "offset": 48951832,
+            "text": "common:/data/levels/gta5/AudioWorldSectorsInfo.dat"
+          },
+          {
+            "offset": 48960342,
+            "text": "hideRockstarDevs"
+          },
+          {
+            "offset": 48960744,
+            "text": "Set Is Rockstar Dev status"
+          },
+          {
+            "offset": 49014802,
+            "text": "K:\\streamGTA5\\stats\\memjunctionstats"
+          },
+          {
+            "offset": 49014839,
+            "text": "K:\\streamGTA5\\stats\\memstats"
+          },
+          {
+            "offset": 49014882,
+            "text": "K:\\streamGTA5\\stats\\perfstats"
+          },
+          {
+            "offset": 49059370,
+            "text": "Rockstar Editor Photos"
+          },
+          {
+            "offset": 49061199,
+            "text": "platform:/movies/rockstar_logos"
+          },
+          {
+            "offset": 49081024,
+            "text": "sc_UseRockstarCandidateMissions"
+          },
+          {
+            "offset": 49145665,
+            "text": "AddRsInvite :: Reject - Script cannot process Rockstar invites"
+          },
+          {
+            "offset": 49202243,
+            "text": "[network] Force privilege setting for Rockstar services"
+          },
+          {
+            "offset": 49223711,
+            "text": "share/gta5/mpchars/%d%s.dds"
+          },
+          {
+            "offset": 49238085,
+            "text": "Now loading Grand Theft Auto V%s%s"
+          },
+          {
+            "offset": 49253790,
+            "text": "X:/gta5/titleupdate/dev_ng/x64/data/errorcodes/%s"
+          },
+          {
+            "offset": 49254680,
+            "text": "share/gta5/ugc/missions5/%s"
+          },
+          {
+            "offset": 49266402,
+            "text": "E:/P1/gta5/tools_ng\\script\\misc\\p4_add_or_edit_frag_tune_file.bat %s"
+          },
+          {
+            "offset": 49302439,
+            "text": "GTAV x64 BankRelease %s"
+          },
+          {
+            "offset": 49329462,
+            "text": "Caching Rockstar SC Admin message for script: %s"
+          },
+          {
+            "offset": 49382849,
+            "text": "Valid Rockstar ID: %s"
+          },
+          {
+            "offset": 49409054,
+            "text": "_global.com.rockstargames.ui.utils.Colour"
+          },
+          {
+            "offset": 49414845,
+            "text": "http://socialclub.rockstargames.com/games/gtav/pc/tutorials/editor"
+          }
+        ]
+      },
+      "pc_dx11": {
+        "count": 270,
+        "samples": [
+          {
+            "offset": 48588390,
+            "text": "Unable to create DXGI factory"
+          },
+          {
+            "offset": 48606121,
+            "text": "Write PC settings file locally"
+          },
+          {
+            "offset": 48608900,
+            "text": "Windows process memory statistics are unavailable on WebAssembly"
+          },
+          {
+            "offset": 48666895,
+            "text": "Invalid opcode. PC = 0x%x"
+          },
+          {
+            "offset": 48957009,
+            "text": "Smash Windows When Convertible Roof Anim Plays"
+          },
+          {
+            "offset": 48957805,
+            "text": "vfx_tty_windows"
+          },
+          {
+            "offset": 48957821,
+            "text": "rmptfx_tty_windows"
+          },
+          {
+            "offset": 48957840,
+            "text": "fileloader_tty_windows"
+          },
+          {
+            "offset": 48957863,
+            "text": "smash_tty_windows"
+          },
+          {
+            "offset": 48957881,
+            "text": "timecycle_tty_windows"
+          },
+          {
+            "offset": 48957903,
+            "text": "Display Windows"
+          },
+          {
+            "offset": 48957919,
+            "text": "Test Fragment Windows"
+          },
+          {
+            "offset": 48957941,
+            "text": "Roll Down All Windows"
+          },
+          {
+            "offset": 48970710,
+            "text": "C:\\Windows\\System32\\drivers\\etc\\hosts"
+          },
+          {
+            "offset": 48989632,
+            "text": "PC Only Achievements"
+          },
+          {
+            "offset": 49082792,
+            "text": "[graphics] Ignore the windows DPI values and compute from raw pixel dimensions"
+          },
+          {
+            "offset": 49131646,
+            "text": "PC Mappings"
+          },
+          {
+            "offset": 49193732,
+            "text": "windowsWithExposedEdges"
+          },
+          {
+            "offset": 49237991,
+            "text": "%s breakpoint at pc=%d%s%s"
+          },
+          {
+            "offset": 49414845,
+            "text": "http://socialclub.rockstargames.com/games/gtav/pc/tutorials/editor"
+          },
+          {
+            "offset": 49424186,
+            "text": "windows crypt init error"
+          },
+          {
+            "offset": 49424954,
+            "text": "windows crypt generation error"
+          },
+          {
+            "offset": 49540887,
+            "text": "win32_40_lq"
+          },
+          {
+            "offset": 49551182,
+            "text": "Can this ped drive around real slow with the windows down and music up"
+          },
+          {
+            "offset": 49612540,
+            "text": "E:\\P1\\GTA5\\SRC\\DEV_NG\\RAGE\\BASE\\SRC\\VCPROJ\\RAGEGRAPHICS\\_UNITY\\../../../grcore/effect_d3d11.cpp"
+          },
+          {
+            "offset": 49612636,
+            "text": "E:\\P1\\GTA5\\SRC\\DEV_NG\\RAGE\\BASE\\SRC\\VCPROJ\\RAGEGRAPHICS\\_UNITY\\../../../grcore/buffer_d3d11.cpp"
+          },
+          {
+            "offset": 49612732,
+            "text": "E:\\P1\\GTA5\\SRC\\DEV_NG\\RAGE\\BASE\\SRC\\VCPROJ\\RAGEGRAPHICS\\_UNITY\\../../../grcore/device_d3d11.cpp"
+          },
+          {
+            "offset": 49653073,
+            "text": "hei_dlc_windows_casino"
+          },
+          {
+            "offset": 49675139,
+            "text": "win32_nvstereo"
+          },
+          {
+            "offset": 49681288,
+            "text": "Windows Down"
+          },
+          {
+            "offset": 49769547,
+            "text": "REMOTE invoke m_windowsBroken SmashCollision"
+          },
+          {
+            "offset": 49803443,
+            "text": "GetProgramCounter - pc went off end during OP_ENTER scan"
+          },
+          {
+            "offset": 50031451,
+            "text": "Write cloud files to PC harddisk for debugging"
+          },
+          {
+            "offset": 50264272,
+            "text": "PC Pipe"
+          },
+          {
+            "offset": 50265262,
+            "text": "PC Tune"
+          },
+          {
+            "offset": 50294039,
+            "text": "PC Force Show Time"
+          },
+          {
+            "offset": 50296238,
+            "text": "[startup] Disable Windows' Aero theme"
+          },
+          {
+            "offset": 50323411,
+            "text": "Name of MP Stats PC Load file"
+          },
+          {
+            "offset": 50323441,
+            "text": "Name of PC Load file"
+          },
+          {
+            "offset": 50511315,
+            "text": "PC Downloader Pipe not initialized"
+          }
+        ]
+      },
+      "console_backend": {
+        "count": 51,
+        "samples": [
+          {
+            "offset": 49003343,
+            "text": "Print Xenon Buckets"
+          },
+          {
+            "offset": 49035285,
+            "text": "XenonLightColors"
+          },
+          {
+            "offset": 49117093,
+            "text": "orbis"
+          },
+          {
+            "offset": 49145838,
+            "text": "[live] On PS3 - will halt at the XMB when sending invites"
+          },
+          {
+            "offset": 49182171,
+            "text": "ms_bSavePS3AchievementVariables"
+          },
+          {
+            "offset": 49234046,
+            "text": "iOrbisVoiceMinimumActivationTimeMs"
+          },
+          {
+            "offset": 49234116,
+            "text": "iDurangoVoiceMinimumActivationTimeMs"
+          },
+          {
+            "offset": 49433757,
+            "text": "xenonLightColor"
+          },
+          {
+            "offset": 49433773,
+            "text": "CVehicleXenonLightColor"
+          },
+          {
+            "offset": 49434717,
+            "text": "xenonCoronaColor"
+          },
+          {
+            "offset": 49435037,
+            "text": "Is Default Xenon Light Color"
+          },
+          {
+            "offset": 49502521,
+            "text": "xenonLightIntensityModifier"
+          },
+          {
+            "offset": 49502573,
+            "text": "xenonCoronaIntensityModifier"
+          },
+          {
+            "offset": 49530652,
+            "text": "ragPS3TargetAddr"
+          },
+          {
+            "offset": 49662559,
+            "text": "durango"
+          },
+          {
+            "offset": 49695202,
+            "text": "xenon"
+          },
+          {
+            "offset": 50494782,
+            "text": "fOrbisVoiceLoudnessDeactivateThreshold"
+          },
+          {
+            "offset": 50494860,
+            "text": "fDurangoVoiceLoudnessDeactivateThreshold"
+          },
+          {
+            "offset": 50494901,
+            "text": "fOrbisVoiceLoudnessActivateThreshold"
+          },
+          {
+            "offset": 50494975,
+            "text": "fDurangoVoiceLoudnessActivateThreshold"
+          },
+          {
+            "offset": 50495924,
+            "text": "fOrbisVoiceDebounceThreshold"
+          },
+          {
+            "offset": 50495982,
+            "text": "fDurangoVoiceDebounceThreshold"
+          },
+          {
+            "offset": 50943405,
+            "text": "SET_VEHICLE_XENON_LIGHT_COLOR_INDEX"
+          },
+          {
+            "offset": 50943441,
+            "text": "GET_VEHICLE_XENON_LIGHT_COLOR_INDEX"
+          },
+          {
+            "offset": 51055356,
+            "text": "VMT_XENON_LIGHTS"
+          },
+          {
+            "offset": 51091267,
+            "text": "USE_WATER_LAG_TUNE_ORBIS"
+          },
+          {
+            "offset": 51091292,
+            "text": "CONTROLLER_LABELS_FILE_ORBIS"
+          },
+          {
+            "offset": 51095380,
+            "text": "bb.GetNumBytesWritten() <= ORBIS_ONLY(forNpPresence ? NP_PRESENCE_DATA_MAX_EXPORTED_SIZE_IN_BYTES :) MAX_EXPORTED_SIZE_IN_BYTES"
+          },
+          {
+            "offset": 51182778,
+            "text": "PROSPERO"
+          },
+          {
+            "offset": 51186683,
+            "text": "CONTROLLER_LABELS_FILE_DURANGO"
+          },
+          {
+            "offset": 51192919,
+            "text": "CONTROLLER_LABELS_FILE_ORBIS_JPN"
+          },
+          {
+            "offset": 51192952,
+            "text": "CONTROLLER_LABELS_FILE_PS3_JPN"
+          },
+          {
+            "offset": 51197876,
+            "text": "STREAMING_FILE_PLATFORM_XENON"
+          },
+          {
+            "offset": 51218098,
+            "text": "IS_ORBIS_VERSION"
+          },
+          {
+            "offset": 51218138,
+            "text": "IS_PROSPERO_VERSION"
+          },
+          {
+            "offset": 51218158,
+            "text": "IS_DURANGO_VERSION"
+          },
+          {
+            "offset": 51218664,
+            "text": "IS_PS3_VERSION"
+          },
+          {
+            "offset": 51330424,
+            "text": "PS3_SCRIPT_RPF"
+          },
+          {
+            "offset": 51611478,
+            "text": "Use mp3 files for PS4"
+          },
+          {
+            "offset": 51618132,
+            "text": "ShapeTestError_PS3"
+          }
+        ]
+      }
+    }
+  },
+  "ai_tool_token_hits": [
+    {
+      "token": "cursor",
+      "offset": 49064521,
+      "context": "stPos\u0000Disable GetClostestPos\u0000RenderCornerMoveTestPos\u0000bScaleTestPos\u0000bitBuffer.GetCursorPos() > startPos\u0000netStartPos\u0000useCamStartPos\u0000playerRFootPos\u0000gPlayerRFootPos\u0000playerLFootPos\u0000gPlayerLFootPos\u0000kUseAlternateContentPos\u0000fxOffsetPos\u0000wreckedFire3Offset"
+    },
+    {
+      "token": "cursor",
+      "offset": 49064945,
+      "context": "s\u0000State_ExitVehicleAtPos\u0000IT IS NOT NetworkTurnToCreateVehicleAtPos\u0000msgBuffer.GetCursorPos()==cursorPos\u0000playerPos\u0000PlayerPos\u0000DamageOverlayCenterPos\u0000attackerPos\u0000CreationPos\u0000minPos\u0000ScreenPos\u0000vExtraRoomPos\u0000objectBehindVictimPos\u0000CamPos\u0000OriginalPos\u0000Loca"
+    },
+    {
+      "token": "cursor",
+      "offset": 49064958,
+      "context": "ehicleAtPos\u0000IT IS NOT NetworkTurnToCreateVehicleAtPos\u0000msgBuffer.GetCursorPos()==cursorPos\u0000playerPos\u0000PlayerPos\u0000DamageOverlayCenterPos\u0000attackerPos\u0000CreationPos\u0000minPos\u0000ScreenPos\u0000vExtraRoomPos\u0000objectBehindVictimPos\u0000CamPos\u0000OriginalPos\u0000LocalPos\u0000headLook"
+    },
+    {
+      "token": "cursor",
+      "offset": 49065836,
+      "context": "ector Pos\u0000Node Ped Map Sector Pos\u0000Node Ped Navmesh Sector Pos\u0000Test For Water At Cursor Pos\u0000Debug Add At Player Pos\u0000Create Angled Area At Player Pos\u0000Locked MiniMap Pos\u0000Give Focus Scripted Ped Use Nearest Scenario To Pos\u0000Firing Weapon Pos\u0000Screen Po"
+    },
+    {
+      "token": "cursor",
+      "offset": 49247131,
+      "context": "    dest=%s,destSeq=%u%s,nextHop=%s,hopCount=%u,route-state=%s,route-type=%s,precursors:%s\u0000bCheckInterestingVehicles:%s, bAllowCopRemovalWithWantedLevel:%s, bOnlyCopCars:%s, bLeaveCarGenCars:%s\u0000%i)  h:0x%x (Ped1:0x%p -> Ped2:0x%p) AgeMs:%i Los:%s"
+    },
+    {
+      "token": "cursor",
+      "offset": 49282832,
+      "context": "oor that has network object ptr to %s\u0000Sending route err to %s\u0000Adding %s as a precursor to %s\u0000register to %s\u0000Frame : %u - %s%s : 0x%p : changed state from %s:%s:0x%p to %s\u0000Frame : %u - %s%s : %p : changed state from %s:%s:%p to %s\u0000Script %s is for"
+    },
+    {
+      "token": "cursor",
+      "offset": 49423650,
+      "context": "Accessor\u0000IBikeNodeDataAccessor\u0000IPedNodeDataAccessor\u0000netINodeDataAccessor\u0000useHandCursor\u0000Pause Menu Cursor\u0000Is switching visor\u0000State_switchHelmetVisor\u0000CPED_CONFIG_FLAG_IsSwitchingHelmetVisor\u0000SwitchVisor\u0000Supports Visor\u0000%smirror\u0000crmtNodeMirror\u0000fwMoveD"
+    },
+    {
+      "token": "cursor",
+      "offset": 49423668,
+      "context": "DataAccessor\u0000IPedNodeDataAccessor\u0000netINodeDataAccessor\u0000useHandCursor\u0000Pause Menu Cursor\u0000Is switching visor\u0000State_switchHelmetVisor\u0000CPED_CONFIG_FLAG_IsSwitchingHelmetVisor\u0000SwitchVisor\u0000Supports Visor\u0000%smirror\u0000crmtNodeMirror\u0000fwMoveDumpNodeMirror\u0000Debu"
+    },
+    {
+      "token": "cursor",
+      "offset": 49636873,
+      "context": "ouldScalePlateaUp\u0000fStairMovementRateModifier_Up\u0000Lock_Up\u0000Roll Window Up\u0000Hands Up\u0000Cursor Up\u0000Is Switching Visor Up\u0000Enables Automatic Replay Marker Up\u0000Suspension Up\u0000Move Rank Up\u0000Back Up\u0000First Person Catch Up\u0000Spinning Up\u0000Tune Up\u0000CWarpManager: Starting"
+    },
+    {
+      "token": "cursor",
+      "offset": 49640767,
+      "context": "kObject() 0x%p\u0000%s%p\u0000array_%p\u0000object_%p\u0000clip_%p\u0000Unknown command (%d & 255 = %d), cursor=%p\u0000RegenerateMap called on invalid ptr %p, m_FirstNode=%p\u0000[HEAD BLEND] MeshBlendManager::UpdateBlend(0x%08x): Failed to look up one or more assets! %d=%p, %d=%"
+    },
+    {
+      "token": "cursor",
+      "offset": 49681301,
+      "context": "ck_Down\u0000Trigger Stunt Race Slow Down\u0000Roll Window Down\u0000Suspect Down\u0000Windows Down\u0000Cursor Down\u0000Is Switching Visor Down\u0000Small Drop Down\u0000Use Drop Down\u0000Left Hand Drop Down\u0000Vehicle Jump Down\u0000Suspension Down\u0000Move Rank Down\u0000Shutting Down\u0000Spinning Down\u0000Tun"
+    },
+    {
+      "token": "cursor",
+      "offset": 49705908,
+      "context": "Object Position\u0000Look At Position\u0000Maintain Selector Position\u0000Sector Position\u0000Use Cursor Position\u0000Rope Anchor Position\u0000Use Player Position\u0000Cover Position\u0000Master Position\u0000Listener Position\u0000Debug Render Position\u0000Has Goto Position\u0000Snap Feed Items Into"
+    },
+    {
+      "token": "cursor",
+      "offset": 49828028,
+      "context": "2f\u001b[0m\u0000\u001b[34mCam: %0.2f,%0.2f,%0.2f\u001b[0m\u0000\u001b[34mPed: %0.2f,%0.2f,%0.2f\u001b[0m\u0000\u001b[34mMap Cursor: %0.2f,%0.2f\u001b[0m\u0000\u001b[34mVersion: (v%s) Time: %02d:%02d Fps:%3.1f\u001b[0m\u0000\u001b[34mPlayers: %d\u001b[0m\u0000\u001b[34mTotal active trains: %d\u001b[0m\u0000\u001b[34mTrain[%d] active[%d]\u001b[0m\u0000\u001b[34m==="
+    },
+    {
+      "token": "cursor",
+      "offset": 50116450,
+      "context": " %s to be %f\u0000[MISSION_CREATOR_ASSETS]: Budget requested %f\u0000Stop scrape speed %f\u0000CursorSpeed %f\u0000bangMag %f, scrapeMag %f, relativeTurnSpeed %f\u0000Current Speed %f\u0000Stereo enabled -- EyeSeparation %f, SeparationPercent %f, Convergence %f, Separation Di"
+    },
+    {
+      "token": "cursor",
+      "offset": 50131194,
+      "context": "rkAssetIgnoreScriptSize\u0000fontSize\u0000size <= m_currentSize\u0000SegmentSize\u0000bitBuffer.GetCursorPos() - elementStartPos == (int)elementSize\u0000bitSize\u0000m_BitSize\u0000BucketSize\u0000targetSize\u0000EntitySelectTargetSize\u0000dofRenderTargetSize\u0000DOFTargetSize\u0000GetSize\u0000GetContentS"
+    },
+    {
+      "token": "cursor",
+      "offset": 50131629,
+      "context": "erSize\u0000ragEventQBufferSize\u0000dynamicIBufferSize\u0000fSphereRenderSize\u0000updateMsgBB->GetCursorPos() - startPos == (int)headerSize\u0000MaxHeaderSize\u0000FindMemberSize\u0000farSize\u0000nearSize\u0000cupSize\u00000 < compSize\u0000AmmoDefaultClipSize\u0000AmmoDrumClipSize\u0000AmmoLargeClipSize\u0000im"
+    },
+    {
+      "token": "cursor",
+      "offset": 50133705,
+      "context": "ze\u0000OpenSpaceReverbSize\u0000m_textBlobSize\u0000bytesWritten == dataSize\u0000messageBuffer.GetCursorPos() <= dataSize\u0000GetContentDataSize\u0000GetPlayerDataSize\u0000MainDataSize\u00000 < nDataSize\u0000m_TaskDataSize\u0000VRAMDataSize\u0000mainLightInfo.coronaSize\u0000MainLightCoronaSize\u0000fCoro"
+    },
+    {
+      "token": "cursor",
+      "offset": 50257703,
+      "context": "PassType\u0000scrollbarsType\u0000PedsKilledOfThisType\u0000antiAliasType\u0000blurType\u0000BlurType\u0000setCursorType\u0000Start of scriptHandlerMgr::SpewResourceInfoForType\u0000End of scriptHandlerMgr::SpewResourceInfoForType\u0000Removal_BadTrailerType\u0000NewWeatherType\u0000OldWeatherType\u0000Fo"
+    },
+    {
+      "token": "cursor",
+      "offset": 50314678,
+      "context": "nStringStyle\u0000DefaultBrawlingStyle\u0000underlineStyle\u0000Grain Mix Style\u0000Font Style\u0000Set Cursor Style\u0000Sonar Style\u0000Idle Grain Randomisation Style\u0000Grain Playback Style\u0000Loop-Loop Crossfade Style\u0000Inter-Grain Crossfade Style\u0000Loop-Grain Crossfade Style\u0000Accel-De"
+    },
+    {
+      "token": "cursor",
+      "offset": 50353661,
+      "context": "sible\u0000Skip Height When Exterior Not Visible\u0000Modifier Not Visible\u0000Is Visible\u0000Set Cursor Visible\u0000Check Is Player Visible\u0000Weapon Visible\u0000Num Visible\u0000Total Visible\u0000Is Sphere Intersecting Visible\u0000Make Visible\u0000Force Visible\u0000Default Pass - Visible\u0000bVehi"
+    },
+    {
+      "token": "cursor",
+      "offset": 50730170,
+      "context": "ame = %d\u0000NumberOfIntroReleaseRectanglesThisFrame = %d\u0000FontStyle = %d\u0000ms_State.m_cursorStyle = %d\u0000     Skelfile = %d\u0000Network time pausable = %d\u0000Edge = %d\u0000CGalleryMenu::CheckIncomingFunctions - TRIGGER_PAUSE_MENU_EVENT - indexWithinPage = %d m_iSel"
+    },
+    {
+      "token": "cursor",
+      "offset": 50909142,
+      "context": "S_Y\u0000INPUT_SCRIPT_LEFT_AXIS_Y\u0000IOM_AXIS_Y\u0000INPUT_FRONTEND_AXIS_Y\u0000IOM_IAXIS_Y\u0000INPUT_CURSOR_Y\u0000Z_PERCENTAGE_FOR_Y\u0000PHONE_INVEHICLE_PASSENGER_Y\u0000PED_MOVER_DISTANCE_FROM_LADDER_Y\u0000SECONDARY_MOTION_MBR_Y\u0000BUTTON_Y\u0000POSITION_Y\u0000PHONE_BLOCK_Y\u0000BONETAG_NECK_Y\u0000SECON"
+    },
+    {
+      "token": "cursor",
+      "offset": 50937831,
+      "context": "S_X\u0000INPUT_SCRIPT_LEFT_AXIS_X\u0000IOM_AXIS_X\u0000INPUT_FRONTEND_AXIS_X\u0000IOM_IAXIS_X\u0000INPUT_CURSOR_X\u0000Z_PERCENTAGE_FOR_X\u0000PHONE_INVEHICLE_PASSENGER_X\u0000SECONDARY_MOTION_MBR_X\u0000BUTTON_X\u0000POSITION_X\u0000PERLIN_X\u0000RAYMINI_MEDIUM_X\u0000PHONE_BLOCK_X\u0000BONETAG_NECK_X\u0000RAYMINI_HIGH"
+    },
+    {
+      "token": "cursor",
+      "offset": 50987180,
+      "context": "ENU_OPTION_ACTION_INCEPT\u0000MAX_STICK_MAG_TO_TRY_ACCEPT\u0000INPUT_CREATOR_ACCEPT\u0000INPUT_CURSOR_ACCEPT\u0000MAX_HEADING_DELTA_TO_ACCEPT\u0000INPUT_FRONTEND_ENDSCREEN_ACCEPT\u0000RESPONSE_ACCEPT\u0000INPUT_FRONTEND_ACCEPT\u0000pt-PT\u0000Open PT\u0000BONETAG_BAGPIVOT\u0000MENU_OPTION_GFX_ANISOT\u0000"
+    },
+    {
+      "token": "cursor",
+      "offset": 51119656,
+      "context": "OR\u0000POOL ALLOCATOR\u0000ROTATION_INDICATOR\u0000INIT_SPEED_INDICATOR\u0000SUPPRESSOR\u0000INPUTGROUP_CURSOR\u0000IS_USING_CURSOR\u0000HELMET_VISOR\u0000INPUT_SWITCH_VISOR\u0000MIRROR\u0000EVENT_ERROR\u0000VEHICLE_OCCUPANT_ERROR\u0000NETTCP_RESULT_ERROR\u0000GetStatus--Other-->RESULT_ERROR\u0000netLicensePlateCh"
+    },
+    {
+      "token": "cursor",
+      "offset": 51119672,
+      "context": "R\u0000ROTATION_INDICATOR\u0000INIT_SPEED_INDICATOR\u0000SUPPRESSOR\u0000INPUTGROUP_CURSOR\u0000IS_USING_CURSOR\u0000HELMET_VISOR\u0000INPUT_SWITCH_VISOR\u0000MIRROR\u0000EVENT_ERROR\u0000VEHICLE_OCCUPANT_ERROR\u0000NETTCP_RESULT_ERROR\u0000GetStatus--Other-->RESULT_ERROR\u0000netLicensePlateChangeRequest:: Ge"
+    },
+    {
+      "token": "cursor",
+      "offset": 51158863,
+      "context": "AULICS_CONTROL_UP\u0000SG_PH_LL_UP\u0000PHASE_TO_BEGIN_PULL_UP\u0000PHASE_TO_END_PULL_UP\u0000INPUT_CURSOR_SCROLL_UP\u0000IOM_WHEEL_UP\u0000INPUT_LOOK_UP\u0000PLAYSTATS_RANK_UP\u0000PAD_RSTICK_UP\u0000PAD_LSTICK_UP\u0000PHASE_TO_BEGIN_PICK_UP\u0000PHASE_TO_END_PICK_UP\u0000SIXAXIS_PITCH_UP\u0000STOP_RENDERING_"
+    },
+    {
+      "token": "cursor",
+      "offset": 51189908,
+      "context": "BE_BROKEN_DOWN\u0000INPUT_VEH_HYDRAULICS_CONTROL_DOWN\u0000OPEN_SEAT_SIDE_PULL_DOWN\u0000INPUT_CURSOR_SCROLL_DOWN\u0000TASK_NM_FALL_DOWN\u0000IOM_WHEEL_DOWN\u0000NET_SOCKERR_NETWORK_DOWN\u0000INPUT_LOOK_DOWN\u0000MELEE_KNOCK_DOWN\u0000PAD_RSTICK_DOWN\u0000PAD_LSTICK_DOWN\u0000PM_SHUTTING_DOWN\u0000HELI_GO"
+    },
+    {
+      "token": "cursor",
+      "offset": 51200413,
+      "context": "E_WEAPON_AT_POSITION\u0000RENDER_THREAT_POSITION\u0000IS_PED_HEADING_TOWARDS_POSITION\u0000SET_CURSOR_POSITION\u0000SET_HUDMARKER_POSITION\u0000BAR_POSITION\u0000UNLOCK_MINIMAP_POSITION\u0000SNAP_NEXT_FEED_ITEM_INTO_POSITION\u0000SET_SYNCH_SCENE_AUDIO_POSITION\u0000SET_CONVERSATION_POSITION"
+    },
+    {
+      "token": "cursor",
+      "offset": 51213416,
+      "context": "DATION\u0000%s: FAILED SHADOW EVENT VALIDATION\u0000%s: FAILED LIGHT EVENT VALIDATION\u0000SET_CURSOR_LOCATION\u0000RESET_DISPATCH_SPAWN_LOCATION\u0000NETWORK_SET_VEHICLE_DRIVEN_LOCATION\u0000SET_CURRENT_DEBUG_LOCATION\u0000RESERVE_COMMERCE_STORE_PURCHASE_LOCATION\u0000TASK_MOVE_CROWD_"
+    },
+    {
+      "token": "cursor",
+      "offset": 51253670,
+      "context": "\u0000BONETAG_NECKROLL\u0000BONETAG_R_THIGHROLL\u0000BONETAG_L_THIGHROLL\u0000KEY_SCROLL\u0000INPUTGROUP_CURSOR_SCROLL\u0000INIT_COLUMN_SCROLL\u0000SET_COLUMN_SCROLL\u0000MIN_TIME_IN_STATE_TO_ALLOW_RAGDOLL\u0000PREF_FPS_RAGDOLL\u0000MIN_VEL_TO_TRIGGER_RAGDOLL\u0000MIN_PED_SPEED_TO_TRIGGER_RAGDOLL\u0000ANG"
+    },
+    {
+      "token": "cursor",
+      "offset": 51262833,
+      "context": "NVALIDMODEL\u0000FORCE DEL\u0000AM_PASS_THE_PARCEL\u0000PLAYSTATS_FM_EVENT_PASSTHEPARCEL\u0000INPUT_CURSOR_CANCEL\u0000Script %s called IPL_GROUP_SWAP_CANCEL\u0000invitesToCancelCount<MAX_INVITES_TO_CANCEL\u0000VEUI_UPLOAD_LINK_CANCEL\u0000INPUT_CELLPHONE_CANCEL\u0000INPUT_FRONTEND_CANCEL\u0000I"
+    },
+    {
+      "token": "cursor",
+      "offset": 51336679,
+      "context": " latest data - increase CACHELOADER_STANDARD_CACHE_BUFFER_SIZE\u0000u32(bitBuffer.GetCursorPos() - elementStartPos) == ELEMENT_HEADER_SIZE\u0000pStream->Size() > kCACHE_HEADER_SIZE\u0000GET_GROUP_SIZE\u0000GET_WEAPON_CLIP_SIZE\u0000sysMemAllocator::GetCurrent().GetAlloca"
+    },
+    {
+      "token": "cursor",
+      "offset": 51398704,
+      "context": "RAME\u0000SET_BLOCKING_OF_NON_TEMPORARY_EVENTS_FOR_AMBIENT_PEDS_THIS_FRAME\u0000SET_MOUSE_CURSOR_THIS_FRAME\u0000SET_RADAR_AS_EXTERIOR_THIS_FRAME\u0000SET_RADAR_AS_INTERIOR_THIS_FRAME\u0000SET_LAW_PEDS_CAN_ATTACK_NON_WANTED_PLAYER_THIS_FRAME\u0000SET_VEHICLE_DENSITY_MULTIPLIE"
+    },
+    {
+      "token": "cursor",
+      "offset": 51406218,
+      "context": "T_LOADGAME\u0000LEFT GAME\u0000SET_HELP_TEXT_STYLE\u0000SET_FLOATING_HELP_TEXT_STYLE\u0000SET_MOUSE_CURSOR_STYLE\u0000FLOOR_NUMBER_STYLE\u0000WALL_STYLE\u0000SET_PLAYER_SHORT_SWITCH_STYLE\u0000SET_DRIVE_TASK_DRIVING_STYLE\u0000LIGHTING_STYLE\u0000SET_CAM_SPLINE_SMOOTHING_STYLE\u0000SET_RETICLE_STYLE\u0000"
+    },
+    {
+      "token": "cursor",
+      "offset": 51423116,
+      "context": "THREAT_IS_VISIBLE\u0000NETWORK_SESSION_IS_VISIBLE\u0000SET_PARACHUTE_IS_VISIBLE\u0000SET_MOUSE_CURSOR_VISIBLE\u0000NETWORK_IS_PLAYER_VISIBLE\u0000CELL_CAM_IS_CHAR_VISIBLE\u0000SET_PED_CURRENT_WEAPON_VISIBLE\u0000NETWORK_SESSION_MARK_VISIBLE\u0000CLOTH_TUNE_UPDATE_IF_VISIBLE\u0000IS_SPHERE_V"
+    },
+    {
+      "token": "cursor",
+      "offset": 51460227,
+      "context": "S_PROBE\u0000START_EXPENSIVE_SYNCHRONOUS_SHAPE_TEST_LOS_PROBE\u0000START_SHAPE_TEST_MOUSE_CURSOR_LOS_PROBE\u0000FINAL_Z_OFFSET_FOR_PEEK_PROBE\u0000INITIAL_Z_OFFSET_FOR_PEEK_PROBE\u0000IN_AIR_CHECK_PROBE\u0000EXTRA_HEIGHT_FOR_SKYDIVE_PROBE\u0000SET_WAIT_FOR_COLLISIONS_BEFORE_PROBE\u0000"
+    },
+    {
+      "token": "cursor",
+      "offset": 51987304,
+      "context": " threshold (%) for garbage collection (Phys)\u0000Capturing Panorama (hide overlays)\u0000Cursor offset (up/down arrows)\u0000rlInbox::GetMessages(localGamerIndex, 0, m_rcvdMsgs.GetMaxCount(), newsStoryTags, NELEM(newsStoryTags), &m_MsgIter, &m_status)\u0000NetworkG"
+    },
+    {
+      "token": "cursor",
+      "offset": 52116324,
+      "context": "uffer, compressedSize)\u0000AES::GetCloudAes()->Encrypt(pSrc, nSrcSize)\u0000bitBuffer.GetCursorPos() == startPos + static_cast<int>(dataSize)\u0000bb.GetCursorPos() == dataStartPos + static_cast<int>(handlerDataSize)\u0000m_gb.Preallocate(pEventData->nDataSize)\u0000m_c"
+    },
+    {
+      "token": "cursor",
+      "offset": 52116383,
+      "context": "rcSize)\u0000bitBuffer.GetCursorPos() == startPos + static_cast<int>(dataSize)\u0000bb.GetCursorPos() == dataStartPos + static_cast<int>(handlerDataSize)\u0000m_gb.Preallocate(pEventData->nDataSize)\u0000m_cloudDataGB.Preallocate(pEventData->nDataSize)\u0000RsonReader::V"
+    },
+    {
+      "token": "cursor",
+      "offset": 52252785,
+      "context": "ricCheatScript(target, cheatExtraData1, cheatExtraData2))\u0000currentStateBuffer.GetCursorPos() <= static_cast<int>(GetElementCursorPos(i+1))\u0000SetContent(emptyJsonBlob, ((int)strlen(emptyJsonBlob)))\u0000((void MAY_ALIAS *&)(*(::rage::union_cast<void**>(&("
+    },
+    {
+      "token": "cursor",
+      "offset": 52252827,
+      "context": "eatExtraData2))\u0000currentStateBuffer.GetCursorPos() <= static_cast<int>(GetElementCursorPos(i+1))\u0000SetContent(emptyJsonBlob, ((int)strlen(emptyJsonBlob)))\u0000((void MAY_ALIAS *&)(*(::rage::union_cast<void**>(&(m_AnimDictionary)))))\u0000((void MAY_ALIAS *&)"
+    },
+    {
+      "token": "cursor",
+      "offset": 52264780,
+      "context": "wQ.empty()\u0000ep->m_CxnlessQ.empty()\u0000m_TaskQ.empty()\u0000m_ResendQ.empty()\u0000node->GetPrecursorList().empty()\u0000pObject->GetEntity()\u0000pPlayerPed->GetSpeechAudioEntity()\u0000bool CProjectile::StickToEntity()\u0000pPickUpRope->GetAttachedEntity()\u0000CPedPopulation::PedsRe"
+    },
+    {
+      "token": "cursor",
+      "offset": 52321900,
+      "context": "mation group '%s' used twice (in 'conditionalanims.meta')\u0000Navigate Focus Ped To Cursor (Key 'N')\u0000!(szContext == NULL || szContext[0] == '\\0' || szTunableName == NULL || szTunableName[0] == '\\0')\u0000email && (email[0] != '\\0')\u0000password && (password[0"
+    },
+    {
+      "token": "cursor",
+      "offset": 52481666,
+      "context": "%d, String - %s \u0000Lower Lod reduce factor \u0000 Shadow LOD Factor \u0000Activate floating cursor \u0000player \u0000-server \u0000Impact dump in water \u0000Vol dump in water \u0000Falling in water \u0000cCommerceManager::InitialiseCommerceUtil(): !localGamer \u0000Transition News Controlle"
+    },
+    {
+      "token": "cursor",
+      "offset": 52506845,
+      "context": "%f,%f,%f>>, %f) \u0000VehicleIndex = CREATE_VEHICLE (%s, <<%f,%f,%f>>, %f) \u0000Floating Cursors (use in water / space levels where there is no ground) \u0000(NoSound) \u0000%sSetCurrentActorVariation (%s, %p) - Variation not in range - (Component: %d (%s), Drawabl"
+    },
+    {
+      "token": "cursor",
+      "offset": 52590819,
+      "context": "e.show failed.\n\u0000Warning: no user event handler interface is installed; Mouse.setCursorType failed.\n\u0000Warning: no user event handler interface is installed; Mouse.hide failed.\n\u0000CTaskCombat::PullTargetFromVehicle_OnUpdate, Ped %s, Aborting TaskComba"
+    },
+    {
+      "token": "cursor",
+      "offset": 56461746,
+      "context": "n() const\ufffd\b*rage::datBitBuffer::SetNumBitsWritten(int)\ufffd\b+rage::datBitBuffer::SetCursorPos(int) const\ufffd\t+rage::datBitBuffer::GetNumBytesRead() const\ufffd\t-rage::datBitBuffer::SetNumBitsRead(int) const\ufffd\t(rage::datBitBuffer::SkipBytes(int) const\ufffd\t3rage::"
+    },
+    {
+      "token": "cursor",
+      "offset": 56461988,
+      "context": "ge::datBitBuffer::ReadBits(void*, int, int) const\ufffd\t-rage::datBitBuffer::BumpReadCursor(int) const\ufffd\t<rage::datBitBuffer::ReadBits(rage::datBitBuffer&, int) const\ufffd\t,rage::datBitBuffer::BumpReadWriteCursor(int)\ufffd\t4rage::datBitBuffer::WriteBits(void c"
+    },
+    {
+      "token": "cursor",
+      "offset": 56462104,
+      "context": "er::ReadBits(rage::datBitBuffer&, int) const\ufffd\t,rage::datBitBuffer::BumpReadWriteCursor(int)\ufffd\t4rage::datBitBuffer::WriteBits(void const*, int, int)\ufffd\t=rage::datBitBuffer::WriteBits(rage::datBitBuffer const&, int)\ufffd\t6rage::datBitBuffer::ReadUns(unsig"
+    },
+    {
+      "token": "cursor",
+      "offset": 57175600,
+      "context": "071\ufffdQ5rage::ioMouse::SetMouseType(rage::ioMouse::MouseType)\ufffdQ%rage::ioMouse::SetCursorVisible(bool)\ufffdQ$rage::ioMouse::SetAbsoluteOnly(bool)\ufffdQ(rage::ioJoystick::GetNormAxis(int) const\ufffdQErage::ioJoystick::GetProductName(unsigned short*, unsigned int"
+    },
+    {
+      "token": "cursor",
+      "offset": 57396081,
+      "context": "se(rage::netConnectionRouter::Node*)\ufffdi5rage::netConnectionRouter::Node::ClearPrecursorList()\ufffdi\ufffd\u0002rage::inmap_base<rage::netConnectionRouter::RoutePair::Key, rage::netConnectionRouter::RoutePair::Data, &rage::netConnectionRouter::RoutePair::Data::m"
+    },
+    {
+      "token": "cursor",
+      "offset": 57400433,
+      "context": "n(rage::netConnectionRouter::Node*)\ufffdiXrage::netConnectionRouter::Node::RemovePrecursor(rage::netConnectionRouter::Node const*)\ufffdiFrage::netConnectionRouter::SwitchToRelayServer(rage::netPeerId const&)\ufffdi2rage::netConnectionManager::GetNumTimeoutPen"
+    },
+    {
+      "token": "cursor",
+      "offset": 57406423,
+      "context": "10\ufffdj!__cxx_global_array_dtor.712_22270\ufffdjUrage::netConnectionRouter::Node::AddPrecursor(rage::netConnectionRouter::Node const*)\ufffdj\ufffd\u0002rage::inmap_base<rage::netConnectionRouter::RoutePair::Key, rage::netConnectionRouter::RoutePair::Data, &rage::netCo"
+    },
+    {
+      "token": "cursor",
+      "offset": 58122275,
+      "context": "playMgrInternal::LoadClip(unsigned long, char const*)\ufffd\ufffd\u0001)CReplayMgrInternal::SetCursorSpeed(float)\ufffd\ufffd\u00015CReplayControl::SetStartRecording(REPLAY_START_PARAM)\ufffd\ufffd\u0001&CReplayControl::IsPlayerOutOfControl()\ufffd\ufffd\u0001#CReplayControl::IsReplayAvailable()\ufffd\ufffd\u00012CRepla"
+    },
+    {
+      "token": "cursor",
+      "offset": 58152301,
+      "context": "EventsToTTY()\ufffd\ufffd\u0001'CReplayMgrInternal::ScrubbingCallback()\ufffd\ufffd\u0001)CReplayMgrInternal::CursorSpeedCallback()\ufffd\ufffd\u0001)CReplayMgrInternal::PrintHistoryPackets()\ufffd\ufffd\u0001(CReplayMgrInternal::PrintReplayPackets()\ufffd\ufffd\u00011CReplayMgrInternal::IncSuppressRefCountCallBack()\ufffd\ufffd\u0001"
+    },
+    {
+      "token": "cursor",
+      "offset": 58154301,
+      "context": "lingData, 0, unsigned short>::Grow(unsigned int)\ufffd\ufffd\u0001+CReplayMgrInternal::IsReplayCursorJumping()\ufffd\ufffd\u0001 CReplayMgrInternal::PostRender()\ufffd\ufffd\u0001_CReplayMgrInternal::CalculateSizeOfBlock(rage::atArray<unsigned int, 0, unsigned short>&, bool)\ufffd\ufffd\u0001&CReplayMgrIn"
+    },
+    {
+      "token": "cursor",
+      "offset": 58605751,
+      "context": "bugManager::~CCutSceneDebugManager()_50970\ufffd\ufffd\u0001fCCutSceneDebugManager::UpdateMouseCursorPosition(rage::Vector3&, rage::Vector3&, rage::Vector3&, bool)\ufffd\ufffd\u0001:CCutSceneDebugManager::UpdateCoCModifierEventOverridesCB()\ufffd\ufffd\u00011CCascadeShadowBoundsDebug::Updat"
+    },
+    {
+      "token": "cursor",
+      "offset": 58797667,
+      "context": "eListenersArray(GASStringContext*, GASEnvironment*)\ufffd\ufffd\u00015GASMouseCtorFunction::SetCursorType(GASFnCall const&)\ufffd\ufffd\u0001oGASMouseCtorFunction::ExecuteForEachChild_GC(GRefCountCollector<323>*, GRefCountBaseGC<323>::OperationGC) const\ufffd\ufffd\u0001#GASMouseCtorFunctio"
+    },
+    {
+      "token": "cursor",
+      "offset": 58823804,
+      "context": "xtDocView::FindFontInfo*, bool)\ufffd\ufffd\u0001\"GFxTextLineBuffer::Line::Release()\ufffd\ufffd\u0001\u001fGFxLineCursor::~GFxLineCursor()\ufffd\ufffd\u0001)GFxLineCursor::operator=(GFxLineCursor&&)\ufffd\ufffd\u0001.GFxLineCursor::operator=(GFxLineCursor const&)\ufffd\ufffd\u0001.GFxTextLineBuffer::Line::GetFormatData() co"
+    },
+    {
+      "token": "cursor",
+      "offset": 58823820,
+      "context": "ontInfo*, bool)\ufffd\ufffd\u0001\"GFxTextLineBuffer::Line::Release()\ufffd\ufffd\u0001\u001fGFxLineCursor::~GFxLineCursor()\ufffd\ufffd\u0001)GFxLineCursor::operator=(GFxLineCursor&&)\ufffd\ufffd\u0001.GFxLineCursor::operator=(GFxLineCursor const&)\ufffd\ufffd\u0001.GFxTextLineBuffer::Line::GetFormatData() const\ufffd\ufffd\u0001%GFxParagr"
+    },
+    {
+      "token": "cursor",
+      "offset": 58823839,
+      "context": "GFxTextLineBuffer::Line::Release()\ufffd\ufffd\u0001\u001fGFxLineCursor::~GFxLineCursor()\ufffd\ufffd\u0001)GFxLineCursor::operator=(GFxLineCursor&&)\ufffd\ufffd\u0001.GFxLineCursor::operator=(GFxLineCursor const&)\ufffd\ufffd\u0001.GFxTextLineBuffer::Line::GetFormatData() const\ufffd\ufffd\u0001%GFxParagraphFormatter::Final"
+    },
+    {
+      "token": "cursor",
+      "offset": 58823864,
+      "context": "Release()\ufffd\ufffd\u0001\u001fGFxLineCursor::~GFxLineCursor()\ufffd\ufffd\u0001)GFxLineCursor::operator=(GFxLineCursor&&)\ufffd\ufffd\u0001.GFxLineCursor::operator=(GFxLineCursor const&)\ufffd\ufffd\u0001.GFxTextLineBuffer::Line::GetFormatData() const\ufffd\ufffd\u0001%GFxParagraphFormatter::FinalizeLine()\ufffd\ufffd\u0001.GFxTextLineB"
+    },
+    {
+      "token": "cursor",
+      "offset": 58823884,
+      "context": "Cursor::~GFxLineCursor()\ufffd\ufffd\u0001)GFxLineCursor::operator=(GFxLineCursor&&)\ufffd\ufffd\u0001.GFxLineCursor::operator=(GFxLineCursor const&)\ufffd\ufffd\u0001.GFxTextLineBuffer::Line::GetFormatData() const\ufffd\ufffd\u0001%GFxParagraphFormatter::FinalizeLine()\ufffd\ufffd\u0001.GFxTextLineBuffer::GlyphIterator"
+    },
+    {
+      "token": "cursor",
+      "offset": 58823909,
+      "context": "\ufffd\u0001)GFxLineCursor::operator=(GFxLineCursor&&)\ufffd\ufffd\u0001.GFxLineCursor::operator=(GFxLineCursor const&)\ufffd\ufffd\u0001.GFxTextLineBuffer::Line::GetFormatData() const\ufffd\ufffd\u0001%GFxParagraphFormatter::FinalizeLine()\ufffd\ufffd\u0001.GFxTextLineBuffer::GlyphIterator::UpdateDesc()\ufffd\ufffd\u0001\u001aGFxLine"
+    },
+    {
+      "token": "cursor",
+      "offset": 58824075,
+      "context": "ter::FinalizeLine()\ufffd\ufffd\u0001.GFxTextLineBuffer::GlyphIterator::UpdateDesc()\ufffd\ufffd\u0001\u001aGFxLineCursor::operator*()\ufffd\ufffd\u0001BGFxTextHighlighter::CreateHighlighter(GFxTextHighlightDesc const&)\ufffd\ufffd\u0001]GFxTextDocView::Display(GFxDisplayContext&, GMatrix2D const&, GRenderer::"
+    },
+    {
+      "token": "cursor",
+      "offset": 58825141,
+      "context": "at, float)\ufffd\ufffd\u0001+GFxTextLineBuffer::FindLineAtYOffset(float)\ufffd\ufffd\u00017GFxTextDocView::GetCursorPosInLine(unsigned int, float)\ufffd\ufffd\u0001?GFxTextDocView::GetCursorPosInLineByOffset(unsigned int, float)\ufffd\ufffd\u00011GFxTextDocView::GetCursorPosAtPoint(float, float)\ufffd\ufffd\u00013GFxTex"
+    },
+    {
+      "token": "cursor",
+      "offset": 58825200,
+      "context": "\u00017GFxTextDocView::GetCursorPosInLine(unsigned int, float)\ufffd\ufffd\u0001?GFxTextDocView::GetCursorPosInLineByOffset(unsigned int, float)\ufffd\ufffd\u00011GFxTextDocView::GetCursorPosAtPoint(float, float)\ufffd\ufffd\u00013GFxTextDocView::IsUrlAtPoint(float, float, GRange*)\ufffd\ufffd\u00011GFxTextDoc"
+    },
+    {
+      "token": "cursor",
+      "offset": 58825267,
+      "context": "tDocView::GetCursorPosInLineByOffset(unsigned int, float)\ufffd\ufffd\u00011GFxTextDocView::GetCursorPosAtPoint(float, float)\ufffd\ufffd\u00013GFxTextDocView::IsUrlAtPoint(float, float, GRange*)\ufffd\ufffd\u00011GFxTextDocView::GetLineIndexOfChar(unsigned long)\ufffd\ufffd\u00013GFxTextLineBuffer::FindL"
+    },
+    {
+      "token": "cursor",
+      "offset": 58826280,
+      "context": "torKit()\ufffd\ufffd\u0001+GFxTextEditorKit::~GFxTextEditorKit()_56113\ufffd\ufffd\u00013GFxTextEditorKit::SetCursorPos(unsigned long, bool)\ufffd\ufffd\u0001(GFxTextEditorKit::ResetBlink(bool, bool)\ufffd\ufffd\u0001\ufffd\u0001GFxTextEditorKit::CalcCursorRectInLineBuffer(unsigned long, GRect<float>*, unsigned int"
+    },
+    {
+      "token": "cursor",
+      "offset": 58826381,
+      "context": "ng, bool)\ufffd\ufffd\u0001(GFxTextEditorKit::ResetBlink(bool, bool)\ufffd\ufffd\u0001\ufffd\u0001GFxTextEditorKit::CalcCursorRectInLineBuffer(unsigned long, GRect<float>*, unsigned int*, unsigned int*, bool, GFxTextLineBuffer::Line::Alignment*)\ufffd\ufffd\u0001\ufffd\u0001GFxTextEditorKit::CalcCursorRectOnSc"
+    },
+    {
+      "token": "cursor",
+      "offset": 58826533,
+      "context": "gned int*, bool, GFxTextLineBuffer::Line::Alignment*)\ufffd\ufffd\u0001\ufffd\u0001GFxTextEditorKit::CalcCursorRectOnScreen(unsigned long, GRect<float>*, unsigned int*, unsigned int*, bool, GFxTextLineBuffer::Line::Alignment*)\ufffd\ufffd\u0001,GFxTextHighlighterPosIterator::InitCurDes"
+    },
+    {
+      "token": "cursor",
+      "offset": 58912942,
+      "context": "*)\ufffd\ufffd\u0002-GFxMouseState::IsTopmostEntityChanged() const\ufffd\ufffd\u0002?GFxMovieRoot::ChangeMouseCursorType(unsigned int, unsigned int)\ufffd\ufffd\u0002IGFxMovieRoot::FinalizeProcessFocusKey(GFxMovieRoot::ProcessFocusKeyInfo*)\ufffd\ufffd\u0002\ufffd\u0001GFxMovieRoot::ProcessFocusKey(GFxEvent::EventT"
+    },
+    {
+      "token": "cursor",
+      "offset": 58927952,
+      "context": " int, GFxFocusMovedType)\ufffd\ufffd\u0002\"GFxSprite::OnInsertionAsLevel(int)\ufffd\ufffd\u0002 GFxSprite::GetCursorType() const\ufffd\ufffd\u0002&GFxSprite::PropagateScale9GridExists()\ufffd\ufffd\u0002)GFxSprite::PropagateNoAdvanceGlobalFlag()\ufffd\ufffd\u0002(GFxSprite::PropagateNoAdvanceLocalFlag()\ufffd\ufffd\u00020GFxSprite::Pr"
+    },
+    {
+      "token": "cursor",
+      "offset": 58936194,
+      "context": "Variable()\ufffd\ufffd\u0002%GFxEditTextCharacter::NotifyChanged()\ufffd\ufffd\u0002DGFxEditTextCharacter::GetCursorBounds(unsigned long, float*, float*)\ufffd\ufffd\u00022GFxEditTextCharacter::GetSelectedTextColor() const\ufffd\ufffd\u00028GFxEditTextCharacter::GetSelectedBackgroundColor() const\ufffd\ufffd\u0002cGFxEd"
+    },
+    {
+      "token": "cursor",
+      "offset": 58948634,
+      "context": "serData(void*)\ufffd\ufffd\u0002$GFxMovieRoot::IsMovieFocused() const\ufffd\ufffd\u0002/GFxMovieRoot::SetMouseCursorCount(unsigned int)\ufffd\ufffd\u0002)GFxMovieRoot::GetMouseCursorCount() const\ufffd\ufffd\u0002.GFxMovieRoot::SetControllerCount(unsigned int)\ufffd\ufffd\u0002(GFxMovieRoot::GetControllerCount() const\ufffd\ufffd"
+    },
+    {
+      "token": "cursor",
+      "offset": 58948685,
+      "context": "nst\ufffd\ufffd\u0002/GFxMovieRoot::SetMouseCursorCount(unsigned int)\ufffd\ufffd\u0002)GFxMovieRoot::GetMouseCursorCount() const\ufffd\ufffd\u0002.GFxMovieRoot::SetControllerCount(unsigned int)\ufffd\ufffd\u0002(GFxMovieRoot::GetControllerCount() const\ufffd\ufffd\u0002&GFxMovieRoot::SetPerspectiveFOV(float)\ufffd\ufffd\u0002$GFxMovi"
+    },
+    {
+      "token": "cursor",
+      "offset": 58953153,
+      "context": ":PropagateMouseEvent(GFxEventId const&)\ufffd\ufffd\u0002RGFxEditTextCharacter::IsUrlUnderMouseCursor(unsigned int, GPoint<float>*, GRange*)\ufffd\ufffd\u00028GFxEditTextCharacter::SetStateChangeFlags(unsigned char)\ufffd\ufffd\u0002GGFxEditTextCharacter::IsFocusAllowed(GFxMovieRoot*, unsig"
+    },
+    {
+      "token": "cursor",
+      "offset": 58954357,
+      "context": ")\ufffd\ufffd\u0002.GFxEditTextCharacter::CheckAdvanceStatus(bool)\ufffd\ufffd\u0002+GFxEditTextCharacter::GetCursorType() const\ufffd\ufffd\u0002/GFxEditTextCharacter::SetNeedToUpdateGeomData()\ufffd\ufffd\u0002RGFxEditTextCharacter::TransformToTextRectSpace(GFxValue::DisplayInfo const&) const\ufffd\ufffd\u00029GFxEdit"
+    },
+    {
+      "token": "cursor",
+      "offset": 58954994,
+      "context": "\ufffd\u0002,GFxEditTextCharacter::SetOverwriteMode(bool)\ufffd\ufffd\u0002)GFxEditTextCharacter::SetWideCursor(bool)\ufffd\ufffd\u00026GFxEditTextCharacter::SetFilters(GFxTextFilter const&)\ufffd\ufffd\u0002;GFxEditTextCharacter::SetTextValue(char const*, bool, bool)\ufffd\ufffd\u0002_GFxEditTextCharacter::SetText"
+    },
+    {
+      "token": "cursor",
+      "offset": 58965327,
+      "context": "\ufffd\ufffd\u00021GFxButtonCharacter::PropagateNoAdvanceLocalFlag()\ufffd\ufffd\u0002)GFxButtonCharacter::GetCursorType() const\ufffd\ufffd\u0002KGFxButtonCharacter::GetBoundsOfRecord(GMatrix2D const&, unsigned int) const\ufffd\ufffd\u0002]GFxButtonCharacter::GetBoundsOfState(GMatrix2D const&, GFxButtonC"
+    },
+    {
+      "token": "cursor",
+      "offset": 59011743,
+      "context": "ankWidgets()\ufffd\ufffd\u0002%CMousePointer::Shutdown(unsigned int)\ufffd\ufffd\u0002(CMousePointer::SetMouseCursorThisFrame()\ufffd\ufffd\u0002*CMousePointer::SetMouseCursorVisible(bool)\ufffd\ufffd\u00027CMousePointer::SetMouseCursorStyle(eMOUSE_CURSOR_STYLE)\ufffd\ufffd\u0002)CMousePointer::DebugSetMouseCursorStyle("
+    },
+    {
+      "token": "cursor",
+      "offset": 59011787,
+      "context": "gned int)\ufffd\ufffd\u0002(CMousePointer::SetMouseCursorThisFrame()\ufffd\ufffd\u0002*CMousePointer::SetMouseCursorVisible(bool)\ufffd\ufffd\u00027CMousePointer::SetMouseCursorStyle(eMOUSE_CURSOR_STYLE)\ufffd\ufffd\u0002)CMousePointer::DebugSetMouseCursorStyle()\ufffd\ufffd\u0002+CMousePointer::DebugSetMouseCursorVisib"
+    },
+    {
+      "token": "cursor",
+      "offset": 59011833,
+      "context": "Frame()\ufffd\ufffd\u0002*CMousePointer::SetMouseCursorVisible(bool)\ufffd\ufffd\u00027CMousePointer::SetMouseCursorStyle(eMOUSE_CURSOR_STYLE)\ufffd\ufffd\u0002)CMousePointer::DebugSetMouseCursorStyle()\ufffd\ufffd\u0002+CMousePointer::DebugSetMouseCursorVisible()\ufffd\ufffd\u0002!CMousePointer::DebugDeviceReset()\ufffd\ufffd\u0002[C"
+    },
+    {
+      "token": "cursor",
+      "offset": 59011852,
+      "context": "inter::SetMouseCursorVisible(bool)\ufffd\ufffd\u00027CMousePointer::SetMouseCursorStyle(eMOUSE_CURSOR_STYLE)\ufffd\ufffd\u0002)CMousePointer::DebugSetMouseCursorStyle()\ufffd\ufffd\u0002+CMousePointer::DebugSetMouseCursorVisible()\ufffd\ufffd\u0002!CMousePointer::DebugDeviceReset()\ufffd\ufffd\u0002[CMultiplayerChat::On"
+    },
+    {
+      "token": "cursor",
+      "offset": 59011897,
+      "context": "ointer::SetMouseCursorStyle(eMOUSE_CURSOR_STYLE)\ufffd\ufffd\u0002)CMousePointer::DebugSetMouseCursorStyle()\ufffd\ufffd\u0002+CMousePointer::DebugSetMouseCursorVisible()\ufffd\ufffd\u0002!CMousePointer::DebugDeviceReset()\ufffd\ufffd\u0002[CMultiplayerChat::OnEvent(CNetworkTextChat*, rage::rlGamerHandle "
+    },
+    {
+      "token": "cursor",
+      "offset": 59011942,
+      "context": "LE)\ufffd\ufffd\u0002)CMousePointer::DebugSetMouseCursorStyle()\ufffd\ufffd\u0002+CMousePointer::DebugSetMouseCursorVisible()\ufffd\ufffd\u0002!CMousePointer::DebugDeviceReset()\ufffd\ufffd\u0002[CMultiplayerChat::OnEvent(CNetworkTextChat*, rage::rlGamerHandle const&, char const*, bool)\ufffd\ufffd\u0002<CMultiplayerCha"
+    },
+    {
+      "token": "cursor",
+      "offset": 59111038,
+      "context": "t::GetClipThumbnailTexture(unsigned int)\ufffd\ufffd\u00026CVideoProjectPlaybackController::SetCursorSpeed(float)\ufffd\ufffd\u0002=CVideoProjectPlaybackController::GetPlaybackEndTimeMs() const\ufffd\ufffd\u0002ACVideoProjectPlaybackController::GetPlaybackCurrentTimeMs() const\ufffd\ufffd\u00025CVideoProj"
+    },
+    {
+      "token": "cursor",
+      "offset": 60174190,
+      "context": "mands::CommandDisablePauseMenuBusySpinner(bool)\ufffd\ufffd\u0003.hud_commands::CommandSetMouseCursorThisFrame()\ufffd\ufffd\u0003-hud_commands::CommandSetMouseCursorStyle(int)\ufffd\ufffd\u00033hud_commands::CommandSetMouseCursorVisibility(bool)\ufffd\ufffd\u0003<hud_commands::CommandIsMouseRolledOverIns"
+    },
+    {
+      "token": "cursor",
+      "offset": 60174240,
+      "context": ".hud_commands::CommandSetMouseCursorThisFrame()\ufffd\ufffd\u0003-hud_commands::CommandSetMouseCursorStyle(int)\ufffd\ufffd\u00033hud_commands::CommandSetMouseCursorVisibility(bool)\ufffd\ufffd\u0003<hud_commands::CommandIsMouseRolledOverInstructionalButtons()\ufffd\ufffd\u00039hud_commands::CommandGetMou"
+    },
+    {
+      "token": "cursor",
+      "offset": 60174289,
+      "context": "\u0003-hud_commands::CommandSetMouseCursorStyle(int)\ufffd\ufffd\u00033hud_commands::CommandSetMouseCursorVisibility(bool)\ufffd\ufffd\u0003<hud_commands::CommandIsMouseRolledOverInstructionalButtons()\ufffd\ufffd\u00039hud_commands::CommandGetMouseEvent(int, int&, int&, int&)\ufffd\ufffd\u00032hud_commands::C"
+    },
+    {
+      "token": "cursor",
+      "offset": 60203766,
+      "context": ":scrThread::Info&)\ufffd\ufffd\u0003ihud_commands::SetupScriptCommands()::scrWrapped_SET_MOUSE_CURSOR_THIS_FRAME::Call(rage::scrThread::Info&)\ufffd\ufffd\u0003dhud_commands::SetupScriptCommands()::scrWrapped_SET_MOUSE_CURSOR_STYLE::Call(rage::scrThread::Info&)\ufffd\ufffd\u0003fhud_command"
+    },
+    {
+      "token": "cursor",
+      "offset": 60203875,
+      "context": ":scrThread::Info&)\ufffd\ufffd\u0003dhud_commands::SetupScriptCommands()::scrWrapped_SET_MOUSE_CURSOR_STYLE::Call(rage::scrThread::Info&)\ufffd\ufffd\u0003fhud_commands::SetupScriptCommands()::scrWrapped_SET_MOUSE_CURSOR_VISIBLE::Call(rage::scrThread::Info&)\ufffd\ufffd\u0003xhud_commands::"
+    },
+    {
+      "token": "cursor",
+      "offset": 60203979,
+      "context": ":scrThread::Info&)\ufffd\ufffd\u0003fhud_commands::SetupScriptCommands()::scrWrapped_SET_MOUSE_CURSOR_VISIBLE::Call(rage::scrThread::Info&)\ufffd\ufffd\u0003xhud_commands::SetupScriptCommands()::scrWrapped_IS_MOUSE_ROLLED_OVER_INSTRUCTIONAL_BUTTONS::Call(rage::scrThread::Info"
+    },
+    {
+      "token": "cursor",
+      "offset": 60658866,
+      "context": "ad_commands::CommandIsUsingKeyboardAndMouse(int)\ufffd\ufffd\u0003'pad_commands::CommandIsUsingCursor(int)\ufffd\ufffd\u00034pad_commands::CommandSetCursorPosition(float, float)\ufffd\ufffd\u0003+pad_commands::CommandIsUsingRemotePlay(int)\ufffd\ufffd\u0003-pad_commands::CommandHaveControlsChanged(int)\ufffd\ufffd\u0003"
+    },
+    {
+      "token": "cursor",
+      "offset": 60658905,
+      "context": "ouse(int)\ufffd\ufffd\u0003'pad_commands::CommandIsUsingCursor(int)\ufffd\ufffd\u00034pad_commands::CommandSetCursorPosition(float, float)\ufffd\ufffd\u0003+pad_commands::CommandIsUsingRemotePlay(int)\ufffd\ufffd\u0003-pad_commands::CommandHaveControlsChanged(int)\ufffd\ufffd\u0003Gpad_commands::CommandGetInputInstructi"
+    },
+    {
+      "token": "cursor",
+      "offset": 60662051,
+      "context": "::scrThread::Info&)\ufffd\ufffd\u0003]pad_commands::SetupScriptCommands()::scrWrapped_IS_USING_CURSOR::Call(rage::scrThread::Info&)\ufffd\ufffd\u0003apad_commands::SetupScriptCommands()::scrWrapped_SET_CURSOR_POSITION::Call(rage::scrThread::Info&)\ufffd\ufffd\u0003bpad_commands::SetupScript"
+    },
+    {
+      "token": "cursor",
+      "offset": 60662143,
+      "context": "(rage::scrThread::Info&)\ufffd\ufffd\u0003apad_commands::SetupScriptCommands()::scrWrapped_SET_CURSOR_POSITION::Call(rage::scrThread::Info&)\ufffd\ufffd\u0003bpad_commands::SetupScriptCommands()::scrWrapped_IS_USING_REMOTE_PLAY::Call(rage::scrThread::Info&)\ufffd\ufffd\u0003cpad_commands::S"
+    },
+    {
+      "token": "cursor",
+      "offset": 60887094,
+      "context": " const&, float, int, int, int)\ufffd\ufffd\u0003kshapetest_commands::CommandStartShapeTestMouseCursorLOSProbe(rage::Vector3&, rage::Vector3&, int, int, int)\ufffd\ufffd\u0003^shapetest_commands::CommandGetShapeTestResult(int, int&, rage::Vector3&, rage::Vector3&, int&)\ufffd\ufffd\u0003usha"
+    },
+    {
+      "token": "cursor",
+      "offset": 60888378,
+      "context": "\ufffd\u0003{shapetest_commands::SetupScriptCommands()::scrWrapped_START_SHAPE_TEST_MOUSE_CURSOR_LOS_PROBE::Call(rage::scrThread::Info&)\ufffd\ufffd\u0003ishapetest_commands::SetupScriptCommands()::scrWrapped_GET_SHAPE_TEST_RESULT::Call(rage::scrThread::Info&)\ufffd\ufffd\u0003|shapete"
+    },
+    {
+      "token": "cursor",
+      "offset": 61374009,
+      "context": "_cb::M<void (CStreamingRequestListEditor::*)(), &CStreamingRequestListEditor::OnCursorUp(), 0>::thunk(void*, void*, void*)\ufffd\ufffd\u0003\ufffd\u0001rage::wasm_cb::M<void (CStreamingRequestListEditor::*)(), &CStreamingRequestListEditor::OnCursorDown(), 0>::thunk(void*"
+    },
+    {
+      "token": "cursor",
+      "offset": 61374146,
+      "context": "_cb::M<void (CStreamingRequestListEditor::*)(), &CStreamingRequestListEditor::OnCursorDown(), 0>::thunk(void*, void*, void*)\ufffd\ufffd\u0003\ufffd\u0001rage::wasm_cb::M<void (CStreamingRequestListEditor::*)(), &CStreamingRequestListEditor::OnMoveEarlier(), 0>::thunk(vo"
+    },
+    {
+      "token": "cursor",
+      "offset": 61391965,
+      "context": "ngExclusive()\ufffd\ufffd\u0003*CControl::SetVehicleSubSteeringExclusive()\ufffd\ufffd\u0003\u001fCControl::IsUsingCursor() const\ufffd\ufffd\u0003(CControl::ScriptCheckForControlsChange()\ufffd\ufffd\u00031CControl::InitWidgets(rage::bkBank&, char const*)\ufffd\ufffd\u0003hrage::wasm_cb::M<void (CControl::*)(), &CControl::U"
+    }
+  ],
+  "game_js_hits": [
+    {
+      "term": "Emscripten",
+      "byte_offset": 5289,
+      "line": 1,
+      "context": "og.bind(console);var err=console.error.bind(console);var wasmBinary;var wasmModule;var ABORT=false;var EXITSTATUS;class EmscriptenEH{}class EmscriptenSjLj extends EmscriptenEH{}function growMemViews(){if(wasmMemory.buffer!=HEAP8.buffer){updateMemoryViews()}}var startWorker;if(ENVIRONMENT_IS_PTHREAD){var initi"
+    },
+    {
+      "term": "em-pthread",
+      "byte_offset": 313,
+      "line": 1,
+      "context": "ersions?.node&&globalThis.process?.type!=\"renderer\";var ENVIRONMENT_IS_PTHREAD=ENVIRONMENT_IS_WORKER&&globalThis.name==\"em-pthread\";(function(){const lines=[];const name=typeof ENVIRONMENT_IS_PTHREAD!==\"undefined\"&&ENVIRONMENT_IS_PTHREAD?\"pthread\":\"main\";const remoteLog=!!Module[\"remoteLog\"]||/[?&]log=1/.test"
+    },
+    {
+      "term": "WebAssembly.Memory",
+      "byte_offset": 7222,
+      "line": 1,
+      "context": "BigUint64Array(b)}function initMemory(){if(ENVIRONMENT_IS_PTHREAD){return}{var INITIAL_MEMORY=3221225472;wasmMemory=new WebAssembly.Memory({initial:BigInt(INITIAL_MEMORY/65536),maximum:262144n,shared:true,address:\"i64\"})}updateMemoryViews()}function preRun(){var preRun=Module[\"preRun\"];if(preRun){if(typeof preRun==\"f"
+    },
+    {
+      "term": "wasmMemory",
+      "byte_offset": 5373,
+      "line": 1,
+      "context": "ar ABORT=false;var EXITSTATUS;class EmscriptenEH{}class EmscriptenSjLj extends EmscriptenEH{}function growMemViews(){if(wasmMemory.buffer!=HEAP8.buffer){updateMemoryViews()}}var startWorker;if(ENVIRONMENT_IS_PTHREAD){var initializedJS=false;self.onunhandledrejection=e=>{throw e.reason||e};function handleMessa"
+    },
+    {
+      "term": "PThread",
+      "byte_offset": 2848,
+      "line": 1,
+      "context": "){lastMem=now;globalThis.__log(\"[mem] wasm memory \"+((growMemViews(),HEAPU8).length/1048576|0)+\" MB (\"+name+\")\"+(typeof PThread!==\"undefined\"&&PThread.runningWorkers?\", pthreads running \"+PThread.runningWorkers.length+\", idle in pool \"+PThread.unusedWorkers.length:\"\"))}if(now-lastConsole>150){lastConsole=n"
+    },
+    {
+      "term": "game.wasm",
+      "byte_offset": 8280,
+      "line": 1,
+      "context": "info.\";var e=new WebAssembly.RuntimeError(what);throw e}var wasmBinaryFile;function findWasmBinary(){return locateFile(\"game.wasm\")}function getBinarySync(file){if(readBinary){return readBinary(file)}throw\"both async and sync fetching of the wasm failed\"}async function getWasmBinary(binaryFile){if(!wasmBinar"
+    },
+    {
+      "term": "__main_argc_argv",
+      "byte_offset": 114280,
+      "line": 1,
+      "context": "_current,__indirect_function_table,wasmTable;function assignWasmExports(wasmExports){_main=Module[\"_main\"]=wasmExports[\"__main_argc_argv\"];_pthread_self=wasmExports[\"pthread_self\"];_fflush=wasmExports[\"fflush\"];_htons=wasmExports[\"htons\"];_ntohs=wasmExports[\"ntohs\"];__emscripten_tls_init=wasmExports[\"_emscripten_tl"
+    },
+    {
+      "term": "wasm_httpfs_manifest_js",
+      "byte_offset": 110736,
+      "line": 1,
+      "context": "ess.versions&&process.versions.node)return;postMessage({audio:{memory:wasmMemory,ring:Number(ring),capacity}})}function wasm_httpfs_manifest_js(buf,cap){if(typeof XMLHttpRequest===\"undefined\")return-1;let bytes=globalThis.__httpfsManifest;if(bytes===undefined){bytes=null;try{const x=new XMLHttpRequest;x.open(\"GET\",self.lo"
+    },
+    {
+      "term": "wgpu_start_worker",
+      "byte_offset": 112066,
+      "line": 1,
+      "context": "tion wasm_userdata_delete_js(path){Module[\"ioWorker\"].postMessage({userdataDelete:UTF8ToString(Number(path))})}function wgpu_start_worker(ring,size,dbg){ring=Number(ring);size=Number(size);var msg={memory:wasmMemory,ring,size,dbg:Number(dbg),shaderUrl:Module[\"wgpuShaderUrl\"]||\"/shaders\",shotEvery:Module[\"wgpuShotEve"
+    }
+  ],
+  "counts": {
+    "sections": 12,
+    "imports": 86,
+    "exports": 22,
+    "custom_sections": 1,
+    "targeted_string_hits": 300,
+    "ai_tool_token_hits": 103
+  }
+}

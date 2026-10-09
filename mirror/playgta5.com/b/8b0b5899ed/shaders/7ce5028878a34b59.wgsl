@@ -1,0 +1,235 @@
+diagnostic(off, derivative_uniformity);
+
+var<private> r0 : vec4<f32>;
+
+var<private> r1 : vec4<f32>;
+
+var<private> r2 : vec4<f32>;
+
+var<private> r3 : vec4<f32>;
+
+var<private> r4 : vec4<f32>;
+
+var<private> r5 : vec4<f32>;
+
+var<private> r6 : vec4<f32>;
+
+struct cb17_struct {
+  tint_symbol : array<vec4<f32>, 17u>,
+}
+
+@group(1u) @binding(2u) var<uniform> cb2_2 : cb17_struct;
+
+struct cb50_struct {
+  tint_symbol_1 : array<vec4<f32>, 50u>,
+}
+
+@group(1u) @binding(3u) var<uniform> cb3_3 : cb50_struct;
+
+struct cb4_struct {
+  tint_symbol_2 : array<vec4<f32>, 4u>,
+}
+
+@group(1u) @binding(5u) var<uniform> cb5_5 : cb4_struct;
+
+struct cb5_struct {
+  tint_symbol_3 : array<vec4<f32>, 5u>,
+}
+
+@group(1u) @binding(12u) var<uniform> cb12_12 : cb5_struct;
+
+struct cb7_struct {
+  tint_symbol_4 : array<vec4<f32>, 7u>,
+}
+
+@group(1u) @binding(11u) var<uniform> cb11_11 : cb7_struct;
+
+@group(1u) @binding(16u) var s0 : sampler;
+
+@group(1u) @binding(19u) var s3 : sampler;
+
+@group(1u) @binding(20u) var s4 : sampler;
+
+@group(1u) @binding(21u) var s5 : sampler;
+
+@group(1u) @binding(32u) var t0 : texture_2d<f32>;
+
+@group(1u) @binding(35u) var t3 : texture_2d<f32>;
+
+@group(1u) @binding(36u) var t4 : texture_2d<f32>;
+
+@group(1u) @binding(37u) var t5 : texture_2d<f32>;
+
+var<private> o0 : vec4<f32>;
+
+var<private> o1 : vec4<f32>;
+
+var<private> o2 : vec4<f32>;
+
+var<private> o3 : vec4<f32>;
+
+fn main_inner(v1 : vec4<f32>, v2 : vec4<f32>, v3 : vec4<f32>, v4 : vec4<f32>) {
+  let v = (v1.xy * cb11_11.tint_symbol_4[0u].xx);
+  r0 = vec4<f32>(v.xy, r0.zw);
+  r1 = textureSample(t3, s3, v1.zwzz.xy);
+  r0 = textureSample(t0, s0, r0.xyxx.xy);
+  r2.x = dot(v2.xyz, v2.xyz);
+  r2.x = inverseSqrt(r2.x);
+  let v_1 = (r2.xxx * v2.xyz);
+  r2 = vec4<f32>(r2.x, v_1.xyz);
+  r3 = textureSample(t5, s5, v1.zwzz.xy);
+  let v_2 = (r3.xy * r3.xy);
+  r3 = vec4<f32>(v_2.xy, r3.zw);
+  r3.x = dot(r3.xyz, cb11_11.tint_symbol_4[5u].xyz);
+  r3.y = (r3.x * cb11_11.tint_symbol_4[4u].y);
+  let v_3 = (r0.xyz * cb11_11.tint_symbol_4[0u].yzw);
+  r4 = vec4<f32>(v_3.xyz, r4.w);
+  r1.w = (r1.w * cb11_11.tint_symbol_4[1u].w);
+  let v_4 = -(r4.xyzx);
+  let v_5 = fma(r1.xyz, cb11_11.tint_symbol_4[1u].xyz, v_4.xyz);
+  r1 = vec4<f32>(v_5.xyz, r1.w);
+  let v_6 = fma(r1.www, r1.xyz, r4.xyz);
+  r0 = vec4<f32>(v_6.xyz, r0.w);
+  r0 = (r0 * v3.xxxw);
+  r1.x = (v3.x * cb2_2.tint_symbol[15u].z);
+  r1.y = (r3.y * v3.x);
+  r1.y = (r1.y * v2.w);
+  let v_7 = ((-(cb11_11.tint_symbol_4[2u].zzzz)).zw + vec2<f32>(1.0f, 2.0f));
+  r1 = vec4<f32>(r1.xy, v_7.xy);
+  r3.y = (r1.z * v3.z);
+  let v_8 = (r1.ww * v1.xy);
+  r4 = vec4<f32>(v_8.xy, r4.zw);
+  r4 = textureSample(t4, s4, r4.xyxx.xy);
+  r1.w = (cb5_5.tint_symbol_2[3u].z * cb11_11.tint_symbol_4[2u].z);
+  r3.z = ((-(r4.xxxx)).z + r4.z);
+  r4.x = fma(r1.w, r3.z, r4.x);
+  let v_9 = (r4.xy * cb11_11.tint_symbol_4[2u].xx);
+  r4 = vec4<f32>(v_9.xy, r4.zw);
+  r1.w = fma(v3.z, r1.z, -1.0f);
+  r1.z = fma(r1.z, r1.w, 1.0f);
+  r1.w = (r1.z * r4.x);
+  let v_10 = -(r0.xyzx);
+  let v_11 = fma(cb11_11.tint_symbol_4[3u].xyz, cb11_11.tint_symbol_4[2u].yyy, v_10.xyz);
+  r5 = vec4<f32>(v_11.xyz, r5.w);
+  let v_12 = fma(r1.www, r5.xyz, r0.xyz);
+  r0 = vec4<f32>(v_12.xyz, r0.w);
+  r1.w = (r3.y * cb11_11.tint_symbol_4[2u].x);
+  let v_13 = ((-(r0.xxyz)).xzw + r4.zzz);
+  r4 = vec4<f32>(v_13.x, r4.y, v_13.yz);
+  let v_14 = fma(r1.www, r4.xzw, r0.xyz);
+  r0 = vec4<f32>(v_14.xyz, r0.w);
+  r1.z = fma((-(r4.yyyy)).z, r1.z, 1.0f);
+  r4.x = (r1.z * r1.y);
+  r1.w = (v3.x * cb11_11.tint_symbol_4[2u].w);
+  r1.w = (r3.x * r1.w);
+  r1.w = (r1.w * 0.75f);
+  r3.x = dot(v4.xyz, v4.xyz);
+  r3.x = inverseSqrt(r3.x);
+  let v_15 = ((-(cb3_3.tint_symbol_1[0u].xyzx)).xyz + vec3<f32>(0.0f, 0.0f, -1.0f));
+  r5 = vec4<f32>(v_15.xyz, r5.w);
+  let v_16 = fma(cb11_11.tint_symbol_4[6u].www, r5.xyz, cb3_3.tint_symbol_1[0u].xyz);
+  r5 = vec4<f32>(v_16.xyz, r5.w);
+  let v_17 = (r1.www * cb11_11.tint_symbol_4[6u].xyz);
+  r6 = vec4<f32>(v_17.xyz, r6.w);
+  let v_18 = -(r5.xyzx);
+  let v_19 = fma(v4.xyz, r3.xxx, v_18.xyz);
+  r3 = vec4<f32>(v_19.xyz, r3.w);
+  r1.w = dot(r3.xyz, r3.xyz);
+  r1.w = inverseSqrt(r1.w);
+  let v_20 = (r1.www * r3.xyz);
+  r3 = vec4<f32>(v_20.xyz, r3.w);
+  r1.w = dot(r2.yzw, r3.xyz);
+  r1.w = clamp(((r1.wwww + vec4<f32>(0.00000000999999993923f))).w, 0.0f, 1.0f);
+  r3.x = fma(r3.w, 15.0f, 0.00000000999999993923f);
+  r1.w = log2(r1.w);
+  r1.w = (r1.w * r3.x);
+  r1.w = exp2(r1.w);
+  let v_21 = fma(r6.xyz, r1.www, r0.xyz);
+  r0 = vec4<f32>(v_21.xyz, r0.w);
+  let v_22 = min(r0.xyz, vec3<f32>(240.0f));
+  r0 = vec4<f32>(v_22.xyz, r0.w);
+  r5.w = (r0.w * cb2_2.tint_symbol[15u].x);
+  r0.w = fma(v2.z, r2.x, -0.34999999403953552246f);
+  r0.w = clamp(((r0.wwww * vec4<f32>(1.53846156597137451172f))).w, 0.0f, 1.0f);
+  r0.w = (r0.w * cb5_5.tint_symbol_2[3u].z);
+  r1.w = ((-(cb2_2.tint_symbol[16u].zzzz)).w + 1.0f);
+  r0.w = (r0.w * r1.w);
+  r0.w = (r1.x * r0.w);
+  r1.x = fma((-(r4.xxxx)).x, 0.5f, 1.0f);
+  r1.x = (r0.w * r1.x);
+  r1.x = fma(r1.x, -0.5f, 1.0f);
+  let v_23 = (r0.xyz * r1.xxx);
+  r5 = vec4<f32>(v_23.xyz, r5.w);
+  r0.x = bitcast<f32>((bitcast<u32>(cb12_12.tint_symbol_3[4u].x) | bitcast<u32>(cb12_12.tint_symbol_3[4u].y)));
+  let v_24 = bitcast<vec4<u32>>(r0.xxxx);
+  r5 = select(r5, v3, (v_24 != vec4<u32>()));
+  r0.x = bitcast<f32>(select(0u, 4294967295u, (0.0039215688593685627f >= r5.w)));
+  v_25((bitcast<u32>(r0.x) != 0u));
+  r0.x = (r3.w * cb11_11.tint_symbol_4[4u].x);
+  r0.y = (v3.x * cb2_2.tint_symbol[15u].y);
+  r0.z = clamp(((cb2_2.tint_symbol[16u].zzzz + cb3_3.tint_symbol_1[49u].wwww)).z, 0.0f, 1.0f);
+  r3.y = (r0.z * r0.y);
+  let v_26 = fma(r2.yzw, vec3<f32>(0.5f), vec3<f32>(0.5f));
+  r2 = vec4<f32>(v_26.xyz, r2.w);
+  let v_27 = (r2.xyz * vec3<f32>(256.0f));
+  r6 = vec4<f32>(v_27.xyz, r6.w);
+  let v_28 = floor(r6.xyz);
+  r6 = vec4<f32>(v_28.xyz, r6.w);
+  let v_29 = -(r6.xyzx);
+  let v_30 = fma(r2.xyz, vec3<f32>(256.0f), v_29.xyz);
+  r2 = vec4<f32>(v_30.xyz, r2.w);
+  let v_31 = (r2.xyz * vec3<f32>(8.0f, 8.0f, 4.0f));
+  r2 = vec4<f32>(v_31.xyz, r2.w);
+  let v_32 = floor(r2.xyz);
+  r2 = vec4<f32>(v_32.xyz, r2.w);
+  r0.y = dot(r2.yxz, vec3<f32>(4.0f, 32.0f, 1.0f));
+  o1.w = (r0.y * 0.0039215688593685627f);
+  let v_33 = (r6.xyz * vec3<f32>(0.00390625f));
+  o1 = vec4<f32>(v_33.xyz, o1.w);
+  r4.y = (r0.x * 0.001953125f);
+  r3.x = fma(v3.x, cb2_2.tint_symbol[15u].z, cb3_3.tint_symbol_1[45u].w);
+  let v_34 = (r3.xy * vec2<f32>(0.5f));
+  r0 = vec4<f32>(v_34.xy, r0.zw);
+  let v_35 = sqrt(r0.xy);
+  o3 = vec4<f32>(v_35.xy, o3.zw);
+  r0.x = clamp(fma(r1.yyyy, r1.zzzz, vec4<f32>(0.40000000596046447754f)).x, 0.0f, 1.0f);
+  r4.z = cb11_11.tint_symbol_4[3u].w;
+  let v_36 = -(r4.xyxx);
+  let v_37 = fma(r0.xx, vec2<f32>(0.5f, 0.48828125f), v_36.xy);
+  r0 = vec4<f32>(v_37.xy, r0.zw);
+  r0.z = 0.0f;
+  let v_38 = max(r0.xyz, vec3<f32>());
+  r0 = vec4<f32>(v_38.xyz, r0.w);
+  let v_39 = fma(r0.xyz, r0.www, r4.xyz);
+  r0 = vec4<f32>(v_39.xyz, r0.w);
+  let v_40 = sqrt(r0.xy);
+  o2 = vec4<f32>(v_40.xy, o2.zw);
+  o0 = r5;
+  o2.z = r0.z;
+  o2.w = 1.0f;
+  o3 = vec4<f32>(o3.xy, vec2<f32>(0.0f, 1.00188386440277099609f));
+}
+
+fn v_25(v_41 : bool) {
+  if (v_41) {
+    discard;
+    return;
+  }
+}
+
+struct tint_symbol_5 {
+  @location(0u)
+  o0 : vec4<f32>,
+  @location(1u)
+  o1 : vec4<f32>,
+  @location(2u)
+  o2 : vec4<f32>,
+  @location(3u)
+  o3 : vec4<f32>,
+}
+
+@fragment
+fn main(@location(1u) v1 : vec4<f32>, @location(2u) v2 : vec4<f32>, @location(3u) v3 : vec4<f32>, @location(4u) v4 : vec4<f32>) -> tint_symbol_5 {
+  main_inner(v1, v2, v3, v4);
+  return tint_symbol_5(o0, o1, o2, o3);
+}

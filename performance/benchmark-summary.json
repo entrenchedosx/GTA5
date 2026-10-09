@@ -1,0 +1,497 @@
+{
+  "date": "2026-10-09",
+  "environment": {
+    "gpu": "NVIDIA RTX 5060",
+    "cpu": "AMD Ryzen 5 7500F",
+    "usableRamGiB": 15.5,
+    "browser": "Microsoft Edge 154",
+    "api": "WebGPU",
+    "resolution": [
+      1920,
+      1080
+    ],
+    "low": 0
+  },
+  "limitations": [
+    "Camera directions and streaming workloads varied despite held player input.",
+    "These timings do not isolate an exact FPS gain or establish 60 FPS.",
+    "CPU is renderer-worker active wall time; native simulation timing is unavailable.",
+    "GPU is sampled pass execution, excluding copies; memory accounting is not VRAM residency.",
+    "Short tests do not establish long-traversal memory bounds."
+  ],
+  "runs": [
+    {
+      "name": "gta6-baseline-protected",
+      "map": "GTA VI env_test",
+      "implementation": "dedicated buffers",
+      "captureLabel": "dedicated-buffers",
+      "frames": 1294,
+      "fps": 20.88768799927911,
+      "frameMs": {
+        "samples": 1294,
+        "mean": 47.87509273570693,
+        "median": 41.00499999523163,
+        "p95": 93.63999998569489,
+        "max": 440.99000000953674
+      },
+      "rendererCpuMs": {
+        "samples": 1294,
+        "mean": 41.961468323581556,
+        "median": 36.78500020503998,
+        "p95": 81.98500001430511,
+        "max": 351.57999980449677
+      },
+      "gpuPassMs": {
+        "samples": 43,
+        "mean": 2.4141633488372096,
+        "median": 2.359296,
+        "p95": 3.2768,
+        "max": 3.407872
+      },
+      "draws": {
+        "samples": 1294,
+        "mean": 5356.549459041731,
+        "median": 5162,
+        "p95": 8103,
+        "max": 8464
+      },
+      "triangles": {
+        "samples": 1294,
+        "mean": 4397031.029366306,
+        "median": 4603474,
+        "p95": 6425788,
+        "max": 7094139
+      },
+      "uploadCpuMs": {
+        "samples": 1294,
+        "mean": 3.7708887074609074,
+        "median": 0.4099998474121094,
+        "p95": 22.990000247955322,
+        "max": 78.84000015258789
+      },
+      "uploadBytes": {
+        "samples": 1294,
+        "mean": 5375531.018547141,
+        "median": 1465354,
+        "p95": 21262892,
+        "max": 39450992
+      },
+      "framesOver100Ms": 51,
+      "memory": {
+        "wasmCapacityBytes": 3764453376,
+        "textureBytes": 2870384244,
+        "bufferBytes": 1193733352,
+        "uniformRingBytes": 50331648,
+        "objectsAlive": 110179,
+        "objectTableLength": 232208,
+        "bindGroupCache": 7779
+      },
+      "logicalGpuBuffers": 56613,
+      "physicalGpuBuffers": 56613,
+      "arena": null,
+      "gpuValidationErrors": 0,
+      "inputEvents": 0,
+      "pipelineCreations": 0,
+      "skippedDraws": 0
+    },
+    {
+      "name": "gta6-baseline-protected-repeat",
+      "map": "GTA VI env_test",
+      "implementation": "dedicated buffers",
+      "captureLabel": "dedicated-buffers",
+      "frames": 1514,
+      "fps": 24.500417631784877,
+      "frameMs": {
+        "samples": 1514,
+        "mean": 40.81563077939864,
+        "median": 37.794999957084656,
+        "p95": 73.96999990940094,
+        "max": 148.00499999523163
+      },
+      "rendererCpuMs": {
+        "samples": 1514,
+        "mean": 37.01840158332449,
+        "median": 34.00500011444092,
+        "p95": 68.20000004768372,
+        "max": 136.97499990463257
+      },
+      "gpuPassMs": {
+        "samples": 50,
+        "mean": 2.361917440000001,
+        "median": 2.29376,
+        "p95": 2.883584,
+        "max": 3.145728
+      },
+      "draws": {
+        "samples": 1514,
+        "mean": 6044.883751651255,
+        "median": 5939,
+        "p95": 8304,
+        "max": 8431
+      },
+      "triangles": {
+        "samples": 1514,
+        "mean": 4613942.906869221,
+        "median": 4594922,
+        "p95": 6118824,
+        "max": 6246746
+      },
+      "uploadCpuMs": {
+        "samples": 1514,
+        "mean": 5.606710695133814,
+        "median": 1.1050000190734863,
+        "p95": 32.31499993801117,
+        "max": 82.3199999332428
+      },
+      "uploadBytes": {
+        "samples": 1514,
+        "mean": 7559801.640686922,
+        "median": 4191466,
+        "p95": 25012002,
+        "max": 39036928
+      },
+      "framesOver100Ms": 4,
+      "memory": {
+        "wasmCapacityBytes": 3762356224,
+        "textureBytes": 2861870060,
+        "bufferBytes": 1180623984,
+        "uniformRingBytes": 50331648,
+        "objectsAlive": 110622,
+        "objectTableLength": 271175,
+        "bindGroupCache": 5630
+      },
+      "logicalGpuBuffers": 56670,
+      "physicalGpuBuffers": 56670,
+      "arena": null,
+      "gpuValidationErrors": 0,
+      "inputEvents": 0,
+      "pipelineCreations": 0,
+      "skippedDraws": 0
+    },
+    {
+      "name": "gta6-arena-protected",
+      "map": "GTA VI env_test",
+      "implementation": "shared geometry",
+      "captureLabel": "geometry-arena",
+      "frames": 1622,
+      "fps": 26.2741526403742,
+      "frameMs": {
+        "samples": 1622,
+        "mean": 38.06021886556863,
+        "median": 35.55999994277954,
+        "p95": 63.769999980926514,
+        "max": 143.99500000476837
+      },
+      "rendererCpuMs": {
+        "samples": 1622,
+        "mean": 34.7010480916603,
+        "median": 32.46999979019165,
+        "p95": 60.114999771118164,
+        "max": 132.6199997663498
+      },
+      "gpuPassMs": {
+        "samples": 54,
+        "mean": 2.791348148148148,
+        "median": 2.752512,
+        "p95": 3.145728,
+        "max": 3.342336
+      },
+      "draws": {
+        "samples": 1622,
+        "mean": 6601.046239210851,
+        "median": 7105,
+        "p95": 7870,
+        "max": 7917
+      },
+      "triangles": {
+        "samples": 1622,
+        "mean": 6254261.472872997,
+        "median": 6210184,
+        "p95": 6959126,
+        "max": 7068214
+      },
+      "uploadCpuMs": {
+        "samples": 1622,
+        "mean": 2.5124969163452504,
+        "median": 0.15999996662139893,
+        "p95": 19.204999923706055,
+        "max": 43.299999833106995
+      },
+      "uploadBytes": {
+        "samples": 1622,
+        "mean": 4334967.032059186,
+        "median": 849480,
+        "p95": 21282096,
+        "max": 41376972
+      },
+      "framesOver100Ms": 5,
+      "memory": {
+        "wasmCapacityBytes": 3764453376,
+        "textureBytes": 2835676772,
+        "bufferBytes": 1225564048,
+        "uniformRingBytes": 50331648,
+        "objectsAlive": 110933,
+        "objectTableLength": 235269,
+        "bindGroupCache": 7203
+      },
+      "logicalGpuBuffers": 56172,
+      "physicalGpuBuffers": 10721,
+      "arena": {
+        "physicalBuffers": 119,
+        "allocatedBytes": 499122176,
+        "logicalBytes": 350888452,
+        "liveRanges": 45570,
+        "retiredRanges": 0,
+        "buffersCreated": 124
+      },
+      "gpuValidationErrors": 0,
+      "inputEvents": 0,
+      "pipelineCreations": 0,
+      "skippedDraws": 0
+    },
+    {
+      "name": "gta6-arena-protected-repeat",
+      "map": "GTA VI env_test",
+      "implementation": "shared geometry",
+      "captureLabel": "geometry-arena",
+      "frames": 1565,
+      "fps": 25.33313681938448,
+      "frameMs": {
+        "samples": 1565,
+        "mean": 39.473990415384215,
+        "median": 38.0349999666214,
+        "p95": 62.74000000953674,
+        "max": 139.70500004291534
+      },
+      "rendererCpuMs": {
+        "samples": 1565,
+        "mean": 36.38038977990135,
+        "median": 35.58500027656555,
+        "p95": 58.924999713897705,
+        "max": 124.22999942302704
+      },
+      "gpuPassMs": {
+        "samples": 52,
+        "mean": 2.7991433846153835,
+        "median": 2.752512,
+        "p95": 3.342336,
+        "max": 3.407872
+      },
+      "draws": {
+        "samples": 1565,
+        "mean": 6747.019808306709,
+        "median": 7085,
+        "p95": 7906,
+        "max": 8089
+      },
+      "triangles": {
+        "samples": 1565,
+        "mean": 6128588.4677316295,
+        "median": 5911941,
+        "p95": 6917595,
+        "max": 6997791
+      },
+      "uploadCpuMs": {
+        "samples": 1565,
+        "mean": 2.6010351472007582,
+        "median": 0.20000016689300537,
+        "p95": 19.985000014305115,
+        "max": 33.794999837875366
+      },
+      "uploadBytes": {
+        "samples": 1565,
+        "mean": 4670786.893290735,
+        "median": 1089646,
+        "p95": 21254212,
+        "max": 33608764
+      },
+      "framesOver100Ms": 2,
+      "memory": {
+        "wasmCapacityBytes": 3766550528,
+        "textureBytes": 2840035068,
+        "bufferBytes": 1222095484,
+        "uniformRingBytes": 50331648,
+        "objectsAlive": 111409,
+        "objectTableLength": 246370,
+        "bindGroupCache": 6366
+      },
+      "logicalGpuBuffers": 56564,
+      "physicalGpuBuffers": 10856,
+      "arena": {
+        "physicalBuffers": 119,
+        "allocatedBytes": 499122176,
+        "logicalBytes": 354611116,
+        "liveRanges": 45827,
+        "retiredRanges": 0,
+        "buffersCreated": 126
+      },
+      "gpuValidationErrors": 0,
+      "inputEvents": 0,
+      "pipelineCreations": 0,
+      "skippedDraws": 0
+    },
+    {
+      "name": "gta5-arena-default",
+      "map": "GTA V",
+      "implementation": "shared geometry",
+      "captureLabel": "dedicated-buffers",
+      "frames": 1577,
+      "fps": 50.594371576640086,
+      "frameMs": {
+        "samples": 1577,
+        "mean": 19.76504438809375,
+        "median": 17.899999976158142,
+        "p95": 30.169999957084656,
+        "max": 55.37999999523163
+      },
+      "rendererCpuMs": {
+        "samples": 1577,
+        "mean": 14.341896010185996,
+        "median": 13.96999979019165,
+        "p95": 18.12999999523163,
+        "max": 27.194999933242798
+      },
+      "gpuPassMs": {
+        "samples": 53,
+        "mean": 1.7521606037735846,
+        "median": 1.703936,
+        "p95": 2.097152,
+        "max": 2.29376
+      },
+      "draws": {
+        "samples": 1577,
+        "mean": 2965.871908687381,
+        "median": 2982,
+        "p95": 3152,
+        "max": 3248
+      },
+      "triangles": {
+        "samples": 1577,
+        "mean": 934093.2149651237,
+        "median": 965786,
+        "p95": 1009991,
+        "max": 1028357
+      },
+      "uploadCpuMs": {
+        "samples": 1577,
+        "mean": 0.0007324033548503869,
+        "median": 0,
+        "p95": 0,
+        "max": 0.7699999809265137
+      },
+      "uploadBytes": {
+        "samples": 1577,
+        "mean": 710112.8611287255,
+        "median": 694680,
+        "p95": 767672,
+        "max": 3536450
+      },
+      "framesOver100Ms": 0,
+      "memory": {
+        "wasmCapacityBytes": 3221225472,
+        "textureBytes": 1105670284,
+        "bufferBytes": 360532548,
+        "uniformRingBytes": 25165824,
+        "objectsAlive": 63610,
+        "objectTableLength": 63619,
+        "bindGroupCache": 1771
+      },
+      "logicalGpuBuffers": 29671,
+      "physicalGpuBuffers": 7154,
+      "arena": {
+        "physicalBuffers": 47,
+        "allocatedBytes": 197132288,
+        "logicalBytes": 140096972,
+        "liveRanges": 22564,
+        "retiredRanges": 0,
+        "buffersCreated": 47
+      },
+      "gpuValidationErrors": 0,
+      "inputEvents": 0,
+      "pipelineCreations": 2,
+      "skippedDraws": 94
+    }
+  ],
+  "hostMemorySnapshots": [
+    {
+      "label": "baseline-protected",
+      "timeUtc": "2026-10-09T20:48:19.3233045Z",
+      "availableMB": 492,
+      "committedBytes": 50154573824,
+      "pagesInputPerSecond": 3178,
+      "pageReadsPerSecond": 439,
+      "largestEdgeProcesses": [
+        {
+          "Role": "gpu-process",
+          "PrivateBytes": 11855777792,
+          "WorkingSet": 642715648
+        },
+        {
+          "Role": "renderer",
+          "PrivateBytes": 6143942656,
+          "WorkingSet": 1360814080
+        }
+      ]
+    },
+    {
+      "label": "arena-protected",
+      "timeUtc": "2026-10-09T20:52:35.6524594Z",
+      "availableMB": 658,
+      "committedBytes": 47058833408,
+      "pagesInputPerSecond": 858,
+      "pageReadsPerSecond": 95,
+      "largestEdgeProcesses": [
+        {
+          "Role": "gpu-process",
+          "PrivateBytes": 9303318528,
+          "WorkingSet": 721846272
+        },
+        {
+          "Role": "renderer",
+          "PrivateBytes": 6039015424,
+          "WorkingSet": 2577129472
+        }
+      ]
+    },
+    {
+      "label": "arena-protected-repeat",
+      "timeUtc": "2026-10-09T20:56:44.7556197Z",
+      "availableMB": 333,
+      "committedBytes": 47035645952,
+      "pagesInputPerSecond": 548,
+      "pageReadsPerSecond": 34,
+      "largestEdgeProcesses": [
+        {
+          "Role": "gpu-process",
+          "PrivateBytes": 8951955456,
+          "WorkingSet": 952619008
+        },
+        {
+          "Role": "renderer",
+          "PrivateBytes": 6345084928,
+          "WorkingSet": 3802501120
+        }
+      ]
+    },
+    {
+      "label": "dedicated-protected-repeat",
+      "timeUtc": "2026-10-09T20:59:50.5269326Z",
+      "availableMB": 380,
+      "committedBytes": 49529950208,
+      "pagesInputPerSecond": 579,
+      "pageReadsPerSecond": 11,
+      "largestEdgeProcesses": [
+        {
+          "Role": "gpu-process",
+          "PrivateBytes": 11640229888,
+          "WorkingSet": 2209476608
+        },
+        {
+          "Role": "renderer",
+          "PrivateBytes": 6403887104,
+          "WorkingSet": 2523856896
+        }
+      ]
+    }
+  ]
+}

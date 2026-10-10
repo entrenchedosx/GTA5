@@ -53,8 +53,3 @@ On other operating systems, install the external data on Windows or copy an exis
 - **Memory pressure:** test with a single game tab. The GTA VI scene still had active host paging after the allocation fix.
 - **Installer finds a differing asset:** use a new clone/destination or investigate the difference. It does not overwrite modified assets.
 
-## Rights and provenance
-
-The project owner states that the covered GTA code/assets are authorized for use, modification, recoding and distribution under a rights-holder agreement, with free distribution and no monetization. See [LICENSE_NOTICE.md](LICENSE_NOTICE.md); no broader third-party license is invented here.
-
-The starting launcher/snapshot packaging project references [shadany7824/playgta5](https://github.com/shadany7824/playgta5) and credits snapshot collection to Sebas Furbastian / @SebasKitten. These packaging references do not establish native-engine authorship. This repository is not an official Rockstar Games or Take-Two release.

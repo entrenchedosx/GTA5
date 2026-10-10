@@ -5,7 +5,7 @@
 <title>game</title>
 <style>
 	html, body { margin: 0; height: 100%; background: #000; color: #ccc; font: 12px monospace; overflow: hidden; }
-	#canvas { display: block; position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; background: #000; }
+	#canvas { display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100vw; height: 100vh; background: #000; }
 	/* title screen: the game's loading screen (LOADINGSCREEN_STARTUP) on its 1280x720 stage, scaled to the window; see the script below */
 	@font-face { font-family: 'Chalet'; src: url('/b/8b0b5899ed/title/chalet.woff') format('woff'); }
 	#loading { position: fixed; inset: 0; background: #000; overflow: hidden; transition: opacity .8s; z-index: 5; }
@@ -353,7 +353,17 @@ async function dropOldCache() {
 	} catch (e) { console.warn('could not remove the old cache: ' + e); }
 }
 let lowMemory = false;		// set below (module scope: the ?mem readout further down also needs it)
-let startSize = [1280, 720], wantSize = null;		// set below (module scope: installInput uses them)
+let startSize = [1280, 720], displaySize = startSize, wantSize = null;
+// CSS sizing changes presentation only, without invoking the compiled engine's
+// unsafe live resize path. The centered canvas keeps its aspect and input rect.
+function fitGameCanvas() {
+	const scale = Math.min(innerWidth / displaySize[0], innerHeight / displaySize[1]);
+	if (!(scale > 0)) return;
+	canvas.style.width = (displaySize[0] * scale) + 'px';
+	canvas.style.height = (displaySize[1] * scale) + 'px';
+}
+addEventListener('resize', fitGameCanvas);
+document.addEventListener('fullscreenchange', fitGameCanvas);
 if (!crossOriginIsolated) { document.getElementById('label').textContent = 'not cross-origin isolated: open the page over https (or localhost); the server sends COOP/COEP'; document.getElementById('label').style.color = '#e66'; }
 else {
 	const offscreen = canvas.transferControlToOffscreen();
@@ -371,18 +381,23 @@ else {
 	const cores = +(q.get('cores') || 0) || (lowMemory ? 2 : navigator.hardwareConcurrency);
 	if (lowMemory) hud.textContent = 'Low-memory device (' + (navigator.deviceMemory || '?') + ' GB reported): close other tabs. If the tab shows "Aw, Snap!" or SIGILL it ran out of memory.';
 postLog('[page env] ' + JSON.stringify({ deviceMemory: navigator.deviceMemory, cores: navigator.hardwareConcurrency, usingCores: cores, low: lowMemory, isolated: crossOriginIsolated, ua: navigator.userAgent.slice(0, 120), screen: screen.width + 'x' + screen.height + '@' + devicePixelRatio }));
-// Back buffer = the browser window in device pixels (native resolution), following window resizes live (see installInput). ?scale=0.75 renders at 75 % (faster), ?fixed=1 keeps the
-// start-up size whatever the window does, ?res=1920x1080 forces a size. Even numbers, at most 3840x2160 (2560x1440 in the low-memory profile: screen-sized render targets dominate GPU memory).
+// Keep engine targets at the startup display resolution: live resizing the
+// compiled engine traps in WASM on the GTA VI map. Fullscreen/windowed changes
+// fit the CSS canvas instead. ?scale=0.75 scales that resolution, ?res=WxH forces
+// it. ?liveResize=1 is the original unsafe engine path for diagnostics only.
+// Even numbers, capped at 3840x2160 (2560x1440 in the low-memory profile).
 wantSize = () => {
 	const forced = /^(\d+)x(\d+)$/.exec(q.get('res') || '');
 	if (forced) return [+forced[1], +forced[2]];
 	const sc = Math.max(0.25, Math.min(2, +(q.get('scale') || 1)));
-	let w = innerWidth * devicePixelRatio * sc, h = innerHeight * devicePixelRatio * sc;
+	const live = q.get('liveResize') === '1';
+	let w = (live ? innerWidth : Math.max(innerWidth, screen.width)) * devicePixelRatio * sc;
+	let h = (live ? innerHeight : Math.max(innerHeight, screen.height)) * devicePixelRatio * sc;
 	const cap = lowMemory ? [2560, 1440] : [3840, 2160], k = Math.min(1, cap[0] / w, cap[1] / h);
 	w *= k; h *= k;
 	return [Math.max(320, Math.round(w / 2) * 2), Math.max(240, Math.round(h / 2) * 2)];
 };
-startSize = wantSize();
+startSize = wantSize(); displaySize = startSize; fitGameCanvas();
 // Script and replay channels: ~87 % of all log lines in play (the scripts print leaderboard and status lines every few frames). Below warning they are off: formatting, the
 // log transport and the dev server's log file cost the main thread for nothing. ?verbose=1 keeps everything.
 const LOG_ARGS = q.get('verbose') ? [] : ['-Script_all=warning', '-replay_all=warning'];
@@ -394,7 +409,7 @@ const ENGINE_ARGS = ['-fastscriptcore'];
 // this timer 2.1 ms, a 4 ms wait 5.0 ms). The game has no such timer, so every short sleep cost a whole tick: the limiter held a 60 fps cap to 37 fps and the visibility
 // wait added 15 ms to a frame. An empty callback; nothing else on this thread runs while the game plays.
 setInterval(() => {}, 1);
-const worker = new Worker(BASE + '/loader.js?runtime=geometry-arena-1' + (q.get('profile') === '1' ? '&profile=1&revision=' + encodeURIComponent(q.get('revision') || '1') : ''));
+const worker = new Worker(BASE + '/loader.js?runtime=fullscreen-2' + (q.get('profile') === '1' ? '&profile=1&revision=' + encodeURIComponent(q.get('revision') || '1') : ''));
 	worker.onmessage = (ev) => {
 		if (ev.data.hud) hud.textContent = ev.data.hud;
 		if (ev.data.input) installInput(ev.data.input.memory, ev.data.input.block);
@@ -508,23 +523,34 @@ function installInput(memory, block) {
 	const w = new Int32Array(memory.buffer, block + 256, 10);
 	const U16 = new Uint16Array(memory.buffer, block + 256 + 40, 64);
 	const MX = 0, MY = 1, DX = 2, DY = 3, DZ = 4, BTN = 5, FOCUS = 6, LOCKED = 7, HEAD = 8, TAIL = 9;
-	let W = startSize[0], H = startSize[1];		// back buffer size in device pixels (mouse clamping); updated when the window is resized
+	let W = startSize[0], H = startSize[1];		// stable engine render size in device pixels (mouse clamping)
 	const ext = new Int32Array(memory.buffer, block + 424, 4);		// dbgDrawLimit, dbgFrameDraws, winW, winH
 	startModeWord = new Int32Array(memory.buffer, block + 440, 1);		// startMode (the start menu above)
 	if (startMode) Atomics.store(startModeWord, 0, startMode);
 	Atomics.store(ext, 2, W); Atomics.store(ext, 3, H);
-	if (!q.get('fixed')) {
+	if (q.get('liveResize') === '1' && !q.get('fixed')) {
 		let timer = 0;
-		addEventListener('resize', () => {
+		const scheduleResize = () => {
 			clearTimeout(timer);
+			// Fullscreen transitions/dragging can publish intermediate sizes.
+			// Keep rendering until the visible viewport has settled; minimized
+			// windows must not rebuild the engine's render-target set.
+			if (document.visibilityState === 'hidden' || innerWidth < 1 || innerHeight < 1) return;
 			timer = setTimeout(() => {
-				const [w, h] = wantSize();
-				if (w === W && h === H) return;
-				W = w; H = h;
-				Atomics.store(ext, 2, w); Atomics.store(ext, 3, h);
-				trace('window resized: back buffer ' + w + 'x' + h);
-			}, 150);
-		});
+				if (document.visibilityState === 'hidden' || innerWidth < 1 || innerHeight < 1) return;
+				const [nextW, nextH] = wantSize();
+				if (nextW === W && nextH === H) return;
+				W = nextW; H = nextH; displaySize = [W, H]; fitGameCanvas();
+				Atomics.store(ext, 2, W); Atomics.store(ext, 3, H);
+				// Rebase absolute mouse coordinates without sending a camera jump.
+				Atomics.store(w, MX, Math.min(W - 1, Atomics.load(w, MX)));
+				Atomics.store(w, MY, Math.min(H - 1, Atomics.load(w, MY)));
+				trace('window resized: back buffer ' + W + 'x' + H);
+			}, 500);
+		};
+		addEventListener('resize', scheduleResize);
+		document.addEventListener('fullscreenchange', scheduleResize);
+		document.addEventListener('visibilitychange', scheduleResize);
 	}
 	Atomics.store(w, FOCUS, document.hasFocus() ? 1 : 0);
 	Atomics.store(w, MX, W >> 1);

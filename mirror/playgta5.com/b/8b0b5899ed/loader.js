@@ -10,7 +10,7 @@ self.onmessage = (ev) => {
 	if (m.cores) Object.defineProperty(navigator, 'hardwareConcurrency', { value: m.cores });
 	// The GPU worker must be up before the engine blocks this thread: Chrome fetches the script of a worker nested in a worker through
 	// the parent's event loop. It idles until the engine sends its start message (wgpu_backend.cpp: wgpu_start_worker).
-	const gq = new URLSearchParams({ runtime: 'geometry-arena-1' });		// invalidate the old worker cached under the unchanged snapshot build ID
+	const gq = new URLSearchParams({ runtime: 'fullscreen-2' });		// invalidate the old worker cached under the unchanged snapshot build ID
 	if (m.profile) gq.set('profile', '1');
 	if (m.profile && m.profileDetail) gq.set('detail', '1');
 	if (m.profile) gq.set('revision', new URLSearchParams(self.location.search).get('revision') || '1');

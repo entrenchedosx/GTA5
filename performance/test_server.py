@@ -14,12 +14,14 @@ thread.start()
 origin = 'http://127.0.0.1:%d' % server.server_port
 try:
  for path in ['/', '/b/8b0b5899ed/performance-profiler.js', '/b/8b0b5899ed/performance-page.js',
-              '/b/8b0b5899ed/geometry-buffer-arena.js', '/b/8b0b5899ed/geometry-arena-test.html']:
+              '/b/8b0b5899ed/geometry-buffer-arena.js', '/b/8b0b5899ed/geometry-arena-test.html',
+              '/b/8b0b5899ed/fullscreen-test.html']:
   with urlopen(origin + path) as response:
    assert response.status == 200
    assert response.headers['Cross-Origin-Opener-Policy'] == 'same-origin'
    assert response.headers['Cross-Origin-Embedder-Policy'] == 'require-corp'
    assert response.headers['Cross-Origin-Resource-Policy'] == 'same-origin'
+   assert response.headers['Cache-Control'] == 'no-cache'
    assert response.read() == (ROOT / ('index.html' if path == '/' else path.lstrip('/'))).read_bytes()
  with urlopen(Request(origin + '/b/8b0b5899ed/game.wasm', headers={'Range':'bytes=0-7'})) as response:
   assert response.status == 206 and response.read() == b'\0asm\x01\0\0\0'

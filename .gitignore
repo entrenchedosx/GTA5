@@ -27,6 +27,7 @@ __pycache__/
 /performance/*.json
 /performance/*.jsonl
 /performance/*.png
+/performance/*.jpg
 /performance/original/
 /performance/.syntax-*.mjs
 /performance/gta5-installer-*/

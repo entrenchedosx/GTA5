@@ -573,6 +573,11 @@ const SPIKE_MS = 40;
 let lastPresentT = 0, spikes = [], spikeCount = 0, frameMax = 0, over25 = 0;
 let pipeMs = 0, pipeCreates = 0, pipeCreates0 = 0, busyMs = 0, idleMs = 0, shaderModuleCount = 0, fpsT0 = 0, fpsCount0 = 0, fpsDraw0 = 0;
 let texBytesAlive = 0, texBytesPeak = 0, texCount = 0, bufBytesAlive = 0, bufBytesPeak = 0;
+let proxyTextureBytesAlive = 0, proxyTextureCount = 0, proxyTexturesCreated = 0, proxyTexturesDestroyed = 0;
+function trackTextureProxy(px) {
+	px.bytes = textureBytes({ ...px.desc, format: px.format });
+	proxyTextureBytesAlive += px.bytes; proxyTextureCount++; proxyTexturesCreated++;
+}
 
 function createTexture(id, dim, w, h, d, mips, arraySize, dxgi, bind, samples) {
 	const m = mapFormat(dxgi, bind);
@@ -981,6 +986,7 @@ function floatToDepthProxy(t) {
 		const d = t.desc;
 		const tex = device.createTexture({ size: d.size, mipLevelCount: d.mipLevelCount, sampleCount: 1, dimension: '2d', format: 'depth32float', usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT });
 		px = t.proxy_fdepth = { kind: 'texture', tex, desc: { size: d.size, mipLevelCount: d.mipLevelCount, dimension: '2d', sampleCount: 1 }, format: 'depth32float', views: new Map(), dirty: true };
+		trackTextureProxy(px);
 	}
 	if (px.dirty) {
 		endPass();
@@ -1023,6 +1029,7 @@ function depthProxy(t, kind) {
 		const tex = device.createTexture({ size: d.size, mipLevelCount: d.mipLevelCount, sampleCount: 1, dimension: '2d',
 			format: kind === 'depth' ? 'r32float' : 'r8uint', usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT });
 		px = t[key] = { kind: 'texture', tex, desc: { size: d.size, mipLevelCount: d.mipLevelCount, dimension: '2d', sampleCount: 1 }, format: tex.format, views: new Map(), dirty: true };
+		trackTextureProxy(px);
 	}
 	if (px.dirty) {
 		endPass();
@@ -2736,9 +2743,11 @@ async function present(id) {
 	const t = objs.get(id);
 	if (t && canvasCtx) {
 		endPass();
-		// configure() reallocates the canvas's swap-chain textures: only on the first present and when the back buffer size changes (it ran every frame)
-		if (!canvasConfigured || canvas.width !== t.desc.size.width || canvas.height !== t.desc.size.height) {
-			canvas.width = t.desc.size.width; canvas.height = t.desc.size.height;
+		// Size setters replace the WebGPU drawing buffer themselves. Configure
+		// once, and avoid an additional swap-chain reset on every size change.
+		if (canvas.width !== t.desc.size.width) canvas.width = t.desc.size.width;
+		if (canvas.height !== t.desc.size.height) canvas.height = t.desc.size.height;
+		if (!canvasConfigured) {
 			canvasCtx.configure({ device, format: canvasFormat, alphaMode: 'opaque' });
 			canvasConfigured = true;
 		}
@@ -2857,6 +2866,7 @@ async function present(id) {
 			skippedDraws: skippedDraws - profileLast.skipped, newBindGroups: bgCreated - profileLast.bindGroups,
 			pipelinesPending, validationErrors: errorCount,
 			memory: { wasmCapacityBytes: mem.buffer.byteLength, textureBytes: texBytesAlive, bufferBytes: bufBytesAlive,
+				proxyTextureBytes: proxyTextureBytesAlive, proxyTextures: proxyTextureCount, proxyTexturesCreated, proxyTexturesDestroyed,
 				uniformRingBytes: ubo.shared.length * RING_CHUNK * FRAME_SLOTS, objectsAlive: objs.size, objectTableLength: objs.a.length, bindGroupCache: bindGroupCache.size } });
 		profileLast = { submits, pipelines: pipeCreates, skipped: skippedDraws, bindGroups: bgCreated };
 	}
@@ -2902,7 +2912,18 @@ async function runCommands(tail, head) {
 			if (o) {
 				if (o.inBG) gEpoch++;		// a cached bind group may hold a view of it
 				if (usedInEncoder.has(o)) flush('destroy');
-				if (o.tex) { o.tex.destroy(); texBytesAlive -= o.bytes || 0; texCount--; }
+				if (o.tex) {
+					// Resize and streaming must also release sampled depth/stencil copies.
+					// Cached bind groups retain their views; GC is not timely GPU cleanup.
+					for (const key of ['proxy_depth', 'proxy_stencil', 'proxy_fdepth']) {
+						const px = o[key];
+						if (!px) continue;
+						px.tex.destroy();
+						proxyTextureBytesAlive -= px.bytes; proxyTextureCount--; proxyTexturesDestroyed++;
+						px.views.clear(); px.passes = null; o[key] = null;
+					}
+					o.tex.destroy(); texBytesAlive -= o.bytes || 0; texCount--;
+				}
 				if (o.gpu) { if (o.arenaAllocation) geometryArena.retire(o.arenaAllocation); else o.gpu.destroy(); bufBytesAlive -= o.bytes || 0; }
 				objs.delete(u32[p]);
 			}

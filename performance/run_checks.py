@@ -9,7 +9,7 @@ root = Path(__file__).resolve().parent.parent
 node = os.environ.get('NODE_BINARY') or shutil.which('node')
 if not node:
     raise SystemExit('Node.js is required. Install it or set NODE_BINARY to its executable.')
-for test in ['test_geometry_arena.cjs', 'test_worker_buffers.cjs', 'test_renderer_cache.cjs',
+for test in ['test_geometry_arena.cjs', 'test_worker_buffers.cjs', 'test_renderer_cache.cjs', 'test_texture_lifetime.cjs', 'test_resize.cjs',
              'test_profiler.cjs', 'test_input.cjs', 'test_benchmark.cjs']:
     subprocess.run([node, str(root / 'performance' / test)], cwd=root, check=True)
 subprocess.run([sys.executable, str(root / 'performance/check_syntax.py')], cwd=root, check=True)

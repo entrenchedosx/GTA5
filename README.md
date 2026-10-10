@@ -50,6 +50,6 @@ On other operating systems, install the external data on Windows or copy an exis
 - **Missing data or a blank page:** complete `Download-Game.cmd`, then run `Verify-Game.cmd`.
 - **Port 8000 is occupied:** use the existing server or run `python serve_local.py --port 8001 --open` with your installed Python.
 - **WebGPU unavailable:** check browser hardware acceleration and WebGPU support.
+- **Fullscreen/windowed switches:** the game now keeps its desktop render resolution and fits the picture to the window, avoiding the compiled engine's resize crash. Borders preserve proportions when the window has a different shape. After updating, restart the local server and refresh the game; use Ctrl+Shift+R if an old page remains cached.
 - **Memory pressure:** test with a single game tab. The GTA VI scene still had active host paging after the allocation fix.
 - **Installer finds a differing asset:** use a new clone/destination or investigate the difference. It does not overwrite modified assets.
-

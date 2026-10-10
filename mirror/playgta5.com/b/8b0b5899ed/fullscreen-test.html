@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Fullscreen regression test</title>
+<style>
+  body { margin:0; background:#111; color:#fff; font:14px sans-serif; overflow:hidden; }
+  header { height:48px; display:flex; align-items:center; gap:8px; padding:0 8px; }
+  button,select { font:inherit; }
+  iframe { position:absolute; top:48px; left:0; width:100%; height:calc(100% - 48px); border:0; }
+  #status { margin-left:auto; white-space:pre; font:12px monospace; }
+</style>
+<header>
+  <select id="map" aria-label="Map"><option value="">GTA V</option><option value="env_test">GTA VI</option></select>
+  <button id="start">Start game</button>
+  <button id="full">Enter fullscreen</button>
+  <button id="window">Return to windowed</button>
+  <button id="cycles">Run 8 size changes</button>
+  <span id="status">Start a map; wait for gameplay before testing.</span>
+</header>
+<iframe id="game" title="Game under test" allow="fullscreen; cross-origin-isolated"></iframe>
+<pre id="resize-results" hidden></pre>
+<script>
+const frame = document.getElementById('game'), status = document.getElementById('status');
+const observations = [];
+let cycleTimer = null, cycleIndex = 0;
+document.getElementById('start').onclick = () => {
+  clearInterval(cycleTimer); cycleTimer = null; observations.length = 0;
+  frame.style.width = ''; frame.style.height = '';
+  frame.src = '/?mode=sandbox&low=0&profile=1&map=' + document.getElementById('map').value + '&revision=fullscreen-test-' + Date.now();
+};
+document.getElementById('full').onclick = () => document.documentElement.requestFullscreen().catch(e => { status.textContent = e.message; });
+document.getElementById('window').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); };
+document.getElementById('cycles').onclick = () => {
+  if (!frame.getAttribute('src') || cycleTimer) return;
+  cycleIndex = 0;
+  cycleTimer = setInterval(() => {
+    const size = cycleIndex % 2 ? [1280,720] : [1920,1080];
+    frame.style.width = size[0] + 'px'; frame.style.height = size[1] + 'px';
+    cycleIndex++;
+    if (cycleIndex === 8) { clearInterval(cycleTimer); cycleTimer = null; }
+  }, 2000);
+};
+setInterval(() => {
+  try {
+    const text = frame.contentDocument?.getElementById('performance-results')?.textContent;
+    if (!text) return;
+    const report = JSON.parse(text), gpu = report.gpu;
+    if (!gpu?.latest) return;
+    const label = frame.contentDocument.getElementById('label')?.textContent || '';
+    const row = { timeMs: performance.now(), fullscreen: !!document.fullscreenElement,
+      pageError: /game stopped|worker error/i.test(label) ? label : null,
+      viewport: [frame.clientWidth,frame.clientHeight], frame: gpu.latest.n,
+      resolution: gpu.latest.resolution, frameMs: gpu.latest.frameMs,
+      memory: gpu.latest.memory, gpuErrors: gpu.gpuErrors,
+      recent: { fps: gpu.recent.fps, frameMs: gpu.recent.frameMs, cpuMs: gpu.recent.cpuMs, gpuMs: gpu.recent.gpuMs },
+      worst: gpu.worstRecentFrames.slice(0,4).map(f => ({frame:f.n,ms:f.frameMs,cpuMs:f.cpuMs,idleMs:f.idleMs,resolution:f.resolution})),
+      errors: report.engineDiagnostics.filter(s => /abort|crash|device lost/i.test(s)).slice(-3) };
+    observations.push(row); if (observations.length > 120) observations.shift();
+    document.getElementById('resize-results').textContent = JSON.stringify(observations);
+    status.textContent = row.resolution.join('x') + ' | frame ' + row.frame + ' | GPU errors ' + row.gpuErrors;
+  } catch (e) { status.textContent = 'Waiting for game: ' + e.message; }
+}, 1000);
+</script>
+</html>

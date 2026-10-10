@@ -49,6 +49,10 @@ Profiling uses `profile=1`; `detail=1` additionally enables sampled hot-function
 
 The allocation fallback is `bufferArena=0`. Ordinary reloads use versioned loader/renderer URLs so earlier cached workers do not hide the current implementation.
 
+Fullscreen and window resizing fit a centered canvas while keeping the native render targets at their startup desktop resolution. This avoids a reproduced GTA VI WASM out-of-bounds crash in the native live-resize path. `res=WxH` still selects a render resolution; `scale` and the existing memory caps still apply. A different window aspect produces borders rather than stretching. Moving to a larger monitor keeps the startup render resolution until reload.
+
+Open `/b/8b0b5899ed/fullscreen-test.html` to load either real map and run eight alternating 1920x1080/1280x720 iframe viewport changes. It also has fullscreen/windowed buttons and records frame progress, render dimensions, errors and texture accounting. The browser may deny automated fullscreen entry; viewport changes exercise the same page resize path. `liveResize=1` retains the unsafe native resize path for diagnosis only; ordinary play does not use it. The GPU worker explicitly destroys auxiliary depth/stencil textures with their parent. Editable HTML/JS responses from the local server revalidate their cache.
+
 ## Evidence and historical utilities
 
 The published `performance/benchmark-summary.json` retains measured phase statistics, workload counts, limitations and sanitized memory snapshots. Full JSON captures, scene PNGs and original-source backups remain local and are ignored. The performance reports distinguish observations from an isolated speedup claim.

@@ -20,7 +20,7 @@ class Scripts(HTMLParser):
 count=0
 for name in ['loader.js','io_worker.js','wgpu_worker.js','performance-profiler.js','performance-page.js','geometry-buffer-arena.js']:
     subprocess.run([str(node),'--check',str(build/name)],check=True); count+=1
-for page in [Path('mirror/playgta5.com/index.html'),build/'geometry-arena-test.html']:
+for page in [Path('mirror/playgta5.com/index.html'),build/'geometry-arena-test.html',build/'fullscreen-test.html']:
     parser=Scripts(); parser.feed(page.read_text(encoding='utf-8'))
     for i,script in enumerate(parser.scripts):
         temporary=Path('performance')/f'.syntax-{page.stem}-{i}.mjs'

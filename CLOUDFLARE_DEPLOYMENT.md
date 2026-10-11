@@ -66,7 +66,9 @@ used four. Shader-cache reuse increased from one to 19 Resource Timing hits,
 with reported GPU-worker resource transfers dropping from 71,918,592 to 4,948
 bytes on the final reload. Public range/batch/conditional/isolation byte checks
 passed; the immutable index returned `MISS` then `HIT`. Main-entry verification
-and the final repository commit are recorded in PERFORMANCE_RESULTS.md.
+is recorded in PERFORMANCE_RESULTS.md. Source implementation commit
+`ef0e9059df8a3c6cde448bf0d40ddc15585b9b82` passed GitHub's Windows and Linux
+checks before this documentation follow-up.
 
 ## Captured rollback point
 

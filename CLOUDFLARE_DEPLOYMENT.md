@@ -102,26 +102,42 @@ and record Resource Timing bytes separately. Other thread script loads are not
 fully covered. Cold OPFS tests are distinct from cold HTTP cache; existing
 engine/shader HTTP cache may be warm. Request reduction does not imply FPS gains.
 
-## Radio station release status
+## Radio station release
 
-The local source adds the page radio control, player, and two original SVG
-logos. Both supplied MP3s were tested in a temporary ignored local stage, then
-removed from that stage; the original Downloads files are unchanged. No radio
-MP3, logo, new runtime, or main HTML was uploaded to production for this
-feature. The live game therefore remains on its previous version.
+The maintainer confirmed public streaming rights for both recordings on 11
+October 2026. The page radio panel, its two original SVG logos, and the two
+MP3s are live on both existing domains. Worker version
+`d241cb89-efe1-4b56-9b8c-39fa38e1ab28` is deployed at 100%; the existing `ASSETS`
+binding and routes are unchanged.
 
-Public streaming rights for the two recordings have not been established. Do
-not run the radio production upload until those rights are confirmed. The
-expected hash-addressed R2 objects, if cleared, are:
+The release published 16 new content-addressed objects and replaced only
+`site/index.html`: 17 planned paths / 4,060,759 bytes total. The page was
+published last. No original game data, WASM, shader, or RPF object was uploaded
+or replaced. The two MP3s total 3,589,431 bytes (about 3.42 MiB) and are outside
+Git. The precise account cost depends on the current R2 allowance and usage.
 
-- `site/radio/cachalot-onda-andar.b456927b52fe308b.svg`
-- `site/radio/type-london-onda-andar.09d74e5eda7c3d2a.svg`
-- `site/radio/audio/cachalot-onda-andar.69de7494e1a3419f.mp3`
-- `site/radio/audio/type-london-onda-andar.ab70604f1e86cefb.mp3`
+Live production verification fetched every planned path from
+`gta.ezgames.lol`; all 17 returned HTTP 200. Runtime, artwork, and audio bodies
+matched the planned SHA-256 hashes. Audio returned `audio/mpeg`; SVGs returned
+`image/svg+xml`; hash-addressed objects returned a one-year immutable cache
+policy. The main page is `no-cache` and references the new content-addressed
+runtime. Browser-component tests had already verified station switching,
+pause/resume, disposal, error handling, and the compact layout.
 
-The two local recordings total 3,589,431 bytes (about 3.42 MiB); this release
-has added no storage or hosting cost. The precise account cost after upload
-depends on current R2 allowance and usage. The browser radio panel is a
-page-level player: the supplied compiled engine does not expose its vehicle
-radio station list or a music-only mixer control, so its original audio mix
-continues underneath the browser player.
+The panel remains a page-level player that plays alongside the engine's original
+mix. The compiled engine has internal native radio code, but its browser-facing
+exports expose no station registration/selection API, and the checkout contains
+no native engine source or build system. Therefore these tracks are not in the
+vehicle radio wheel. Doing that safely requires compatible engine source/build
+support or a documented station API; the page-level player cannot add native
+wheel entries.
+
+For radio-only rollback, the previous Worker version was
+`2140b2d0-721e-44dd-8c8f-a04ecbe83375` (deployment
+`4ad4791b-818f-474b-ab97-a6331d31a6a5`). The exact previous entry HTML from
+`ffd53b0` is preserved locally in ignored
+`.downloads/radio-rollback/site/index.html` (35,096 bytes, SHA-256
+`180c0579d51506b0feaa9cb51fb67d7802d638d794b1989ddf8fd96dd0c8a1dd`). Restore
+that file through `cloudflare/publish.py`, then roll the Worker back to the
+version above. This restores the pre-radio page/runtime; immutable radio assets
+can remain in the private bucket.

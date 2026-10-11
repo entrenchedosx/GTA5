@@ -8,39 +8,46 @@ position, pauses it when switching, and pauses the active stream when the page c
 Station selection requires a click, so it does not autoplay. Volume is exposed
 in the panel.
 
-The existing engine in this checkout is a compiled WebAssembly binary; its
-native radio wheel and station list are not in the supplied source. The web
-player therefore runs as a page overlay alongside the engine's existing audio
-mix. It does not claim to replace the built-in vehicle-radio station or isolate
-game music from sound effects. Replacing that internal station requires the
-engine's native radio/mixer source or a published engine control for it.
+The existing engine in this checkout is a compiled WebAssembly binary. Static
+inspection found no browser API for registering or selecting native stations;
+the page receives the engine's mixed audio ring but cannot change its station
+list. The web player therefore runs as a page overlay alongside the engine's
+existing audio mix. It does not replace the built-in vehicle-radio station or
+isolate game music from sound effects. Putting tracks in the in-game radio wheel
+requires compatible native engine source/build support or a documented station
+control API, neither of which is present in this checkout.
 
 The original local source files map as follows:
 
-| Station | Local source filename | Public object name after rights clearance |
+| Station | Local source filename | Live public object |
 |---|---|---|
-| CACHALOT — ONDA ANDAR | `cachalot #2016 [prod. onda andar].mp3` | `cachalot-onda-andar.<content-hash>.mp3` |
-| TYPE LONDON — ONDA ANDAR | `ONDA ANDAR – type london.mp3` | `type-london-onda-andar.<content-hash>.mp3` |
+| CACHALOT — ONDA ANDAR | `cachalot #2016 [prod. onda andar].mp3` | `/radio/audio/cachalot-onda-andar.69de7494e1a3419f.mp3` |
+| TYPE LONDON — ONDA ANDAR | `ONDA ANDAR – type london.mp3` | `/radio/audio/type-london-onda-andar.ab70604f1e86cefb.mp3` |
 
 Both original filenames are retained in the staging mapping in
-`cloudflare/prepare_site.py`. Audio files are not included in Git or copied into
-the published site unless they are explicitly passed with `--audio-dir`.
-Distribution rights for both recordings must be confirmed before that audio
-upload or main-page deployment. Local test audio is copied only into ignored
-temporary storage; the originals in Downloads remain unchanged.
+`cloudflare/prepare_site.py`. The maintainer confirmed public streaming rights
+for both recordings on 11 October 2026. The recordings remain outside Git; the
+original files in Downloads were left unchanged.
 
-To stage the two licensed source files after confirming streaming rights, run:
+To stage the two licensed source files for a later release, run:
 
 ```powershell
 python cloudflare/prepare_site.py --audio-dir "$env:USERPROFILE\Downloads" --output .downloads/radio-release
 ```
 
 Review the generated immutable names and upload plan before using the existing
-Cloudflare deployment helper. The content-hashed MP3 paths return
+Cloudflare deployment helper. The live content-hashed MP3 paths return
 `audio/mpeg`, same-origin isolation headers and immutable cache policy. The
 asset requests occur only after a player selection. The additional audio
 storage is 3,589,431 bytes (about 3.42 MiB) for the two local files; actual
 monthly cost depends on the current account's R2 allowance and use.
+
+The release is live on `gta.ezgames.lol` and `gta.kerncode.art`. Cloudflare
+Worker version `d241cb89-efe1-4b56-9b8c-39fa38e1ab28` is deployed at 100%.
+Production verification on 11 October 2026 fetched all 17 changed paths; each
+new runtime, logo, and MP3 matched its planned SHA-256, and both MP3s returned
+`audio/mpeg` with a one-year immutable cache policy. The entry page was
+published last, after its hashed runtime and radio objects.
 
 Original station artwork is in `mirror/playgta5.com/radio/`. No external fonts,
 images or music APIs are used.

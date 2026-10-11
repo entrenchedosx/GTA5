@@ -42,12 +42,13 @@ asset requests occur only after a player selection. The additional audio
 storage is 3,589,431 bytes (about 3.42 MiB) for the two local files; actual
 monthly cost depends on the current account's R2 allowance and use.
 
-The release is live on `gta.ezgames.lol` and `gta.kerncode.art`. Cloudflare
-Worker version `d241cb89-efe1-4b56-9b8c-39fa38e1ab28` is deployed at 100%.
-Production verification on 11 October 2026 fetched all 17 changed paths; each
-new runtime, logo, and MP3 matched its planned SHA-256, and both MP3s returned
-`audio/mpeg` with a one-year immutable cache policy. The entry page was
-published last, after its hashed runtime and radio objects.
+The release is live on `gta.ezgames.lol`. Cloudflare Worker version
+`d241cb89-efe1-4b56-9b8c-39fa38e1ab28` is deployed at 100%. Production
+verification on 11 October 2026 fetched all 17 changed paths; each new runtime,
+logo, and MP3 matched its planned SHA-256, and both MP3s returned `audio/mpeg`
+with a one-year immutable cache policy. The entry page was published last,
+after its hashed runtime and radio objects. `gta.kerncode.art` did not resolve
+from the test environment, so its public availability was not verified.
 
 Original station artwork is in `mirror/playgta5.com/radio/`. No external fonts,
 images or music APIs are used.

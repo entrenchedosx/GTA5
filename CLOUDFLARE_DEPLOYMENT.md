@@ -106,7 +106,7 @@ engine/shader HTTP cache may be warm. Request reduction does not imply FPS gains
 
 The maintainer confirmed public streaming rights for both recordings on 11
 October 2026. The page radio panel, its two original SVG logos, and the two
-MP3s are live on both existing domains. Worker version
+MP3s are live on `gta.ezgames.lol`. Worker version
 `d241cb89-efe1-4b56-9b8c-39fa38e1ab28` is deployed at 100%; the existing `ASSETS`
 binding and routes are unchanged.
 
@@ -122,7 +122,9 @@ matched the planned SHA-256 hashes. Audio returned `audio/mpeg`; SVGs returned
 `image/svg+xml`; hash-addressed objects returned a one-year immutable cache
 policy. The main page is `no-cache` and references the new content-addressed
 runtime. Browser-component tests had already verified station switching,
-pause/resume, disposal, error handling, and the compact layout.
+pause/resume, disposal, error handling, and the compact layout. The other
+configured domain, `gta.kerncode.art`, did not resolve from the test environment
+and its public availability was not verified.
 
 The panel remains a page-level player that plays alongside the engine's original
 mix. The compiled engine has internal native radio code, but its browser-facing

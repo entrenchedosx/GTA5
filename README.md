@@ -6,6 +6,8 @@ An existing browser game with GTA V and GTA VI (`env_test`) maps, a WebAssembly 
 
 Play the hosted build at [gta.ezgames.lol](https://gta.ezgames.lol/). It uses the existing Cloudflare Worker and private R2 bucket. The delivery layer combines recorded startup reads into 77 bounded downloads at normal graphics, and fetches measured map-region packs only on demand. The local disk cache reuses those original file blocks across visits; gameplay settings and asset contents are preserved. The full launch includes requests outside those 77 startup packs.
 
+The source includes an optional two-station browser radio panel with original SVG artwork. It loads only when opened and fetches each MP3 only after station selection. The two local recordings are not in Git. Public playback is held until redistribution rights are confirmed. See [station mapping, local setup and distribution limits](RADIO_STATIONS.md). The compiled game engine's own vehicle-radio wheel is outside the available source.
+
 Cloudflare cache hits still count as requests. Bundling and avoiding browser fetches through the local cache reduce request count; edge caching mainly reduces origin work. See [delivery results](PERFORMANCE_RESULTS.md) and [deployment/rollback](CLOUDFLARE_DEPLOYMENT.md).
 
 ## Run locally on Windows

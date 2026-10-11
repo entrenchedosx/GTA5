@@ -1,6 +1,6 @@
 // Read-only delivery from the existing private R2 bucket. No upload/admin route.
 const MAX_BATCH_BODY = 1048576, MAX_BATCH_RUNS = 1000, MAX_BATCH_TOTAL = 64 * 1048576;
-const MIME = { html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8', mjs: 'text/javascript; charset=utf-8', wasm: 'application/wasm', json: 'application/json', wgsl: 'text/plain; charset=utf-8', css: 'text/css; charset=utf-8', png: 'image/png', webp: 'image/webp', ico: 'image/x-icon', woff: 'font/woff', woff2: 'font/woff2', txt: 'text/plain; charset=utf-8', xml: 'application/xml', csv: 'text/csv' };
+const MIME = { html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8', mjs: 'text/javascript; charset=utf-8', wasm: 'application/wasm', json: 'application/json', wgsl: 'text/plain; charset=utf-8', css: 'text/css; charset=utf-8', png: 'image/png', webp: 'image/webp', svg: 'image/svg+xml', mp3: 'audio/mpeg', ico: 'image/x-icon', woff: 'font/woff', woff2: 'font/woff2', txt: 'text/plain; charset=utf-8', xml: 'application/xml', csv: 'text/csv' };
 const isolation = { 'Cross-Origin-Opener-Policy': 'same-origin', 'Cross-Origin-Embedder-Policy': 'require-corp', 'Cross-Origin-Resource-Policy': 'same-origin', 'Accept-Ranges': 'bytes' };
 function error(status, message, extra = {}) {
   return new Response(message ? message + '\n' : null, { status, headers: { ...isolation, 'Cache-Control': 'no-store', 'Content-Type': 'text/plain', ...extra } });
@@ -11,7 +11,7 @@ function safeName(name) {
   return name;
 }
 function immutable(path) {
-  return /^\/data\/packs\/(?:index-)?[a-f0-9]{64}\.(?:bin|json)$/.test(path) || /^\/runtime\/[a-f0-9]{64}\/[a-zA-Z0-9_.-]+\.js$/.test(path) || /^\/data\/batchc\/[a-f0-9]{40}\.bin$/.test(path) || /^\/b\/[a-f0-9]+\/shaders\/pack\d+\.[a-f0-9]{8}\.bin$/.test(path);
+  return /^\/data\/packs\/(?:index-)?[a-f0-9]{64}\.(?:bin|json)$/.test(path) || /^\/runtime\/[a-f0-9]{64}\/[a-zA-Z0-9_.-]+\.js$/.test(path) || /^\/data\/batchc\/[a-f0-9]{40}\.bin$/.test(path) || /^\/b\/[a-f0-9]+\/shaders\/pack\d+\.[a-f0-9]{8}\.bin$/.test(path) || /^\/radio\/(?:audio\/)?[a-z0-9-]+\.[a-f0-9]{16}\.(?:mp3|svg)$/.test(path);
 }
 function policy(path) { return immutable(path) ? 'public, max-age=31536000, immutable, no-transform' : 'no-cache'; }
 function headersFor(obj, path, type) {

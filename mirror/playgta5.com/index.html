@@ -19,6 +19,11 @@
 	#data { color: #6a9; font-variant-numeric: tabular-nums; }
 	#hud { position: fixed; left: 8px; bottom: 8px; max-width: 60vw; white-space: pre-wrap; opacity: .8; pointer-events: none; }
 	#fps { position: fixed; left: 8px; top: 6px; display: none; color: #0f0; font: bold 18px/1.2 Consolas, monospace; font-variant-numeric: tabular-nums; text-shadow: 1px 1px 2px #000, 0 0 3px #000; pointer-events: none; z-index: 10; }
+	#radio-shell { position: fixed; top: 12px; right: 12px; z-index: 15; font: 12px/1.4 system-ui, sans-serif; color: #f3efe7; }
+	#radio-shell[hidden], #radio-panel[hidden] { display: none; }
+	#radio-launcher, .web-radio button { color: inherit; font: inherit; cursor: pointer; }
+	#radio-launcher { padding: 8px 13px; border: 1px solid #82765f; border-radius: 6px; background: rgba(16,17,17,.94); box-shadow: 0 3px 14px #0009; font-weight: 800; letter-spacing: .09em; }
+	#radio-launcher:hover, #radio-launcher:focus-visible { border-color: #f0bd64; }
 </style>
 </head>
 <body>
@@ -26,6 +31,7 @@
 <div id="hud"></div>
 <div id="loading"><div id="modes" aria-label="Game mode"><button data-act="back"></button><button data-act="map5"></button><button data-act="map6"></button><button data-act="sandbox"></button><button data-act="story"></button></div><div id="label" role="status" aria-live="polite">Starting...</div><div id="data"></div></div>
 <div id="fps"></div>
+<div id="radio-shell" hidden><button id="radio-launcher" type="button" aria-expanded="false" aria-controls="radio-panel">RADIO</button><div id="radio-panel" hidden></div></div>
 <script type="module">
 // Page of the browser build. The engine runs in a dedicated worker (loader.js: its "main thread", where the static constructors and
 // main() run and which may block); the page only owns the canvas, which is transferred to that worker and on to the GPU worker.
@@ -35,6 +41,20 @@ const q = new URLSearchParams(location.search);
 // text `/b/8b0b5899ed` through str_replace to `/b/<build id>`, so those files are cached for ever under URLs that change when the build does.
 const BASE = '/b/8b0b5899ed'.charAt(0) === '_' ? '' : '/b/8b0b5899ed';
 const RUNTIME = BASE; // prepare_site.py substitutes a content-addressed runtime.
+const radioShell = document.getElementById('radio-shell'), radioLauncher = document.getElementById('radio-launcher'), radioPanel = document.getElementById('radio-panel');
+let radioController = null, radioModule = null;
+radioLauncher.addEventListener('click', async () => {
+	try {
+		if (!radioModule) radioModule = await import(RUNTIME + '/web-radio.js');
+		if (!radioController) radioController = radioModule.mountRadio(radioPanel, { onStation: ({ status, station }) => { radioLauncher.textContent = status === 'playing' && station ? 'RADIO · ' + station.name : 'RADIO'; }, onVisibility: open => radioLauncher.setAttribute('aria-expanded', String(open)) });
+		const opening = radioPanel.hidden;
+		if (opening) radioController.open(); else radioController.close();
+		radioLauncher.setAttribute('aria-expanded', String(opening));
+	} catch (error) {
+		radioLauncher.textContent = 'RADIO UNAVAILABLE';
+		radioLauncher.title = 'Could not load the radio controls: ' + String(error?.message || error);
+	}
+});
 if (q.get('deliveryAudit') === '1') await import(RUNTIME + '/delivery-page.js');
 if (q.get('profile') === '1') await import(RUNTIME + '/performance-page.js?revision=' + encodeURIComponent(q.get('revision') || '1'));
 // ?log=1: the page, the engine threads and the workers send their log lines to the dev server (browser.log, browser_<ip>.log); off by default: the player's upload
@@ -103,7 +123,7 @@ const act = (a) => {
 };
 modesEl.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b && !b.hidden) act(b.dataset.act); });
 addEventListener('keydown', (e) => {
-	if (startCommitted || e.ctrlKey || e.altKey || e.metaKey || !document.getElementById('loading')) return;
+	if (startCommitted || e.target?.closest?.('#radio-shell') || e.ctrlKey || e.altKey || e.metaKey || !document.getElementById('loading')) return;
 	const b = modeButtons.find((x) => !x.hidden && ACTS[x.dataset.act][2].includes(e.code));
 	if (!b) return;
 	act(b.dataset.act);
@@ -151,6 +171,7 @@ const hud = document.getElementById('hud');
 		if (m.compiling !== undefined && !waitingChoice && !failed) label.textContent = lastLabel = 'Preparing shaders';
 		if (m.world) {
 			ready = true; clearInterval(stallTimer); loading.remove();
+			radioShell.hidden = false;
 			hud.textContent = 'click the game to capture the mouse (Esc releases it, Shift+P switches keyboard mode, = shows FPS)';
 			setTimeout(() => { if (hud.textContent.startsWith('click the game')) hud.textContent = ''; }, 15000);
 		}
@@ -417,7 +438,7 @@ function installInput(memory, block) {
 	let benchmarkInputLocked = q.get('profile') === '1' && q.get('autoBenchmark') === '1';
 	const syncFlyAlias = () => { for (const [src, target] of Object.entries(FLY_ALIAS)) Atomics.store(keys, VK[target], held.has(src) || held.has(target) ? 0x80 : 0); };
 	addEventListener('keydown', (e) => {
-		if (passThrough(e)) return;
+		if (passThrough(e) || e.target?.closest?.('#radio-shell')) return;
 		if (benchmarkInputLocked) return;
 		e.preventDefault();
 		const vk = VK[e.code];

@@ -101,3 +101,27 @@ browser Network trace. Opt-in diagnostics count IO/GPU/loader fetch attempts
 and record Resource Timing bytes separately. Other thread script loads are not
 fully covered. Cold OPFS tests are distinct from cold HTTP cache; existing
 engine/shader HTTP cache may be warm. Request reduction does not imply FPS gains.
+
+## Radio station release status
+
+The local source adds the page radio control, player, and two original SVG
+logos. Both supplied MP3s were tested in a temporary ignored local stage, then
+removed from that stage; the original Downloads files are unchanged. No radio
+MP3, logo, new runtime, or main HTML was uploaded to production for this
+feature. The live game therefore remains on its previous version.
+
+Public streaming rights for the two recordings have not been established. Do
+not run the radio production upload until those rights are confirmed. The
+expected hash-addressed R2 objects, if cleared, are:
+
+- `site/radio/cachalot-onda-andar.b456927b52fe308b.svg`
+- `site/radio/type-london-onda-andar.09d74e5eda7c3d2a.svg`
+- `site/radio/audio/cachalot-onda-andar.69de7494e1a3419f.mp3`
+- `site/radio/audio/type-london-onda-andar.ab70604f1e86cefb.mp3`
+
+The two local recordings total 3,589,431 bytes (about 3.42 MiB); this release
+has added no storage or hosting cost. The precise account cost after upload
+depends on current R2 allowance and usage. The browser radio panel is a
+page-level player: the supplied compiled engine does not expose its vehicle
+radio station list or a music-only mixer control, so its original audio mix
+continues underneath the browser player.

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 240" role="img" aria-labelledby="title desc">
+  <title id="title">Cachalot — Onda Andar</title>
+  <desc id="desc">A bold black and amber radio mark with an original whale and sound-wave symbol.</desc>
+  <rect width="480" height="240" rx="18" fill="#131515"/>
+  <path d="M27 24h426v192H27z" fill="none" stroke="#efad4b" stroke-width="3"/>
+  <path d="M56 116c17-22 34-33 57-33 21 0 37 11 52 29l18-12 1 19-20 19c-13 14-30 22-50 22-22 0-40-10-58-31l-19 13 2-22 17-4Zm58-20 13-26 21 26m-54 27h49" fill="#efad4b" stroke="#efad4b" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"/>
+  <path d="M57 186h140m-126 10h119" stroke="#cf6f37" stroke-width="4"/>
+  <text x="202" y="112" fill="#f4efe4" font-family="Arial,sans-serif" font-size="38" font-weight="900" letter-spacing="1">CACHALOT</text>
+  <text x="204" y="153" fill="#efad4b" font-family="Arial,sans-serif" font-size="20" font-weight="700" letter-spacing="5">ONDA ANDAR</text>
+  <text x="204" y="184" fill="#b8b4ab" font-family="Arial,sans-serif" font-size="10" letter-spacing="3">FIELD FREQUENCY  /  016</text>
+</svg>

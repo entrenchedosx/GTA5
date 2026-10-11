@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 240" role="img" aria-labelledby="title desc">
+  <title id="title">Type London — Onda Andar</title>
+  <desc id="desc">An original violet and pale-pink type identity inspired by London street music and letterpress.</desc>
+  <rect width="480" height="240" rx="18" fill="#20182a"/>
+  <path d="M27 24h426v192H27z" fill="none" stroke="#d2a8d4" stroke-width="3"/>
+  <path d="M54 64h110v110H54z" fill="#d2a8d4"/>
+  <path d="M67 80h84v16H67zm34 0h16v78h-16zm-34 62h84v16H67z" fill="#342039"/>
+  <path d="M182 57v128m13-128v128m13-128v128m13-128v128m13-128v128" stroke="#885b8d" stroke-width="3" opacity=".6"/>
+  <text x="254" y="100" fill="#fff3e9" font-family="Arial,sans-serif" font-size="32" font-weight="900" letter-spacing="2">TYPE</text>
+  <text x="254" y="135" fill="#d2a8d4" font-family="Arial,sans-serif" font-size="27" font-weight="800" letter-spacing="1">LONDON</text>
+  <text x="255" y="169" fill="#fff3e9" font-family="Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="4">ONDA ANDAR</text>
+  <text x="255" y="193" fill="#bba9bd" font-family="Arial,sans-serif" font-size="10" letter-spacing="3">NIGHT TRANSMISSION</text>
+</svg>

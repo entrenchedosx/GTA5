@@ -134,8 +134,9 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
   const html = fs.readFileSync(path.join(root,'mirror/playgta5.com/index.html'),'utf8');
   assert.ok(!/title\/art|ls-screens|ls-stage|@font-face|stopTitle|id="bar"/.test(html),'artwork, title animation and artificial progress bar are removed');
   const elements = Object.fromEntries(['hud','loading','label','data'].map(id=>[id,{textContent:'',style:{},remove(){this.removed=true;}}]));
+  const radioShell={hidden:true};
   let receive, watchdog, now=0;
-  const statusScope = {document:{getElementById:id=>elements[id]},
+  const statusScope = {radioShell,document:{getElementById:id=>id==='radio-shell'?radioShell:elements[id]},
     performance:{now:()=>now}, setInterval(fn){watchdog=fn;return 1;},clearInterval(){},setTimeout(){},
     BroadcastChannel:class {set onmessage(fn){receive=fn;}},
     waitingChoice:false,startMode:3,startCommitted:false,pickingMap:false,modesEl:{classList:{add(){}}},showModes(){},
@@ -151,6 +152,6 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
   receive({data:{error:'Missing game data'}}); receive({data:{label:'First frame'}});
   receive({data:{error:'Secondary error while stopping workers'}}); watchdog();
   assert.equal(elements.label.textContent,'Missing game data','later progress cannot overwrite an error');
-  receive({data:{world:true}}); assert.equal(elements.loading.removed,true,'startup controls leave immediately when the world is ready');
+  receive({data:{world:true}}); assert.equal(elements.loading.removed,true,'startup controls leave immediately when the world is ready'); assert.equal(radioShell.hidden,false,'radio control appears when gameplay is ready');
   console.log('PASS: cached startup progress, failed/timed-out manifests, cache lock cleanup, worker readiness/errors, and removal of title overlay');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>clearTimeout(guard));

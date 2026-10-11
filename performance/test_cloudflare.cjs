@@ -30,6 +30,8 @@ const path = require('node:path');
   res=await request('/data/%00x');assert.equal(res.status,400);
   res=await request('/data/batchc/'+'a'.repeat(40)+'.bin');assert.equal(res.status,200);assert.equal(res.headers.get('Content-Encoding'),null);assert.match(res.headers.get('Cache-Control'),/immutable/);
   res=await request('/data/packs/'+'b'.repeat(64)+'.bin');assert.match(res.headers.get('Cache-Control'),/immutable/);
+  res=await request('/radio/audio/cachalot-onda-andar.69de7494e1a3419f.mp3');assert.equal(res.headers.get('Content-Type'),'audio/mpeg');assert.match(res.headers.get('Cache-Control'),/immutable/);
+  res=await request('/radio/cachalot-onda-andar.b456927b52fe308b.svg');assert.equal(res.headers.get('Content-Type'),'image/svg+xml');assert.match(res.headers.get('Cache-Control'),/immutable/);
   res=await request('/data/manifest.json?v=1');assert.doesNotMatch(res.headers.get('Cache-Control'),/immutable/);
   heads=gets=0;
   res=await request('/data/batch',{method:'POST',body:JSON.stringify([['test.rpf',2,5],['test.rpf',8,99]])});

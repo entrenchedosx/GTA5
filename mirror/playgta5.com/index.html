@@ -17,6 +17,12 @@
 	#label, #data { text-shadow: 0 1px 3px #000; }
 	#label { max-width: 80ch; }
 	#data { color: #6a9; font-variant-numeric: tabular-nums; }
+	#startup-help { position: fixed; left: 12px; bottom: 12px; z-index: 20; max-width: min(520px, calc(100vw - 56px)); padding: 16px; background: #171a1e; border: 1px solid #535c67; border-radius: 8px; font: 14px/1.5 system-ui, sans-serif; }
+	#startup-help[hidden] { display: none; }
+	#startup-help p { margin: 0 0 10px; }
+	#startup-help ol { padding-left: 22px; }
+	#startup-help a { color: #a9d2ff; }
+	#startup-help button { padding: 7px 12px; color: #fff; background: #303b48; border: 1px solid #75879b; border-radius: 4px; cursor: pointer; font: inherit; }
 	#hud { position: fixed; left: 8px; bottom: 8px; max-width: 60vw; white-space: pre-wrap; opacity: .8; pointer-events: none; }
 	#fps { position: fixed; left: 8px; top: 6px; display: none; color: #0f0; font: bold 18px/1.2 Consolas, monospace; font-variant-numeric: tabular-nums; text-shadow: 1px 1px 2px #000, 0 0 3px #000; pointer-events: none; z-index: 10; }
 	#radio-shell { position: fixed; top: 12px; right: 12px; z-index: 15; font: 12px/1.4 system-ui, sans-serif; color: #f3efe7; }
@@ -31,6 +37,7 @@
 <div id="hud"></div>
 <div id="loading"><div id="modes" aria-label="Game mode"><button data-act="back"></button><button data-act="map5"></button><button data-act="map6"></button><button data-act="sandbox"></button><button data-act="story"></button></div><div id="label" role="status" aria-live="polite">Starting...</div><div id="data"></div></div>
 <div id="fps"></div>
+<div id="startup-help" role="alert" hidden><p id="startup-error"></p><p id="startup-reason"></p><ol><li>Open the game in an up-to-date desktop Chrome or Edge browser.</li><li>Turn on “Use graphics acceleration when available” in your browser’s System settings, then restart the browser.</li><li>Update your graphics driver and close other games or busy tabs before trying again.</li></ol><p><a href="https://developer.chrome.com/docs/web-platform/webgpu/troubleshooting-tips" target="_blank" rel="noopener noreferrer">Browser graphics troubleshooting</a></p><button id="startup-retry" type="button">Reload and try again</button></div>
 <div id="radio-shell" hidden><button id="radio-launcher" type="button" aria-expanded="false" aria-controls="radio-panel">RADIO</button><div id="radio-panel" hidden></div></div>
 <script type="module">
 // Page of the browser build. The engine runs in a dedicated worker (loader.js: its "main thread", where the static constructors and
@@ -133,6 +140,8 @@ showModes();
 // Startup status reports real work, including cache reads. It never covers the
 // canvas or holds a finished world behind artwork or an artificial progress bar.
 const hud = document.getElementById('hud');
+let gameWorker = null, fineTick = null, startupFailed = false;
+document.getElementById('startup-retry').addEventListener('click', () => location.reload());
 {
 	const loading = document.getElementById('loading'), label = document.getElementById('label'), dataEl = document.getElementById('data');
 	let ready = false, failed = false, lastLabel = 'Starting...', lastActivity = performance.now();
@@ -149,17 +158,26 @@ const hud = document.getElementById('hud');
 	}, 2000);
 	bc.onmessage = (ev) => {
 		const m = ev.data;
-		if (m.gpuLost) { hud.textContent = 'The graphics device was lost (' + m.gpuLost + '). Reload the page.'; hud.style.color = '#f66'; }
-		if (ready) return;
+		if (failed) return;
 		// Repeated diagnostic log lines are not evidence of startup progress.
 		if (m.lines) return;
 		if (m.error || m.gpuLost) {
-			if (failed) return;
-			failed = true; clearInterval(stallTimer);
+			failed = startupFailed = true; clearInterval(stallTimer); clearInterval(fineTick);
+			// Terminating the owner also stops its nested engine/GPU/IO workers.
+			try { new BroadcastChannel('game-io').postMessage('close'); } catch (e) {}
+			if (gameWorker) { gameWorker.terminate(); gameWorker = null; }
 			label.textContent = m.error || 'Graphics device lost: ' + m.gpuLost;
 			label.style.color = '#e66';
+			modesEl.hidden = true;
+			if (m.graphicsCode || m.gpuLost) {
+				const help = document.getElementById('startup-help');
+				document.getElementById('startup-error').textContent = label.textContent;
+				document.getElementById('startup-reason').textContent = m.graphicsCode === 'formats' ? 'This game needs a graphics adapter with BC texture support. Try another compatible computer.' : 'The game requires WebGPU. Downloads have stopped; your cached game data is kept.';
+				help.hidden = false; loading.hidden = true; radioShell.hidden = true;
+			}
 			return;
 		}
+		if (ready) return;
 		lastActivity = performance.now();
 		if (m.dl) { networkBytes += m.dl; renderData(); }
 		if (m.read) { readBytes += m.read; renderData(); }
@@ -231,7 +249,9 @@ function fitGameCanvas() {
 }
 addEventListener('resize', fitGameCanvas);
 document.addEventListener('fullscreenchange', fitGameCanvas);
-if (!crossOriginIsolated) { new BroadcastChannel('game-progress').postMessage({ error: 'Browser isolation is unavailable. Open the game through Launch-Local.cmd and keep the local server running.' }); }
+if (!isSecureContext) { new BroadcastChannel('game-progress').postMessage({ error: 'Open the game over HTTPS, or use Launch-Local.cmd on this computer.', graphicsCode: 'secure-context' }); }
+else if (!crossOriginIsolated || typeof SharedArrayBuffer === 'undefined') { new BroadcastChannel('game-progress').postMessage({ error: 'Browser isolation is unavailable. Reload the HTTPS game page, or use Launch-Local.cmd for a local copy.', graphicsCode: 'isolation' }); }
+else if (!navigator.gpu || typeof canvas.transferControlToOffscreen !== 'function') { new BroadcastChannel('game-progress').postMessage({ error: 'This browser does not provide the graphics features this game needs.', graphicsCode: 'api' }); }
 else {
 	const offscreen = canvas.transferControlToOffscreen();
 	await dropOldCache();
@@ -275,8 +295,8 @@ const ENGINE_ARGS = ['-fastscriptcore'];
 // timer tick, 15.6 ms, unless the renderer process has a timer below 16 ms pending, which switches the process to a fine tick (measured: a 1 ms wait takes 15.5 ms; with
 // this timer 2.1 ms, a 4 ms wait 5.0 ms). The game has no such timer, so every short sleep cost a whole tick: the limiter held a 60 fps cap to 37 fps and the visibility
 // wait added 15 ms to a frame. An empty callback; nothing else on this thread runs while the game plays.
-setInterval(() => {}, 1);
-const worker = new Worker(RUNTIME + '/loader.js?runtime=delivery-1' + (q.get('deliveryAudit') === '1' ? '&deliveryAudit=1&role=loader' : '') + (q.get('profile') === '1' ? '&profile=1&revision=' + encodeURIComponent(q.get('revision') || '1') : ''));
+fineTick = setInterval(() => {}, 1);
+const worker = gameWorker = new Worker(RUNTIME + '/loader.js?runtime=delivery-1' + (q.get('deliveryAudit') === '1' ? '&deliveryAudit=1&role=loader' : '') + (q.get('profile') === '1' ? '&profile=1&revision=' + encodeURIComponent(q.get('revision') || '1') : ''));
 	worker.onmessage = (ev) => {
 		if (ev.data.hud) hud.textContent = ev.data.hud;
 		if (ev.data.input) installInput(ev.data.input.memory, ev.data.input.block);

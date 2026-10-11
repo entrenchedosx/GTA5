@@ -36,7 +36,7 @@ function ioSetup(fetcher) {
 }
 
 function loaderSetup() {
-  const workers = [], messages = [], imports = [];
+  const workers = [], messages = [], imports = [], timers = new Map();
   class Worker {
     constructor(url) { this.url = url; this.sent = []; workers.push(this); }
     postMessage(m) { this.sent.push(m); }
@@ -47,10 +47,11 @@ function loaderSetup() {
   vm.runInContext(fs.readFileSync(path.join(build, 'loader.js'), 'utf8'), vm.createContext({
     self, Worker, BroadcastChannel: class {postMessage(m) {messages.push(m);}},
     navigator: {}, URLSearchParams, console: {log(){},error(){}},
-    importScripts(url) {imports.push(url);}, setTimeout, clearTimeout,
+    importScripts(url) {imports.push(url);},
+    setTimeout(fn, ms) { timers.set(1, {fn, ms}); return 1; }, clearTimeout(id) { timers.delete(id); },
   }));
   self.onmessage({data:{base:'/b/test',args:[],canvas:{}}});
-  return {gpu:workers[0],io:workers[1],messages,imports};
+  return {gpu:workers[0],get io(){return workers[1];},workers,messages,imports,timers};
 }
 
 // Keep the process alive until assertions finish; an unresolved fake-worker
@@ -111,19 +112,31 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
   assert.deepEqual(handles,[1,1],'failed cache replay releases both exclusive handles');
   assert.deepEqual(Array.from(damaged.self.test.handles),[null,null]);
 
-  for (const first of ['gpu','io']) {
-    const loader = loaderSetup();
-    loader.io.emit({loaded:true}); loader.gpu.emit({loaded:true}); loader.gpu.emit({loaded:true});
-    assert.equal(loader.imports.length,0,'script-loaded notices cannot start the engine before data readiness');
-    if (first==='io') loader.io.emit({ready:true}); else loader.gpu.emit({loaded:true});
-    loader.io.emit({ready:true}); loader.io.emit({ready:true}); loader.gpu.emit({loaded:true});
-    assert.equal(loader.imports.length,1,'engine starts exactly once after data initialization');
+  const gated = loaderSetup();
+  assert.equal(gated.workers.length,1,'no IO worker or data requests before graphics');
+  gated.gpu.emit({loaded:true}); gated.gpu.emit({loaded:true});
+  assert.equal(gated.gpu.sent.length,1,'graphics preflight requested exactly once');
+  assert.equal(gated.gpu.sent[0].graphicsCheck,true);
+  assert.equal(gated.io,undefined,'script readiness is insufficient to download assets');
+  assert.equal(gated.imports.length,0,'WASM runtime is not imported before device readiness');
+  gated.gpu.emit({graphicsReady:true}); gated.gpu.emit({graphicsReady:true});
+  assert.equal(gated.workers.length,2); assert.equal(gated.io.sent.length,1);
+  assert.equal(gated.timers.size,0); assert.equal(gated.imports.length,0);
+  gated.io.emit({ready:true}); gated.io.emit({ready:true}); gated.gpu.emit({loaded:true});
+  assert.equal(gated.imports.length,1,'engine starts exactly once after actual graphics and data readiness');
+  for (const kind of ['adapter','device','timeout','script']) {
+    const loader=loaderSetup(); loader.gpu.emit({loaded:true});
+    if(kind==='timeout') loader.timers.get(1).fn();
+    else if(kind==='script') loader.gpu.onerror({message:'script failed',preventDefault(){}});
+    else loader.gpu.emit({graphicsError:'Unavailable',graphicsCode:kind});
+    loader.gpu.emit({graphicsReady:true});
+    assert.equal(loader.io,undefined,'graphics failure downloads no data and creates no IO worker');
+    assert.equal(loader.imports.length,0); assert.ok(loader.gpu.terminated);
+    assert.equal(loader.timers.size,0); assert.ok(loader.messages.some(m=>m.error));
   }
-  const earlyData = loaderSetup(); earlyData.io.emit({ready:true});
-  assert.equal(earlyData.imports.length,0); earlyData.gpu.emit({loaded:true});
-  assert.equal(earlyData.imports.length,1,'data may become ready before graphics worker script');
   for (const kind of ['manifest','io','gpu']) {
     const loader = loaderSetup();
+    loader.gpu.emit({loaded:true}); loader.gpu.emit({graphicsReady:true});
     if (kind==='manifest') loader.io.emit({error:'missing manifest'});
     else loader[kind].onerror({message:'script failed',preventDefault(){}});
     loader.io.emit({ready:true}); loader.gpu.emit({loaded:true});
@@ -133,12 +146,12 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
 
   const html = fs.readFileSync(path.join(root,'mirror/playgta5.com/index.html'),'utf8');
   assert.ok(!/title\/art|ls-screens|ls-stage|@font-face|stopTitle|id="bar"/.test(html),'artwork, title animation and artificial progress bar are removed');
-  const elements = Object.fromEntries(['hud','loading','label','data'].map(id=>[id,{textContent:'',style:{},remove(){this.removed=true;}}]));
+  const elements = Object.fromEntries(['hud','loading','label','data','startup-help','startup-error','startup-reason','startup-retry'].map(id=>[id,{textContent:'',style:{},hidden:true,addEventListener(){},remove(){this.removed=true;}}]));
   const radioShell={hidden:true};
   let receive, watchdog, now=0;
   const statusScope = {radioShell,document:{getElementById:id=>id==='radio-shell'?radioShell:elements[id]},
     performance:{now:()=>now}, setInterval(fn){watchdog=fn;return 1;},clearInterval(){},setTimeout(){},
-    BroadcastChannel:class {set onmessage(fn){receive=fn;}},
+    BroadcastChannel:class {set onmessage(fn){receive=fn;} postMessage(){}},
     waitingChoice:false,startMode:3,startCommitted:false,pickingMap:false,modesEl:{classList:{add(){}}},showModes(){},
   };
   vm.runInContext(html.slice(html.indexOf('const hud ='),html.indexOf('// FPS counter,')),vm.createContext(statusScope));
@@ -152,6 +165,15 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
   receive({data:{error:'Missing game data'}}); receive({data:{label:'First frame'}});
   receive({data:{error:'Secondary error while stopping workers'}}); watchdog();
   assert.equal(elements.label.textContent,'Missing game data','later progress cannot overwrite an error');
-  receive({data:{world:true}}); assert.equal(elements.loading.removed,true,'startup controls leave immediately when the world is ready'); assert.equal(radioShell.hidden,false,'radio control appears when gameplay is ready');
+  receive({data:{world:true,dl:100}}); assert.equal(elements.loading.removed,undefined,'late world messages cannot hide a terminal startup error');
+  assert.ok(!elements.data.textContent.includes('100'),'late download messages cannot advance failed startup');
+  // A fresh run still removes the startup controls as soon as the world is ready.
+  const freshScope={...statusScope}; receive=null;
+  vm.runInContext(html.slice(html.indexOf('const hud ='),html.indexOf('// FPS counter,')),vm.createContext(freshScope));
+  receive({data:{world:true}}); assert.equal(elements.loading.removed,true); assert.equal(radioShell.hidden,false);
+  receive({data:{gpuLost:'device removed'}});
+  assert.equal(elements['startup-help'].hidden,false,'device loss during gameplay shows recovery controls');
+  assert.equal(radioShell.hidden,true);
+  assert.match(elements['startup-reason'].textContent,/Downloads have stopped/);
   console.log('PASS: cached startup progress, failed/timed-out manifests, cache lock cleanup, worker readiness/errors, and removal of title overlay');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>clearTimeout(guard));

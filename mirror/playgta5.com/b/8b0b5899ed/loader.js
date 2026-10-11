@@ -8,13 +8,14 @@ self.onmessage = (ev) => {
 	started = true;
 	const m = ev.data;
 	const bc0 = new BroadcastChannel('game-progress');
-	let engineStarted = false, failed = false;
-	const fail = (message) => {
+	let engineStarted = false, failed = false, io = null, graphicsTimer = null;
+	const fail = (message, graphicsCode) => {
 		if (failed) return;
 		failed = true;
-		bc0.postMessage({ error: message });
+		clearTimeout(graphicsTimer);
+		bc0.postMessage({ error: message, graphicsCode });
 		console.error(message);
-		if (!engineStarted) { gpu.terminate(); io.terminate(); }
+		if (!engineStarted) { gpu.terminate(); if (io) io.terminate(); }
 	};
 	// ?cores=N (debug): pretend to be a machine with N logical cores; the engine sizes its worker pools from it
 	if (m.cores) Object.defineProperty(navigator, 'hardwareConcurrency', { value: m.cores });
@@ -36,20 +37,30 @@ self.onmessage = (ev) => {
 	const B = m.base || '';		// the page's URL prefix for everything it loads (index.html BASE): /b/<build> on the PHP host, empty otherwise
 	const runtimeBase = m.runtimeBase || B;
 	const gpu = new Worker(runtimeBase + '/wgpu_worker.js' + (gq.toString() ? '?' + gq : ''));
-	const io = new Worker(runtimeBase + '/io_worker.js?runtime=delivery-1' + (m.deliveryAudit ? '&deliveryAudit=1&role=io' : '') + (m.profile || m.deliveryAudit ? '&profile=1' : ''));
-	let dataReady = false, gpuLoaded = false;
-	const maybeStart = () => { if (!failed && !engineStarted && dataReady && gpuLoaded) { engineStarted = true; start(); } };
-	io.onmessage = (e) => {
-		if (e.data.error) { fail('Game data unavailable: ' + e.data.error); return; }
-		if (e.data.ready) { dataReady = true; maybeStart(); }
+	let dataReady = false, graphicsReady = false, graphicsRequested = false;
+	const maybeStart = () => { if (!failed && !engineStarted && dataReady && graphicsReady) { engineStarted = true; start(); } };
+	const openData = () => {
+		if (failed || io) return;
+		io = new Worker(runtimeBase + '/io_worker.js?runtime=delivery-1' + (m.deliveryAudit ? '&deliveryAudit=1&role=io' : '') + (m.profile || m.deliveryAudit ? '&profile=1' : ''));
+		io.onmessage = (e) => {
+			if (e.data.error) { fail('Game data unavailable: ' + e.data.error); return; }
+			if (e.data.ready) { dataReady = true; maybeStart(); }
+		};
+		io.onerror = (e) => { e.preventDefault(); fail('Game data worker failed: ' + e.message); };
+		bc0.postMessage({ label: 'Opening game data' });
+		io.postMessage({ init: true, base: self.location.origin + '/data/', packIndex: m.packIndex, cacheNamespace: m.cacheNamespace, noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
 	};
 	gpu.onmessage = (e) => {
-		if (e.data.loaded) { gpuLoaded = true; maybeStart(); }
+		if (failed) return;
+		if (e.data.graphicsError) { fail('Graphics startup failed: ' + e.data.graphicsError, e.data.graphicsCode || 'device'); return; }
+		if (e.data.loaded && !graphicsRequested) { graphicsRequested = true; gpu.postMessage({ graphicsCheck: true }); }
+		if (e.data.graphicsReady && graphicsRequested && !graphicsReady) {
+			graphicsReady = true; clearTimeout(graphicsTimer); openData();
+		}
 	};
-	io.onerror = (e) => { e.preventDefault(); fail('Game data worker failed: ' + e.message); };
-	gpu.onerror = (e) => { e.preventDefault(); fail('Graphics worker failed: ' + e.message); };
-	bc0.postMessage({ label: 'Opening game data' });
-	io.postMessage({ init: true, base: self.location.origin + '/data/', packIndex: m.packIndex, cacheNamespace: m.cacheNamespace, noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
+	gpu.onerror = (e) => { e.preventDefault(); fail('Graphics worker failed: ' + e.message, 'worker'); };
+	bc0.postMessage({ label: 'Checking graphics compatibility' });
+	graphicsTimer = setTimeout(() => fail('Graphics startup timed out. Restart the browser and try again.', 'timeout'), 30000);
 	// An overloaded host answers 503/500/429 (2026-10-06): retried up to 8 times with growing, jittered waits (~20 s in all) instead of compiling an error page.
 	const fetchWasm = async () => {
 		for (let attempt = 0; ; attempt++) {

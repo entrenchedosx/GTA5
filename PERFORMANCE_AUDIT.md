@@ -122,3 +122,46 @@ Applied corrections:
 All 324 unique final pack files were decompressed and hashed, and their 8,368 original slices / 2,709,286,701 decoded bytes compared directly with the source files. All 18 original shader-pack SHA-1 filename prefixes and R2 MD5/size matches were verified. Native asset decoding, resolution, LOD, simulation, input and save formats are unchanged. Existing JavaScript regressions plus pack/fallback/Worker response and deterministic-builder checks pass; real browser results and production verification are recorded in PERFORMANCE_RESULTS.md.
 
 Remaining work: collect longer walking/driving footprints for regions outside these two starts, assess pack read amplification, and compare full public loads over repeated identical runs. Preserve the request-saving OPFS cache; browsers without it retain the original memory-cache loader and can need many more requests. Native simulation/rendering CPU and memory pressure remain separate bottlenecks. These delivery changes do not establish a frame-rate speedup or 60 FPS.
+
+## Graphics startup failure — 11 October 2026
+
+User evidence: `Graphics startup failed: no WebGPU adapter` after 114.7 MB of
+game reads / 275.0 MB downloaded. That message proves adapter selection returned
+null; it does not establish the affected user's browser, driver or hardware cause.
+
+Confirmed client defects: `wgpu_worker.js::initDevice` only tried the
+high-performance preference; `loader.js` opened the IO worker and imported the
+engine based on script readiness rather than device readiness. Device creation
+occurred after substantial loading. Its failure only broadcast a status error;
+startup/download workers remained active. `index.html` accepted subsequent
+world/download notifications after an error, potentially hiding the failure.
+
+Corrections:
+
+- `wgpu_worker.js::requestGameDevice/initDevice/createDevice` tries preferred,
+  default and low-power adapter/device pairs, retains the original supported
+  feature/limit requests, verifies required BC texture support, and creates the
+  device exactly once. Preflight and native startup use the same GPU worker/device.
+  Early validation errors guard the as-yet-uninitialized command ring.
+- `loader.js` checks that actual device before creating the IO worker or importing
+  the WASM engine. Failure, worker errors and a 30-second deadline terminate
+  pre-start workers. A late graphics-ready event cannot resume failed startup.
+- `index.html` checks secure context, isolation, shared memory and basic graphics
+  APIs before starting workers. Graphics failures/device loss stop the worker tree
+  and timer, hide startup controls, retain cached assets/saves, and show accessible
+  recovery instructions plus a reload button. Failure is terminal for that page.
+- `test_graphics_startup.cjs` exercises the actual selection/initialization code;
+  startup regressions cover gating, failure cleanup and late notifications.
+  `serve_graphics_qa.py` provides local-only fixtures for browser verification;
+  none of its mocked adapter code is included in the deployed runtime.
+
+Browser verification: forced high-performance null returned a working real default
+device; missing API, null adapters and hung selection displayed recovery controls
+with zero asset/WASM requests. Actual GTA VI gameplay rendered at 1280×720,
+normal profile after preflight. See results for the second map and rollout.
+
+Limitation: code cannot enable a disabled/blocklisted WebGPU implementation or
+add missing driver/hardware/BC support. This renderer has no WebGL backend or
+texture transcoder. The fallback helps when the preferred selection is unavailable;
+the affected users' original environments were not available to reproduce.
+No FPS improvement is claimed for this startup correction.

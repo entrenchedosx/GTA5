@@ -215,3 +215,40 @@ Production verification: Worker version `2140b2d0-721e-44dd-8c8f-a04ecbe83375`, 
 Files added: `cloudflare/{build_packs.py,prepare_site.py,publish.py,worker.js,wrangler.toml,requirements.txt,demand-reads.json}`, `CLOUDFLARE_DEPLOYMENT.md`, browser `delivery-{packs,audit,page}.js`, and `performance/test_{delivery,cloudflare,pack_build,shader_delivery}` (CJS/Python as appropriate). Updated: index, loader, IO/GPU workers, regression runner/syntax/startup harness, `.gitignore`, README, DEVELOPMENT and both performance reports. New/changed objects only were uploaded; credentials/account IDs, original data, generated packs and raw captures are excluded from Git.
 
 Remaining priorities: reduce cold latency and pack read amplification, record longer GTA VI walking/driving workloads to pack currently uncached regions/NPC resources, and measure repeated runs over a fixed timed scene. Request reduction is verified; no paired FPS speedup, 60 FPS result, resident-memory reduction or exhaustive gameplay correctness is claimed for this delivery change.
+
+## Graphics startup regression checks — 11 October 2026
+
+The user's failing screenshot showed 114.7 MB consumed / 275.0 MB downloaded
+before `no WebGPU adapter`. Those numbers are screenshot evidence, not a baseline
+benchmark of that user's machine.
+
+Local browser QA used the Codex Chromium browser on this desktop, localhost with
+COOP/COEP/CORP, and the existing compiled engine plus edited browser scripts.
+`python performance/serve_graphics_qa.py` supplies test pages at port 8877.
+
+| Browser scenario | Result | Game-data/WASM HTTP requests |
+|---|---|---:|
+| `/qa/adapter.html`, all adapter preferences return null | Recovery card; workers stopped | 0 |
+| `/qa/api.html`, API absent | Recovery card; no engine worker starts | 0 |
+| `/qa/timeout.html`, adapter never resolves | Recovery card after 30-second deadline | 0 |
+| `/qa/check.html`, preferred returns null, default uses the real GPU | Actual GPU device initialized successfully | 0 (preflight-only fixture) |
+
+The fixture server recorded 14 requests including pages, worker scripts, favicon
+and two diagnostic-list reads; none requested `/data/` or `game.wasm`.
+Raw local evidence is ignored in `performance/graphics-browser-requests.json`.
+The real local GTA VI page (`mode=sandbox&map=env_test&low=0&res=1280x720`)
+reached gameplay and rendered the character, world and HUD. This test used local
+assets and the existing persistent cache, avoiding public cold-download traffic.
+
+All 14 JavaScript regression suites, 13 syntax checks, deterministic pack tests,
+radio asset tests and Windows installer tests passed. Selection tests additionally
+cover request exceptions, rejected devices, identical adapter deduplication,
+unsupported BC textures, concurrent preflight/device reuse and device loss.
+These are startup/correctness checks; no frame-time percentiles, FPS speedup or
+memory reduction was measured for this change. Affected users still require a
+working WebGPU implementation; no universal hardware compatibility is claimed.
+
+The local GTA V page (`mode=sandbox&low=0&res=1280x720`) also reached gameplay.
+The runtime/entry was subsequently published to the existing domain; the actual
+public GTA VI page passed preflight and reached the first-frame stage without
+reported browser errors. Final world readiness is recorded below after verification.

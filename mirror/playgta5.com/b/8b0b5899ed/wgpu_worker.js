@@ -497,7 +497,45 @@ function shaderProgram(sh) {
 }
 const STAGE_NAME = ['vs', 'ps', 'cs'];
 
+function graphicsFailure(code, message) { return Object.assign(new Error(message), { code }); }
+
+// A power preference is a hint. Some browsers cannot satisfy it even though
+// their default adapter works. Try complete adapter/device pairs so a rejected
+// device cannot start downloads or cause a second requestDevice on its adapter.
+async function requestGameDevice(api, descriptor, node = false) {
+	if (!api) throw graphicsFailure('api', 'WebGPU is unavailable in this browser.');
+	const attempted = new Set();
+	let foundAdapter = false, missingFormats = false, deviceRejected = false;
+	for (const options of (node ? [{ powerPreference: 'high-performance' }] : [{ powerPreference: 'high-performance' }, {}, { powerPreference: 'low-power' }])) {
+		let candidate;
+		try { candidate = await api.requestAdapter(options); } catch (e) { continue; }
+		if (!candidate || attempted.has(candidate)) continue;
+		attempted.add(candidate); foundAdapter = true;
+		// Original textures use BC formats; this renderer has no transcoding path.
+		if (!candidate.features.has('texture-compression-bc')) { missingFormats = true; continue; }
+		try { return { adapter: candidate, device: await candidate.requestDevice(descriptor(candidate)) }; }
+		catch (e) { deviceRejected = true; logLine('device request rejected: ' + String(e && e.message || e).slice(0, 200)); }
+	}
+	if (deviceRejected) throw graphicsFailure('device', 'The browser could not create the graphics device.');
+	if (foundAdapter && missingFormats) throw graphicsFailure('formats', 'This graphics adapter cannot read the game’s BC textures.');
+	throw graphicsFailure('adapter', 'The browser did not provide a WebGPU adapter.');
+}
+
+let deviceInit = null, deviceLost = null;
 async function initDevice(msg) {
+	// The preflight and engine use the same device, in the same worker.
+	if (!deviceInit) deviceInit = createDevice();
+	await deviceInit;
+	if (deviceLost) throw graphicsFailure('device-lost', 'The graphics device was lost. Restart the browser and try again.');
+	if (msg.canvas) {
+		canvas = msg.canvas;
+		canvasCtx = canvas.getContext('webgpu');
+		if (!canvasCtx) throw graphicsFailure('canvas', 'The browser cannot create a WebGPU canvas.');
+		canvasFormat = gpu.getPreferredCanvasFormat();
+	}
+}
+
+async function createDevice() {
 	if (isNode) {
 		const modPath = process.env.WGPU_NODE_MODULE || 'D:/wasm_build/shaders/node/node_modules/webgpu';
 		const dawn = require(modPath);
@@ -509,23 +547,24 @@ async function initDevice(msg) {
 	} else {
 		gpu = self.navigator.gpu;
 	}
-	if (!gpu) throw new Error('no WebGPU');
-	adapter = await gpu.requestAdapter({ powerPreference: 'high-performance' });
-	if (!adapter) throw new Error('no WebGPU adapter');
+	const selected = await requestGameDevice(gpu, (candidate) => {
 	const want = ['texture-compression-bc', 'texture-compression-bc-sliced-3d', 'depth32float-stencil8', 'float32-filterable', 'indirect-first-instance', 'rg11b10ufloat-renderable', 'bgra8unorm-storage', 'depth-clip-control', 'clip-distances', 'texture-formats-tier1', 'dual-source-blending'];
-	const requiredFeatures = want.filter((f) => adapter.features.has(f));
-	if (profileEnabled && adapter.features.has('timestamp-query')) requiredFeatures.push('timestamp-query');
+	const requiredFeatures = want.filter((f) => candidate.features.has(f));
+	if (profileEnabled && candidate.features.has('timestamp-query')) requiredFeatures.push('timestamp-query');
 	const limits = {};
 	for (const k of ['maxBufferSize', 'maxStorageBufferBindingSize', 'maxUniformBufferBindingSize', 'maxTextureDimension2D', 'maxTextureArrayLayers',
 		'maxColorAttachmentBytesPerSample', 'maxBindGroups', 'maxStorageBuffersPerShaderStage', 'maxSampledTexturesPerShaderStage', 'maxSamplersPerShaderStage',
 		'maxStorageTexturesPerShaderStage', 'maxUniformBuffersPerShaderStage', 'maxVertexBuffers', 'maxVertexAttributes', 'maxBindingsPerBindGroup',
 		'maxInterStageShaderVariables', 'maxDynamicUniformBuffersPerPipelineLayout', 'maxComputeInvocationsPerWorkgroup', 'maxComputeWorkgroupSizeX', 'maxComputeWorkgroupSizeY', 'maxComputeWorkgroupSizeZ', 'maxComputeWorkgroupStorageSize', 'maxComputeWorkgroupsPerDimension'])
-		if (adapter.limits[k] !== undefined) limits[k] = adapter.limits[k];
+		if (candidate.limits[k] !== undefined) limits[k] = candidate.limits[k];
 	// WGPU_LIMITS=name=value,... (Node, test aid): request a smaller device, e.g. a Chromebook's (maxInterStageShaderVariables=16)
 	if (isNode && process.env.WGPU_LIMITS) for (const kv of process.env.WGPU_LIMITS.split(',')) { const [k, v] = kv.split('='); limits[k] = +v; }
 	// ?limits=name:value,... (browser): the same, lowered to a weaker device's limits (never below the WebGPU defaults)
 	if (!isNode) for (const kv of (new URLSearchParams(self.location.search).get('limits') || '').split(',').filter(Boolean)) { const [k, v] = kv.split(':'); limits[k] = +v; }
-	device = await adapter.requestDevice({ requiredFeatures, requiredLimits: limits });
+	return { requiredFeatures, requiredLimits: limits };
+	}, isNode);
+	adapter = selected.adapter; device = selected.device;
+	const requiredFeatures = Array.from(device.features);
 	if (geometryArenaEnabled) geometryArena = new GeometryBufferArena(device, GPUBufferUsage.VERTEX | GPUBufferUsage.INDEX | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST);
 	logLine('geometry buffers: ' + (geometryArena ? 'shared small-buffer allocations' : 'dedicated allocations'));
 	if (profileEnabled) {
@@ -534,7 +573,7 @@ async function initDevice(msg) {
 	}
 	device.addEventListener('uncapturederror', (ev) => {
 		errorCount++;
-		Atomics.add(i32, ringW + 4, 1);
+		if (i32) Atomics.add(i32, ringW + 4, 1);
 		const msg = ev.error.message;
 		const key = msg.replace(/0x[0-9a-f]+|\d+/g, 'N').slice(0, 200);
 		const e = errorKinds.get(key);
@@ -542,17 +581,16 @@ async function initDevice(msg) {
 		else { errorKinds.set(key, { n: 1, msg }); if (errorKinds.size <= 40) logLine('validation error: ' + msg.slice(0, 700)); }
 	});
 	device.lost.then((info) => {
+		deviceLost = info;
 		logLine('device lost: ' + info.reason + ' ' + info.message);
-		if (!isNode && info.reason !== 'destroyed') new BroadcastChannel('game-progress').postMessage({ gpuLost: info.message.split('\n')[0].slice(0, 160) });
+		if (!isNode && info.reason !== 'destroyed') {
+			post({ graphicsError: 'The graphics device was lost. Restart the browser and try again.', graphicsCode: 'device-lost' });
+			new BroadcastChannel('game-progress').postMessage({ gpuLost: String(info.message || info.reason).split('\n')[0].slice(0, 160) });
+		}
 	});
 	logLine('limits: maxDynamicUniformBuffersPerPipelineLayout=' + device.limits.maxDynamicUniformBuffersPerPipelineLayout + ' maxBindGroups=' + device.limits.maxBindGroups + ' maxUniformBuffersPerShaderStage=' + device.limits.maxUniformBuffersPerShaderStage + ' maxVertexBuffers=' + device.limits.maxVertexBuffers +
 		' maxInterStageShaderVariables=' + device.limits.maxInterStageShaderVariables + ' maxSampledTexturesPerShaderStage=' + device.limits.maxSampledTexturesPerShaderStage + ' maxColorAttachmentBytesPerSample=' + device.limits.maxColorAttachmentBytesPerSample);
 	logLine('device ready: ' + (adapter.info ? (adapter.info.description || adapter.info.vendor) : 'adapter') + ', features ' + requiredFeatures.join(','));
-	if (msg.canvas) {
-		canvas = msg.canvas;
-		canvasCtx = canvas.getContext('webgpu');
-		canvasFormat = gpu.getPreferredCanvasFormat();
-	}
 }
 
 // ---- objects ----------------------------------------------------------------------------------------------------------------
@@ -3073,7 +3111,7 @@ async function start(msg) {
 		await initDevice(msg);
 	} catch (e) {
 		logLine('init failed: ' + (e && e.stack || e));
-		if (!isNode) new BroadcastChannel('game-progress').postMessage({ error: 'Graphics startup failed: ' + (e && e.message || e) });
+		if (!isNode) new BroadcastChannel('game-progress').postMessage({ error: 'Graphics startup failed: ' + (e && e.message || e), graphicsCode: e.code || 'device' });
 		Atomics.store(i32, ringW + 2, 2);
 		// drain forever so the producers never block
 		for (;;) {
@@ -3111,5 +3149,9 @@ if (!isNode) {
 	self.postMessage({ loaded: true });		// loader.js waits for this before it starts the engine (see there)
 }
 if (isNode && parentPort) parentPort.on('message', (m) => { start(m); });
-else if (!isNode) self.onmessage = (ev) => { start(ev.data); };
+else if (!isNode) self.onmessage = async (ev) => {
+	if (!ev.data.graphicsCheck) { start(ev.data); return; }
+	try { await initDevice({}); post({ graphicsReady: true }); }
+	catch (e) { post({ graphicsError: e.message || String(e), graphicsCode: e.code || 'device' }); }
+};
 if (typeof module !== 'undefined') module.exports = { packUniforms, parseWgsl };

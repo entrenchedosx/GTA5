@@ -143,3 +143,22 @@ For radio-only rollback, the previous Worker version was
 that file through `cloudflare/publish.py`, then roll the Worker back to the
 version above. This restores the pre-radio page/runtime; immutable radio assets
 can remain in the private bucket.
+
+## Graphics startup patch — 11 October 2026
+
+Published 12 new hashed runtime scripts and replaced only `site/index.html`:
+13 objects / 474,888 bytes. Runtime:
+`/runtime/5e224cd56ae32db8936bff9d54562d35587d96dc99ee87cb21b87abb6d948d01/`.
+No Worker script/configuration, bucket permissions, routes, original assets,
+WASM, shaders or radio recordings changed in this patch. Worker version remains
+`d241cb89-efe1-4b56-9b8c-39fa38e1ab28`.
+
+Upload plans and records are ignored locally in
+`.downloads/graphics-upload-{plan,executed}.json`. Before promotion, the previous
+live entry was downloaded from private R2 to
+`.downloads/graphics-rollback/site/index.html`: 37,063 bytes,
+SHA-256 `96d9a359a13bef7bab8a29d46153c7226c2f2c8418cccb4a100db52cd5415b9b`.
+For entry-only rollback, publish that staging directory with the existing
+uploader; old and new immutable runtime URLs remain valid. Local tests exercised
+missing API/adapters and timeouts without requesting game data. Both maps reached
+gameplay at normal graphics / 1280×720 locally.

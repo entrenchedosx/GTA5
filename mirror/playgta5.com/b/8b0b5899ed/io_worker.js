@@ -19,6 +19,10 @@
 //   hint ring (4 words per entry): file id, offset low, offset high, length (written last; 0 = free): a read the engine has queued and will perform later, one at a time (the
 //   streamer's single reader thread); fetching it now, HINT_PAR at a time, turns ~3 reads/s (one round trip each) into as many as the link carries. See drainHints.
 'use strict';
+if (new URLSearchParams(self.location.search).get('deliveryAudit') === '1') importScripts('delivery-audit.js');
+importScripts('delivery-packs.js');
+let deliveryPacks = null;
+const packPromises = new Map();
 let mem, HEAP32, HEAPU8, table;
 let files = [], base = '', bc = null, pendingBytes = 0, pendingReadBytes = 0, progressTimer = 0, noHints = false, dataQuery = '';		// noHints: ?nohints=1 (diagnostics), see drainHints; dataQuery: ?v=<manifest version> on every data URL
 // Store block size 4 KB. The engine mounts ~1,200 archives at boot and reads only each one's table of contents (16 bytes, the entries, the names: median 3 KB, 4.9 MB for all
@@ -63,8 +67,8 @@ if (new URLSearchParams(self.location.search).get('profile') === '1') {
 	const profileChannel = new BroadcastChannel('game-performance-io');
 	setInterval(() => profileChannel.postMessage({ timeMs: performance.now(), fetchedBytes: statTotal,
 		engineReads: netStat.demand, networkMisses: netStat.demandMiss, networkWaitMs: netStat.demandWaitMs,
-		fetches: netStat.started, activeFetches: netStat.active, persistentStore: !!sh,
-		decompressionMs: null, note: 'HTTP body decompression is performed by the browser; archive decompression is inside WASM.' }), 2000);
+		fetches: netStat.started, activeFetches: netStat.active, activePackDownloads: packActive, queuedPacks: packQueue.length, persistentStore: !!sh,
+		rangeBatches: netStat.rangeBatches || 0, rangeRequestsSaved: netStat.rangeRequestsSaved || 0, packs: netStat.packs || 0, packFailures: netStat.packFailures || 0, packLoadAndValidationMs: netStat.packProcessingMs || 0, storeBytes: storeEnd, wasmBytes: mem ? mem.buffer.byteLength : 0, decompressionMs: null, note: 'HTTP body decompression is performed by the browser; archive decompression is inside WASM.' }), 2000);
 }
 function startNetStats() {
 	let last = { started: 0, demand: 0, demandMiss: 0, demandWaitMs: 0, bytes: 0, cold: 0 }, t = performance.now();
@@ -133,11 +137,12 @@ function indexRun(id, f, a, b, offset, got, fullBytes) {
 	if (got % BS) index.set(id * 1048576 + a + whole, offset + whole * BS);
 }
 
-async function openStore(version) {
+async function openStore(version, cacheNamespace) {
 	let s = null, j = null;
 	try {
 		const root = await navigator.storage.getDirectory();
-		const dir = await root.getDirectoryHandle('gamedata', { create: true });
+		const name = /^[a-zA-Z0-9_-]{1,64}$/.test(cacheNamespace || '') ? 'delivery-test-' + cacheNamespace : 'gamedata';
+		const dir = await root.getDirectoryHandle(name, { create: true });
 		// A reload while the previous page's io worker is still shutting down finds the files locked (sync access handles are exclusive): wait for it to let go.
 		const openHandle = async (name) => {
 			for (let attempt = 0; ; attempt++) {
@@ -358,7 +363,67 @@ async function fetchRange(f, start, end, onChunk, whole, low) {
 	netStat.started++; if (++netStat.active > netStat.maxActive) netStat.maxActive = netStat.active;
 	try { return await fetchRangeRaw(f, start, end, onChunk, whole, low); } finally { netStat.active--; }
 }
-async function fetchRangeRaw(f, start, end, onChunk, whole, low) {
+
+// Gameplay reads outside startup packs are still requested on demand. Coalesce
+// simultaneous file ranges into one streamed POST, without fetching extra bytes
+// or waiting for a frame. Single/urgent reads remain individual GETs.
+const rangeQueue = [];
+let rangeQueueTimer = 0;
+function queueRange(f, start, end, onChunk, whole, low) {
+	return new Promise((resolve, reject) => {
+		rangeQueue.push({ f, start, end, onChunk, whole, low, resolve, reject });
+		if (!rangeQueueTimer) rangeQueueTimer = setTimeout(flushRanges, 1);
+	});
+}
+function flushRanges() {
+	rangeQueueTimer = 0;
+	rangeQueue.sort((a, b) => Number(a.low) - Number(b.low));
+	while (rangeQueue.length) {
+		const group = []; let n = 0;
+		while (rangeQueue.length && group.length < 16) {
+			const next = rangeQueue[0], bytes = next.end - next.start + 1;
+			if (group.length && n + bytes > 4 * 1048576) break;
+			group.push(rangeQueue.shift()); n += bytes;
+		}
+		streamRanges(group).catch(() => {});
+	}
+}
+async function streamRanges(group) {
+	const individual = r => fetchRangeRaw(r.f, r.start, r.end, r.onChunk, r.whole, r.low, true).then(r.resolve, r.reject);
+	if (group.length === 1) { await individual(group[0]); return; }
+	try {
+		const body = JSON.stringify(group.map(r => [r.f.path, r.start, r.end]));
+		const res = await fetchRetry(base + 'batch?exact=1', { method: 'POST', body, priority: group.every(r => r.low) ? 'low' : 'high' });
+		if (!res.ok || !res.body) throw new Error('Range batch HTTP ' + res.status);
+		const lengths = group.map(r => r.end - r.start + 1), reader = res.body.getReader();
+		let at = 0, inRun = 0;
+		try {
+			for (;;) {
+				const { done, value } = await reader.read(); if (done) break;
+				report(value.length);
+				for (let pos = 0; pos < value.length;) {
+					if (at >= group.length) throw new Error('Oversized range batch');
+					const r = group[at], n = Math.min(value.length - pos, lengths[at] - inRun);
+					r.onChunk(value.subarray(pos, pos + n), inRun); tally(r.f, n);
+					pos += n; inRun += n;
+					if (inRun === lengths[at]) { at++; inRun = 0; }
+				}
+			}
+			if (at !== group.length) throw new Error('Short range batch');
+		} finally { await reader.cancel().catch(() => {}); }
+		group.forEach((r, i) => r.resolve(lengths[i]));
+		netStat.rangeBatches = (netStat.rangeBatches || 0) + 1;
+		netStat.rangeRequestsSaved = (netStat.rangeRequestsSaved || 0) + group.length - 1;
+	} catch (e) {
+		// Older hosts and failed batch bodies are supported without poisoning
+		// block indexes. Overwrite any partial bytes with individual responses.
+		log('[io] range batch failed: ' + e.message + '; using original ranges');
+		await Promise.all(group.map(individual));
+	}
+}
+
+async function fetchRangeRaw(f, start, end, onChunk, whole, low, individual = false) {
+	if (deliveryPacks && !individual) return queueRange(f, start, end, onChunk, whole, low);
 	const url = base + f.path.split('/').map(encodeURIComponent).join('/') + dataQuery;		// ?v=<manifest version>: the same URL always has the same bytes, so the host (and Cloudflare, with a rule for /data/) may cache it for ever
 	// no-store: the host's own static serving of a range (Apache, host/data/.htaccess) sends no Cache-Control, and Chrome would keep every 206 in its HTTP cache next to this store
 	const init = { cache: 'no-store', priority: low ? 'low' : 'high' };
@@ -398,6 +463,14 @@ async function ensureBlocks(id, first, last, low) {
 	const f = files[id], waits = [];
 	last = Math.min(last, Math.ceil(f.size / BS) - 1);		// the file may have turned out shorter than the manifest says (shrink)
 	if (first > last) return;
+	if (deliveryPacks) {
+		const needed = deliveryPacks.forBlocks(id, first, last).filter(pack => pack.runs.some(([fid, start, n]) => {
+			if (fid !== id) return false;
+			for (let k = Math.max(first, start / BS); k <= Math.min(last, Math.floor((start + n - 1) / BS)); k++) if (!index.has(id * 1048576 + k)) return true;
+			return false;
+		}));
+		await Promise.all(needed.map(pack => startPack(pack, false))); // rejected packs fail open to the original range path
+	}
 	let runStart = -1;
 	if (untouched(id, f)) { first = 0; last = Math.ceil(f.size / BS) - 1; }
 	const whole = first === 0 && last === Math.ceil(f.size / BS) - 1 && untouched(id, f);
@@ -407,7 +480,7 @@ async function ensureBlocks(id, first, last, low) {
 		const p = (async () => {
 			// A read the engine may be blocked on (not low) is cut into slices fetched side by side: one stream through the host moves ~0.15 MB/s after its round trip of ~0.6 s (a 512 KB
 			// read took 2-5 s, measured), so eight of them in parallel finish in about a second. Speculative runs (low) stay whole: their speed is the number in flight, not their latency.
-			const slice = wholeFile || low ? b - a + 1 : SLICE_BLOCKS, jobs = [];
+			const slice = deliveryPacks || wholeFile || low ? b - a + 1 : SLICE_BLOCKS, jobs = [];
 			for (let s = a; s <= b; s += slice) {
 				const e = Math.min(b, s + slice - 1), pos = (s - a) * BS, n = (e - s) * BS + blockLen(f, e);
 				jobs.push(fetchRange(f, s * BS, s * BS + n - 1, (chunk, at) => sh.write(chunk, { at: offset + pos + at }), wholeFile, low).then((g) => [g, n]));
@@ -461,6 +534,74 @@ function readFromStore(id, off, len, dst) {
 		if (got !== n) throw new Error('store read returned ' + got + ' of ' + n);
 		done += n;
 	}
+}
+
+
+// One pack fetch fills only missing blocks. Commit follows validation; failure
+// leaves the original range loader available and never poisons the journal.
+const packQueue = [];
+let packActive = 0;
+function packSlot(low) {
+	return new Promise(resolve => {
+		const job = { low, resolve }; packQueue.push(job); packQueue.sort((a, b) => Number(a.low) - Number(b.low)); pumpPacks();
+	});
+}
+function pumpPacks() {
+	while (packActive < 4 && packQueue.length) {
+		packActive++; packQueue.shift().resolve(() => { packActive--; pumpPacks(); });
+	}
+}
+function startPack(pack, low = true) {
+	if (packPromises.has(pack)) return packPromises.get(pack);
+	if (deliveryPacks.failed.has(pack)) return Promise.resolve();
+	const jobs = [], owned = [];
+	for (const [id, start, length, source] of pack.runs) {
+		const first = start / BS, last = Math.floor((start + length - 1) / BS);
+		let a = -1;
+		const add = (b) => {
+			const n = (b - a) * BS + blockLen(files[id], b), offset = storeEnd;
+			storeEnd += n; jobs.push({ id, first: a, last: b, offset, length: n, source: source + (a - first) * BS });
+			for (let k = a; k <= b; k++) owned.push(id * 1048576 + k);
+		};
+		for (let k = first; k <= last + 1; k++) {
+			const need = k <= last && !index.has(id * 1048576 + k) && !inflight.has(id * 1048576 + k);
+			if (need && a < 0) a = k;
+			if (!need && a >= 0) { add(k - 1); a = -1; }
+		}
+	}
+	if (!jobs.length) return Promise.resolve();
+	const p = (async () => {
+		try {
+			const release = await packSlot(low);
+			let bytes;
+			const t0 = performance.now();
+			try { bytes = await deliveryPacks.download(pack, (url, init) => fetchRetry(url, { ...init, priority: low ? 'low' : 'high' })); }
+			finally { release(); }
+			netStat.packProcessingMs = (netStat.packProcessingMs || 0) + performance.now() - t0;
+			report(pack.encodedBytes);
+			for (const r of jobs) {
+				sh.write(bytes.subarray(r.source, r.source + r.length), { at: r.offset });
+				tally(files[r.id], r.length);
+				indexRun(r.id, files[r.id], r.first, r.last, r.offset, r.length, r.length);
+			}
+			netStat.packs = (netStat.packs || 0) + 1; scheduleFlush();
+		} catch (e) {
+			deliveryPacks.failed.add(pack); netStat.packFailures = (netStat.packFailures || 0) + 1;
+			log('[io] pack failed: ' + e.message + '; using original file ranges');
+		} finally {
+			for (const key of owned) if (inflight.get(key) === p) inflight.delete(key);
+			packPromises.delete(pack);
+		}
+	})();
+	packPromises.set(pack, p);
+	for (const key of owned) inflight.set(key, p);
+	return p;
+}
+async function prefetchPacks() {
+	let next = 0;
+	const packs = deliveryPacks.packs.filter(pack => pack.prefetch !== false);
+	const lane = async () => { while (next < packs.length) await startPack(packs[next++]); };
+	await Promise.all(Array.from({ length: 4 }, lane));
 }
 
 // ---- without a store ---------------------------------------------------------------------------------------------------------------------------------------
@@ -644,10 +785,16 @@ async function init(m) {
 	if (remoteLog) startNetStats();
 	if (!m.noStore) {
 		bc.postMessage({ label: 'Opening cached game data', io: { state: 'cache' } });
-		await openStore(Number(String(j.version).replace(/\D/g, '')) || 0);
+		await openStore(Number(String(j.version).replace(/\D/g, '')) || 0, m.cacheNamespace);
 	}
 	bc.postMessage({ label: 'Game data ready', io: { state: 'ready', cachedBytes: index.size * BS, persistentStore: !!sh } });
-	if (sh && m.bootset && !m.record) prefetch(m.bootset);
+	if (sh && m.packIndex && !m.record && typeof DecompressionStream !== 'undefined' && self.crypto && crypto.subtle) {
+		try { deliveryPacks = await DeliveryPacks.load(m.packIndex, dataVersion, j.files, m.bootset, fetchRetry); }
+		catch (e) { log('[io] packs unavailable: ' + e.message + '; using original file ranges'); }
+	}
+	if (sh && m.bootset && !m.record) {
+		if (deliveryPacks) prefetchPacks(); else prefetch(m.bootset);
+	}
 }
 
 // The page tells us when it is going away (pagehide): close the handles at once so the next load can take them.

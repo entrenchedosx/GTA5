@@ -1,6 +1,7 @@
 // Worker that hosts the engine ("main runtime thread" of the Emscripten module). importScripts('game.js') runs the static constructors
 // and main() here; the loop blocks this worker, which is fine (nothing else runs on it). game.js also runs in every pthread worker.
 'use strict';
+if (new URLSearchParams(self.location.search).get('deliveryAudit') === '1') importScripts('delivery-audit.js');
 let started = false;
 self.onmessage = (ev) => {
 	if (started) return;
@@ -19,7 +20,8 @@ self.onmessage = (ev) => {
 	if (m.cores) Object.defineProperty(navigator, 'hardwareConcurrency', { value: m.cores });
 	// The GPU worker must be up before the engine blocks this thread: Chrome fetches the script of a worker nested in a worker through
 	// the parent's event loop. It idles until the engine sends its start message (wgpu_backend.cpp: wgpu_start_worker).
-	const gq = new URLSearchParams({ runtime: 'startup-3' });		// invalidate the old worker cached under the unchanged snapshot build ID
+	const gq = new URLSearchParams({ runtime: 'delivery-1' });
+	if (m.deliveryAudit) { gq.set('deliveryAudit', '1'); gq.set('role', 'gpu'); }		// invalidate the old worker cached under the unchanged snapshot build ID
 	if (m.profile) gq.set('profile', '1');
 	if (m.profile && m.profileDetail) gq.set('detail', '1');
 	if (m.profile) gq.set('revision', new URLSearchParams(self.location.search).get('revision') || '1');
@@ -32,8 +34,9 @@ self.onmessage = (ev) => {
 	if (m.shotRt) gq.set('shotrt', '1');		// ?shotrt=1 (with ?shot=N): every render target of one frame after the world is shown goes to the dev server (diagnosis)
 	if (m.gpuLimits) gq.set('limits', m.gpuLimits);		// ?limits=name:value,...: a smaller device (diagnosis of weaker GPUs)
 	const B = m.base || '';		// the page's URL prefix for everything it loads (index.html BASE): /b/<build> on the PHP host, empty otherwise
-	const gpu = new Worker(B + '/wgpu_worker.js' + (gq.toString() ? '?' + gq : ''));
-	const io = new Worker(B + '/io_worker.js?runtime=startup-3' + (m.profile ? '&profile=1' : ''));
+	const runtimeBase = m.runtimeBase || B;
+	const gpu = new Worker(runtimeBase + '/wgpu_worker.js' + (gq.toString() ? '?' + gq : ''));
+	const io = new Worker(runtimeBase + '/io_worker.js?runtime=delivery-1' + (m.deliveryAudit ? '&deliveryAudit=1&role=io' : '') + (m.profile || m.deliveryAudit ? '&profile=1' : ''));
 	let dataReady = false, gpuLoaded = false;
 	const maybeStart = () => { if (!failed && !engineStarted && dataReady && gpuLoaded) { engineStarted = true; start(); } };
 	io.onmessage = (e) => {
@@ -46,7 +49,7 @@ self.onmessage = (ev) => {
 	io.onerror = (e) => { e.preventDefault(); fail('Game data worker failed: ' + e.message); };
 	gpu.onerror = (e) => { e.preventDefault(); fail('Graphics worker failed: ' + e.message); };
 	bc0.postMessage({ label: 'Opening game data' });
-	io.postMessage({ init: true, base: self.location.origin + '/data/', noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
+	io.postMessage({ init: true, base: self.location.origin + '/data/', packIndex: m.packIndex, cacheNamespace: m.cacheNamespace, noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
 	// An overloaded host answers 503/500/429 (2026-10-06): retried up to 8 times with growing, jittered waits (~20 s in all) instead of compiling an error page.
 	const fetchWasm = async () => {
 		for (let attempt = 0; ; attempt++) {
@@ -117,7 +120,7 @@ self.onmessage = (ev) => {
 			wgpuShaderUrl: B + '/shaders',
 			wgpuShotEvery: m.shotEvery,
 			keepThreads: m.keepThreads|0,		// bit mask of engine thread groups that are NOT skipped (1 replay, 2 net, 4 bink), see ipc_wasm.cpp
-			mainScriptUrlOrBlob: B + '/game.js' + ((m.fullConsole || m.remoteLog) ? '?' + [m.fullConsole ? 'console=1' : '', m.remoteLog ? 'log=1' : ''].filter(Boolean).join('&') : ''),		// pthreads read both from it, and take game.wasm's folder from it
+			mainScriptUrlOrBlob: runtimeBase + '/game.js' + ((m.fullConsole || m.remoteLog) ? '?' + [m.fullConsole ? 'console=1' : '', m.remoteLog ? 'log=1' : ''].filter(Boolean).join('&') : ''),		// pthreads read both from it, and take game.wasm's folder from it
 			locateFile: (p) => B + '/' + p,
 			onExit: (code) => { console.error('EXIT ' + code); self.__log('EXIT ' + code); self.__logFlush(); if (code) self.__crash('exit', 'EXIT ' + code); },
 			onAbort: (what) => { console.error('ABORT ' + what); self.__log('ABORT ' + what); self.__logFlush(); self.__crash('abort', 'ABORT ' + what); },
@@ -159,6 +162,6 @@ self.onmessage = (ev) => {
 		};
 		// __log/__logFlush come from prejs.js, which only exists once game.js is loaded: note the start line in the console.
 		console.log('loader: starting engine: ' + m.args.join(' ') + ' (cores ' + m.cores + ')');
-		importScripts(B + '/game.js');
+		importScripts(runtimeBase + '/game.js');
 	};
 };

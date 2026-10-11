@@ -20,6 +20,7 @@ function ioSetup(fetcher) {
     setTimeout(fn, ms) { const id = ++nextTimer; timers.set(id, {fn, ms}); return id; },
     clearTimeout(id) { timers.delete(id); } };
   const context = vm.createContext(scope);
+  scope.importScripts = name => vm.runInContext(fs.readFileSync(path.join(build, name), 'utf8'), context);
   vm.runInContext(ioSource + `\nself.test = {
     get ready() { return ready; },
     get handles() { return [sh, jh]; },

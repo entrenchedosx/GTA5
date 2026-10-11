@@ -23,6 +23,7 @@
 // Node needs the `webgpu` npm package (Dawn). Its location: env WGPU_NODE_MODULE, default D:/wasm_build/shaders/node/node_modules/webgpu.
 
 'use strict';
+if (typeof self !== 'undefined' && new URLSearchParams(self.location.search).get('deliveryAudit') === '1') importScripts('delivery-audit.js');
 
 const RING_DATA = 64;
 // keep in sync with wgpu_backend.h
@@ -379,7 +380,8 @@ function packBytes(k) {
 	let c = packs.get(k);
 	if (!c) {
 		c = { p: null, last: 0, done: false };
-		c.p = fetchRetry(shaderUrl + '/' + (shaderIndex._packs && shaderIndex._packs[k] ? shaderIndex._packs[k].file : 'pack' + k + '.bin')).then((r) => (r.ok ? r.arrayBuffer() : null)).then((b) => (b ? new Uint8Array(b) : null)).catch(() => null).then((u8) => { c.done = true; c.last = performance.now(); return u8; });
+		const file = shaderIndex._packs && shaderIndex._packs[k] ? shaderIndex._packs[k].file : 'pack' + k + '.bin';
+		c.p = fetchRetry(shaderUrl + '/' + file, /^pack\d+\.[a-f0-9]{8}\.bin$/.test(file) ? { cache: 'force-cache' } : undefined).then((r) => (r.ok ? r.arrayBuffer() : null)).then((b) => (b ? new Uint8Array(b) : null)).catch(() => null).then((u8) => { c.done = true; c.last = performance.now(); return u8; });
 		packs.set(k, c);
 		if (!packSweep) packSweep = setInterval(() => { const now = performance.now(); for (const [n, x] of packs) if (x.done && now - x.last > 8000) packs.delete(n); }, 4000);
 	}

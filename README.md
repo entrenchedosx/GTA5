@@ -4,6 +4,10 @@ An existing browser game with GTA V and GTA VI (`env_test`) maps, a WebAssembly 
 
 **The native C++ engine source and its build configuration are not available.** This is a working compiled client with editable browser workers; it is not a reproducible native-engine source release.
 
+Play the hosted build at [gta.ezgames.lol](https://gta.ezgames.lol/). It uses the existing Cloudflare Worker and private R2 bucket. The delivery layer combines recorded startup reads into 77 bounded downloads at normal graphics, and fetches measured map-region packs only on demand. The local disk cache reuses those original file blocks across visits; gameplay settings and asset contents are preserved. The full launch includes requests outside those 77 startup packs.
+
+Cloudflare cache hits still count as requests. Bundling and avoiding browser fetches through the local cache reduce request count; edge caching mainly reduces origin work. See [delivery results](PERFORMANCE_RESULTS.md) and [deployment/rollback](CLOUDFLARE_DEPLOYMENT.md).
+
 ## Run locally on Windows
 
 1. Clone this repository or extract **Code → Download ZIP** completely.
@@ -44,6 +48,8 @@ python performance/run_checks.py
 ```
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for the architecture, optional browser tests, and source limitations. No npm packages are required by the browser runtime or the regression suite.
+
+Cloudflare deployment tools are under `cloudflare/`. They generate packs from an installed asset tree and upload only new or changed objects. Credentials, generated packs and local deployment records are excluded from Git. GitHub Pages alone cannot provide the private R2 reads, POST batch endpoint and required isolation headers used by this build; this hosted version uses the existing Worker.
 
 On other operating systems, install the external data on Windows or copy an existing complete data installation, install Python 3.11 or newer, and run `python3 serve_local.py --open`. The bundled runtime is Windows-only; other operating systems have not been gameplay-tested.
 

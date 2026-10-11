@@ -1,0 +1,12 @@
+name = "gta5-browser"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[cache]
+enabled = true
+
+[[r2_buckets]]
+binding = "ASSETS"
+bucket_name = "gta5-browser"
+
+# Account and token are provided through environment variables.

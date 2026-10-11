@@ -14,6 +14,7 @@
 | `serve_local.py` | Loopback HTTP server with isolation headers, ranges and batch reads |
 | `Download-Game.*`, `download-manifest.json`, `file-inventory.json` | External data/runtime installation and original archive checksums |
 | `performance/` | Regression tests, analysis utilities and sanitized benchmark summary |
+| `cloudflare/` | Deterministic pack builder, normalized measured ranges, staged runtime uploader and read-only production Worker |
 | `snapshot/` and investigation documents | Selected original snapshot manifests and historical static evidence |
 
 Only `mirror/playgta5.com` is served. Old root-level copies of the page/workers, local original-source backups, runtime binaries, downloaded game data, screenshots and raw profiling records are excluded from Git; existing local copies are preserved.
@@ -60,6 +61,34 @@ Open `/b/8b0b5899ed/fullscreen-test.html` to load either real map and run eight 
 The published `performance/benchmark-summary.json` retains measured phase statistics, workload counts, limitations and sanitized memory snapshots. Full JSON captures, scene PNGs and original-source backups remain local and are ignored. The performance reports distinguish observations from an isolated speedup claim.
 
 `verify_snapshot.py` and `performance/verify_integrity.py` concern the original snapshot, not the current fork. The former detects intentional runtime edits; the latter additionally requires local `performance/original/` backups. Neither is a clean-clone code check. `mirror_site.py`, `public_discovery.py`, `inspect_assets.py`, `engine_static_evidence.py`, `append_investigation.py`, `bundle_runtime.py` and `build_portable_zip.py` are historical snapshot/research/package tools. They depend on original collection files or a complete original snapshot. They are retained as code, but are not the installer or a native-engine build system; run collection/packaging work in a separate checkout.
+
+## Cloudflare asset delivery
+
+`delivery-packs.js` validates a versioned pointer, the manifest path/size fingerprint, hash-named index, pack bounds, encoded and decoded SHA-256, and nonoverlapping file-block offsets. Packs contain original byte slices; the native engine still sees its original filenames and reads. `io_worker.js` deduplicates pack/block requests and commits validated bytes to the existing OPFS journal. There are at most four pack downloads, each with an 8 MiB decoded bound and a deadline. Index and pointer reads are bounded too. Missing, corrupt or stale packs fall back to original reads. Without OPFS or gzip support, the original loader remains available.
+
+Startup packs reproduce the existing normal/low boot sets. Additional normal-graphics packs use `cloudflare/demand-reads.json`, recorded from both actual maps, and have `prefetch: false`; visiting a new region requests its packs only when engine reads need them. Unrecorded regions use original ranges, coalesced into at most 16 runs/4 MiB per request. Normal caches and IndexedDB saves are retained. Low graphics uses its original 68 startup packs and the range fallback for world streaming.
+
+Generate after installing all assets:
+
+```sh
+python cloudflare/build_packs.py
+python cloudflare/prepare_site.py
+python -m pip install -r cloudflare/requirements.txt
+```
+
+The output defaults to ignored `.downloads/delivery-packs` and `.downloads/delivery-site`. The builder reads assets without modifying them, and fails on differing sizes, stale demand-plan versions or corrupted generated packs. The stage builder hashes all browser scripts, including an unchanged copy of compiled `game.js`, into a frozen `/runtime/<sha256>/` path. The existing WASM and shader objects remain at their original keys.
+
+Set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `R2_ENDPOINT_URL`, `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` through your local secret environment. Do not put their values in source or command arguments. With Wrangler 4.69 or newer:
+
+```sh
+python cloudflare/publish.py --site .downloads/delivery-site --packs .downloads/delivery-packs --record .downloads/upload-plan.json
+```
+
+Review that plan; repeat with `--execute` to upload. Dependencies precede the mutable pointer and HTML. Existing immutable keys with different hashes are rejected; no deletion or original-asset upload is performed. Before switching the main entry, use `--entry site/delivery-candidate.html` for a canary. Deploy the Worker with `wrangler deploy --config cloudflare/wrangler.toml --keep-vars`, then validate the public canary and promote `site/index.html`. Record and preserve the previous entry HTML and Worker version as described in [CLOUDFLARE_DEPLOYMENT.md](CLOUDFLARE_DEPLOYMENT.md).
+
+For diagnostics use `deliveryAudit=1` and, optionally, a new `cacheNamespace=<test-name>`. The separate diagnostic OPFS directory is used only with delivery auditing; ordinary play retains `gamedata`. Read the hidden `#delivery-results` JSON and its small badge. `packs=0` compares the original algorithm. Diagnostics stay in the page; they send no telemetry or per-read log requests. `profile=1` separately enables existing CPU/GPU measurements. The diagnostic fetch counter includes attempts and browser-cache hits, not billed requests; Resource Timing bytes and hits are reported separately.
+
+Workers Cache is enabled in Wrangler and verified on the deployed Worker. Only hash-named packs/runtime/shader packs are immutable. Editable entries and original asset paths revalidate. [Cloudflare charges cached requests too](https://developers.cloudflare.com/workers/cache/), so avoid browser requests through packing and persistent blocks. The Worker streams GETs and batch bodies; an exact manifest-bounded batch performs one R2 GET per run without metadata HEAD. Batching reduces HTTP requests but does not reduce that batch's number of R2 data reads.
 
 ## Contributions
 

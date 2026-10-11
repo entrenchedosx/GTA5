@@ -14,7 +14,10 @@ __pycache__/
 *.zip
 *.zip.part
 *.zip.sha256
-
+*.api
+cloudflare/.wrangler/
+/cloudflare/.downloads/
+cloudflare/*.local.toml
 # Unserved copies from the original snapshot; canonical code is under mirror/.
 /homepage.html
 /headers.txt

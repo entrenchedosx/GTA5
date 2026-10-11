@@ -34,7 +34,9 @@ const q = new URLSearchParams(location.search);
 // URL prefix of everything this page loads (loader, workers, engine, shaders): empty on the dev server; on the PHP host (phase3/host/index.php) it puts the page's own
 // text `/b/8b0b5899ed` through str_replace to `/b/<build id>`, so those files are cached for ever under URLs that change when the build does.
 const BASE = '/b/8b0b5899ed'.charAt(0) === '_' ? '' : '/b/8b0b5899ed';
-if (q.get('profile') === '1') await import(BASE + '/performance-page.js?revision=' + encodeURIComponent(q.get('revision') || '1'));
+const RUNTIME = BASE; // prepare_site.py substitutes a content-addressed runtime.
+if (q.get('deliveryAudit') === '1') await import(RUNTIME + '/delivery-page.js');
+if (q.get('profile') === '1') await import(RUNTIME + '/performance-page.js?revision=' + encodeURIComponent(q.get('revision') || '1'));
 // ?log=1: the page, the engine threads and the workers send their log lines to the dev server (browser.log, browser_<ip>.log); off by default: the player's upload
 // bandwidth and this thread's time. The loading screen's own log line and the browser console do not depend on it.
 const remoteLog = q.get('log') === '1';
@@ -123,7 +125,7 @@ const hud = document.getElementById('hud');
 	const stallTimer = setInterval(() => {
 		if (ready || failed || (waitingChoice && !startMode)) return;
 		const quiet = (performance.now() - lastActivity) / 1000;
-		if (quiet > 30) label.textContent = lastLabel + ' — still waiting (' + (quiet | 0) + ' s). Check the browser console if this continues.';
+		if (quiet > 30) label.textContent = lastLabel + ' â€” still waiting (' + (quiet | 0) + ' s). Check the browser console if this continues.';
 	}, 2000);
 	bc.onmessage = (ev) => {
 		const m = ev.data;
@@ -253,7 +255,7 @@ const ENGINE_ARGS = ['-fastscriptcore'];
 // this timer 2.1 ms, a 4 ms wait 5.0 ms). The game has no such timer, so every short sleep cost a whole tick: the limiter held a 60 fps cap to 37 fps and the visibility
 // wait added 15 ms to a frame. An empty callback; nothing else on this thread runs while the game plays.
 setInterval(() => {}, 1);
-const worker = new Worker(BASE + '/loader.js?runtime=startup-3' + (q.get('profile') === '1' ? '&profile=1&revision=' + encodeURIComponent(q.get('revision') || '1') : ''));
+const worker = new Worker(RUNTIME + '/loader.js?runtime=delivery-1' + (q.get('deliveryAudit') === '1' ? '&deliveryAudit=1&role=loader' : '') + (q.get('profile') === '1' ? '&profile=1&revision=' + encodeURIComponent(q.get('revision') || '1') : ''));
 	worker.onmessage = (ev) => {
 		if (ev.data.hud) hud.textContent = ev.data.hud;
 		if (ev.data.input) installInput(ev.data.input.memory, ev.data.input.block);
@@ -266,6 +268,10 @@ const worker = new Worker(BASE + '/loader.js?runtime=startup-3' + (q.get('profil
 		profileDetail: q.get('detail') === '1',
 		canvas: offscreen,
 		base: BASE,
+		runtimeBase: RUNTIME,
+		deliveryAudit: q.get('deliveryAudit') === '1',
+		cacheNamespace: q.get('deliveryAudit') === '1' ? q.get('cacheNamespace') : '',
+		packIndex: q.get('packs') === '0' ? '' : '/data/delivery.json',
 		args: ['-rootdir=/game/', ...(q.get('nogpu') ? [] : ['-wgpu']), '-nodisplaycalibration', '-noSocialClub', '-pc:nosocialclub', ...(q.get('newgame') === '1' ? ['-noautoload'] : []), '-nonetwork', '-output', '-width=' + startSize[0], '-height=' + startSize[1], '-forceResolution', ...LOG_ARGS, ...ENGINE_ARGS, '-frameLimit=' + (q.get('fps') === '30' ? 2 : q.get('fps') === '0' ? 0 : 1),		// the game's own limiter: VSync 2 (its default) = 30 fps; 1 = 60 fps; ?fps=0 uncapped (diagnostics). Story Mode continues from the newest savegame (the engine skips that for Sandbox Mode); ?newgame=1 (-noautoload) starts it from the Prologue instead
 		 ...(cores <= 2 ? ['-numCores=' + cores] : []), ...(lowMemory ? LOW_ARGS : []), ...(q.get('args') || '').split(',').filter(Boolean)],
 		shotEvery: +(q.get('shot') || 0),
@@ -308,7 +314,7 @@ function tryStartAudio() {
 	(async () => {
 		try {
 			const ctx = new AudioContext({ sampleRate: 48000, latencyHint: 'interactive' });
-			await ctx.audioWorklet.addModule(BASE + '/audio-worklet.js');
+			await ctx.audioWorklet.addModule(RUNTIME + '/audio-worklet.js');
 			const node = new AudioWorkletNode(ctx, 'game-audio', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2], processorOptions: audioPending });
 			node.connect(ctx.destination);
 			await ctx.resume();

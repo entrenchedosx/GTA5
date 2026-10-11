@@ -50,6 +50,20 @@ with tempfile.TemporaryDirectory() as temporary:
     assert extras and sum(p['bytes'] for p in extras) == 16384
     assert all(start >= 16384 for p in extras for _,start,_,_ in p['runs'])
     assert all(p.get('prefetch',True) for p in extended['profiles']['bootset_low.json'])
+    demand['extensions']=[{'dataVersion':'test-1','reads':[['a.rpf',[[0,49151]]]]},
+                          {'dataVersion':'test-1','reads':[['a.rpf',[[0,49151]]]]}]
+    appended, _ = builder.build(data,base/'appended',8192,demand)
+    old=extended['profiles']['bootset.json'];new=appended['profiles']['bootset.json']
+    assert new[:len(old)]==old,'new captures must preserve every previously published pack descriptor'
+    assert sum(p['bytes'] for p in new[len(old):])==16384,'overlapping captures add each missing block once'
+    assert appended['profiles']['bootset_low.json']==extended['profiles']['bootset_low.json']
+    for pack in old:
+        filename=Path(pack['url']).name
+        assert (base/'extended'/filename).read_bytes()==(base/'appended'/filename).read_bytes()
+    demand['extensions'][0]['dataVersion']='stale'
+    try: builder.build(data,base/'stale',8192,demand)
+    except ValueError: pass
+    else: raise AssertionError('stale extension accepted')
     assert list(builder.subtract_runs([(0,0,32768)], [(0,4096,4096),(0,16384,8192)])) == [(0,0,4096),(0,8192,8192),(0,24576,8192)]
     assert before == {p.name: p.read_bytes() for p in data.iterdir()}
 print('PASS: reproducible pack bytes/index, overlap merging, exact source bytes/coverage, final partial blocks, bounded packs and unchanged originals')

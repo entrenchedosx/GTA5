@@ -6,9 +6,9 @@ An existing browser game with GTA V and GTA VI (`env_test`) maps, a WebAssembly 
 
 Play the hosted build at [gta.ezgames.lol](https://gta.ezgames.lol/). It uses the existing Cloudflare Worker and private R2 bucket. The delivery layer combines recorded startup reads into 77 bounded downloads at normal graphics, and fetches measured map-region packs only on demand. The local disk cache reuses those original file blocks across visits; gameplay settings and asset contents are preserved. The full launch includes requests outside those 77 startup packs.
 
-The source includes an optional two-station browser radio panel with original SVG artwork. It loads only when opened and fetches each MP3 only after station selection. The two local recordings are not in Git. Public playback is held until redistribution rights are confirmed. See [station mapping, local setup and distribution limits](RADIO_STATIONS.md). The compiled game engine's own vehicle-radio wheel is outside the available source.
+The source includes an optional two-station browser radio panel with original SVG artwork. It loads only when opened and fetches each MP3 only after station selection. The maintainer confirmed public streaming rights for both recordings, which are served on the hosted site and kept outside Git. See [station mapping, local setup and distribution limits](RADIO_STATIONS.md). The compiled game engine's own vehicle-radio wheel is outside the available source.
 
-Cloudflare cache hits still count as requests. Bundling and avoiding browser fetches through the local cache reduce request count; edge caching mainly reduces origin work. See [delivery results](PERFORMANCE_RESULTS.md) and [deployment/rollback](CLOUDFLARE_DEPLOYMENT.md).
+Bundling and reusing the local cache reduce actual browser requests. The live deployment serves recorded packs, browser scripts, shaders and metadata through [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/), where matching files bypass the metered Worker. Combined startup metadata needs one cold HTTP request and can reuse the browser cache on repeat visits. The compiled engine reuses the validated manifest too. Original archive ranges, batches, WASM and radio audio retain the private-R2 handler and still use Worker requests. Static hosting changes quota consumption, not the number of pack downloads. See [delivery results](PERFORMANCE_RESULTS.md) and [deployment/rollback](CLOUDFLARE_DEPLOYMENT.md).
 
 ## Run locally on Windows
 
@@ -18,6 +18,8 @@ Cloudflare cache hits still count as requests. Bundling and avoiding browser fet
 4. Open [localhost:8000](http://localhost:8000/) in Chrome or Edge. Choose Story Mode or Sandbox Mode, then click the game to capture the mouse and enable sound. **Esc** releases the mouse.
 
 Use a browser with WebGPU and hardware acceleration. First loading and shader preparation may take several minutes. Do not open `index.html` directly; the server supplies the isolation headers and asset-read endpoints required by the game.
+
+The client also tries a compatible software WebGPU adapter if hardware selection fails. `?renderer=cpu` requests only that software adapter, without silently selecting hardware or changing graphics quality. This depends on browser support: both tested desktop browsers returned no software adapter. Devices without any compatible WebGPU adapter cannot play this build. Guaranteed CPU-only rendering would require an engine rendering backend that is not present in this checkout; CPU gameplay/FPS is unverified.
 
 The illustrated loading screen has been removed. Small mode/map controls and startup status remain in the corner until gameplay is ready. `Game data read` includes completed reads from the browser cache; downloaded bytes are reported separately. It is a read counter, not an installation percentage.
 

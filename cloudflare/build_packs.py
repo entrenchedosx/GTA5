@@ -71,6 +71,16 @@ def build(data, output, pack_bytes=PACK_BYTES, demand_reads=None):
         # Measured normal-graphics footprints of both maps. Low-memory startup
         # remains its original recorded set; ordinary range fallback still works.
         extra_runs = list(subtract_runs(planned_runs(manifest, demand_reads['reads']), boot_runs)) if demand_reads and name == 'bootset.json' else []
+        phases = [(True, boot_runs), (False, extra_runs)]
+        # Append measured coverage in separate phases: previously published pack
+        # boundaries/hashes stay intact, and repeated traces cannot duplicate blocks.
+        covered = boot_runs + extra_runs
+        for extension in (demand_reads.get('extensions', []) if demand_reads and name == 'bootset.json' else []):
+            if str(extension.get('dataVersion')) != str(manifest['version']):
+                raise ValueError('Demand extension belongs to another data version')
+            runs = list(subtract_runs(planned_runs(manifest, extension['reads']), covered))
+            phases.append((False, runs))
+            covered.extend(runs)
         packs, payload, slices = [], bytearray(), []
         def flush():
             if not payload:
@@ -92,7 +102,7 @@ def build(data, output, pack_bytes=PACK_BYTES, demand_reads=None):
             packs.append(descriptor)
             payload.clear()
             slices.clear()
-        for prefetch, selected_runs in [(True, boot_runs), (False, extra_runs)]:
+        for prefetch, selected_runs in phases:
             for fid, start, length in selected_runs:
                 path, size = manifest['files'][fid][:2]
                 source = (data / path).resolve()

@@ -66,6 +66,29 @@
         return decoded;
       } finally { clearTimeout(timeout); }
     }
+    static async validateIndex(index, version, manifestFiles) {
+      const fingerprint = await hash(new TextEncoder().encode(JSON.stringify(manifestFiles.map(f => [f[0], f[1]]))));
+      if (!index || index.schema !== 1 || String(index.dataVersion) !== version || index.fileFingerprint !== fingerprint) throw new Error('Pack manifest mismatch');
+    }
+    static async fromIndex(index, version, manifestFiles, profile) {
+      await this.validateIndex(index, version, manifestFiles);
+      return new DeliveryPacks(index.profiles[profile], manifestFiles.map(f => ({ path: f[0], size: f[1] })));
+    }
+    static async loadBootstrap(url, fetchImpl) {
+      if (!/^\/data\/packs\/bootstrap-[a-f0-9]{64}\.json$/.test(url)) throw new Error('Invalid bootstrap URL');
+      const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 10000);
+      try {
+        const response = await fetchImpl(url, { cache: 'force-cache', signal: controller.signal });
+        if (!response.ok) throw new Error('Bootstrap HTTP ' + response.status);
+        const body = await bounded(response.body, null, 4 * 1048576);
+        if (!url.includes(await hash(body))) throw new Error('Corrupt bootstrap hash');
+        const bootstrap = JSON.parse(new TextDecoder().decode(body)), m = bootstrap.manifest;
+        if (bootstrap.schema !== 1 || !m || m.version == null || !Array.isArray(m.files) || !m.files.length ||
+            !m.files.every(f => Array.isArray(f) && typeof f[0] === 'string' && Number.isSafeInteger(f[1]) && f[1] >= 0)) throw new Error('Invalid bootstrap manifest');
+        await this.validateIndex(bootstrap.index, String(m.version), m.files);
+        return bootstrap;
+      } finally { clearTimeout(timer); }
+    }
     static async load(pointerURL, version, manifestFiles, profile, fetchImpl) {
       const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 10000);
       try {
@@ -78,9 +101,7 @@
         const body = await bounded(response.body, null, 2 * 1048576);
         if (!pointer.index.includes(await hash(body))) throw new Error('Corrupt pack index');
         const index = JSON.parse(new TextDecoder().decode(body));
-        const fingerprint = await hash(new TextEncoder().encode(JSON.stringify(manifestFiles.map(f => [f[0], f[1]]))));
-        if (index.schema !== 1 || String(index.dataVersion) !== version || index.fileFingerprint !== fingerprint) throw new Error('Pack manifest mismatch');
-        return new DeliveryPacks(index.profiles[profile], manifestFiles.map(f => ({ path: f[0], size: f[1] })));
+        return await this.fromIndex(index, version, manifestFiles, profile);
       } finally { clearTimeout(timer); }
     }
   }

@@ -14,6 +14,7 @@ for test in ['test_geometry_arena.cjs', 'test_worker_buffers.cjs', 'test_rendere
     subprocess.run([node, str(root / 'performance' / test)], cwd=root, check=True)
 subprocess.run([sys.executable, str(root / 'performance/check_syntax.py')], cwd=root, check=True)
 subprocess.run([sys.executable, str(root / 'performance/test_pack_build.py')], cwd=root, check=True)
+subprocess.run([sys.executable, str(root / 'performance/test_static_build.py')], cwd=root, check=True)
 subprocess.run([sys.executable, str(root / 'performance/test_radio.py')], cwd=root, check=True)
 if sys.platform == 'win32':
     subprocess.run([sys.executable, str(root / 'performance/test_installer.py')], cwd=root, check=True)

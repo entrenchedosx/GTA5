@@ -1,7 +1,7 @@
 // Read-only delivery from the existing private R2 bucket. No upload/admin route.
 const MAX_BATCH_BODY = 1048576, MAX_BATCH_RUNS = 1000, MAX_BATCH_TOTAL = 64 * 1048576;
 const MIME = { html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8', mjs: 'text/javascript; charset=utf-8', wasm: 'application/wasm', json: 'application/json', wgsl: 'text/plain; charset=utf-8', css: 'text/css; charset=utf-8', png: 'image/png', webp: 'image/webp', svg: 'image/svg+xml', mp3: 'audio/mpeg', ico: 'image/x-icon', woff: 'font/woff', woff2: 'font/woff2', txt: 'text/plain; charset=utf-8', xml: 'application/xml', csv: 'text/csv' };
-const isolation = { 'Cross-Origin-Opener-Policy': 'same-origin', 'Cross-Origin-Embedder-Policy': 'require-corp', 'Cross-Origin-Resource-Policy': 'same-origin', 'Accept-Ranges': 'bytes' };
+const isolation = { 'Cross-Origin-Opener-Policy': 'same-origin', 'Cross-Origin-Embedder-Policy': 'require-corp', 'Cross-Origin-Resource-Policy': 'same-origin', 'Accept-Ranges': 'bytes', 'X-Game-Delivery': 'worker' };
 function error(status, message, extra = {}) {
   return new Response(message ? message + '\n' : null, { status, headers: { ...isolation, 'Cache-Control': 'no-store', 'Content-Type': 'text/plain', ...extra } });
 }

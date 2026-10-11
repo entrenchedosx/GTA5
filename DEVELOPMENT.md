@@ -78,6 +78,16 @@ python -m pip install -r cloudflare/requirements.txt
 
 The output defaults to ignored `.downloads/delivery-packs` and `.downloads/delivery-site`. The builder reads assets without modifying them, and fails on differing sizes, stale demand-plan versions or corrupted generated packs. The stage builder hashes all browser scripts, including an unchanged copy of compiled `game.js`, into a frozen `/runtime/<sha256>/` path. The existing WASM and shader objects remain at their original keys.
 
+New measured spans go in `demand-reads.json::extensions`, with the installed
+data version and a concrete scene description. Each extension is appended in a
+separate pack phase after subtracting all earlier coverage. This preserves existing
+pack bodies/boundaries/URLs and avoids repeated blocks; startup and low graphics
+stay intact. Do not flatten an extension into the old ordered footprint, which
+would regroup published packs and invalidate caches unnecessarily. For local
+engine capture, `serve_bootstrap_qa.py --capture-reads` enables the existing recorder
+after normal IO initialization; read the hidden `#read-footprint` after 75 seconds.
+Only that local fixture adds capture code; release code sends no read telemetry.
+
 Set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `R2_ENDPOINT_URL`, `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` through your local secret environment. Do not put their values in source or command arguments. With Wrangler 4.69 or newer:
 
 ```sh
@@ -89,6 +99,75 @@ Review that plan; repeat with `--execute` to upload. Dependencies precede the mu
 For diagnostics use `deliveryAudit=1` and, optionally, a new `cacheNamespace=<test-name>`. The separate diagnostic OPFS directory is used only with delivery auditing; ordinary play retains `gamedata`. Read the hidden `#delivery-results` JSON and its small badge. `packs=0` compares the original algorithm. Diagnostics stay in the page; they send no telemetry or per-read log requests. `profile=1` separately enables existing CPU/GPU measurements. The diagnostic fetch counter includes attempts and browser-cache hits, not billed requests; Resource Timing bytes and hits are reported separately.
 
 Workers Cache is enabled in Wrangler and verified on the deployed Worker. Only hash-named packs/runtime/shader packs are immutable. Editable entries and original asset paths revalidate. [Cloudflare charges cached requests too](https://developers.cloudflare.com/workers/cache/), so avoid browser requests through packing and persistent blocks. The Worker streams GETs and batch bodies; an exact manifest-bounded batch performs one R2 GET per run without metadata HEAD. Batching reduces HTTP requests but does not reduce that batch's number of R2 data reads.
+
+## Static hosting and the daily Worker allowance
+
+`wrangler.toml` additionally serves an explicit static catalogue before invoking
+the Worker. Original data stays in private R2; its `ASSETS` binding is preserved.
+The new `STATIC` binding handles generated packs, frozen browser scripts,
+existing shaders, metadata and SVG logos. Audio and WASM retain the R2 handler.
+Static requests are [free and unlimited](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/);
+remaining dynamic reads still use the Worker allowance. HTTP pack count itself
+is unchanged by this routing change.
+
+After preparing the runtime and generating the complete pack catalogue:
+
+```sh
+python cloudflare/build_static.py --site .downloads/delivery-site --packs .downloads/delivery-packs
+python cloudflare/verify_static.py --base http://127.0.0.1:8890 --record .downloads/static-local-checks.json --coverage-heads
+wrangler versions upload --config cloudflare/wrangler.toml --keep-vars
+```
+
+The verification command assumes local `wrangler dev --local --port 8890` is
+running. Stage generation must finish first. The builder defaults to ignored
+`.downloads/static-public` and rejects an existing output directory. For later
+releases use a fresh `--output .downloads/static-public-<release>` and pass that
+directory to Wrangler with `--assets`. Retain previous stages for rollback.
+The exact staging inventory/hashes stay outside Git in a separate plan JSON.
+The builder never scans private world archives, credentials, saves or caches.
+
+Validate the uploaded version before promoting it with `wrangler versions
+deploy`. Preserve the existing private R2 copies/old immutable runtimes for old
+tabs and rollback. Once static hosting is active, changing `site/index.html` in
+R2 alone does **not** update the statically served homepage. Every client or pack
+pointer update must publish a matching static version too. Keep entries/pointers
+revalidating and hashed runtime/packs immutable; do not enable `run_worker_first`
+for these paths. `_headers` supplies isolation directly, without a Worker call.
+
+`build_static.py` also creates `/data/packs/bootstrap-<sha256>.json` from the exact
+manifest and selected pack index, inserts its URL into the staged page, and
+checks the 4 MiB client bound. `io_worker.js` validates its bytes/version/file
+catalogue and uses `force-cache` only for this immutable URL. Missing/corrupt
+bootstrap data falls back to the existing mutable metadata paths. The manifest
+is transferred to the loader's one-use `__httpfsManifest` cache before engine
+import, using the compiled glue's existing hook; `game.js` and WASM are unchanged.
+The native glue clears that cache after copying it into the WASM heap.
+
+For actual-worker metadata QA, run `python performance/serve_bootstrap_qa.py`
+with matching `--stage` and `--plan` arguments, then open its localhost test
+page. Only that fixture disables asset prefetch; release code retains it.
+
+Original archives use range requests; the pack readers request complete bodies.
+Local static Range tests returned 200 with the entire file, so radio MP3s are
+excluded to preserve the existing 206/If-Range behavior. Static HEAD may omit
+Content-Length; readers validate known sizes and actual body hashes instead.
+Do not stage a fallback index.html/SPA for missing data paths.
+
+For graphics failure QA, run `python performance/serve_graphics_qa.py` and open
+`http://localhost:8877/qa/adapter.html`, `api.html`, `timeout.html` or `check.html`.
+The first three inject local-only failure cases; the fourth tries the actual
+default adapter after forcing the preferred selection to fail. They must request
+no `/data/` or WASM before graphics succeeds. Mocked code stays outside the
+deployed runtime; normal gameplay uses the actual GPU worker/device.
+
+CPU compatibility uses WebGPU's `forceFallbackAdapter: true`, after hardware
+attempts or exclusively with `?renderer=cpu`. Required BC textures and game
+features/limits remain intact. A fallback adapter is not guaranteed by browsers.
+Run `python performance/serve_cpu_qa.py` to test the real software device without
+loading game assets. Its result must identify a real adapter/device; mocks are
+only regression coverage. Both tested browsers returned null in the actual
+probe, so no CPU gameplay or performance result is established. There is no
+bundled CPU renderer or WebGL backend, and no native source to build one here.
 
 ## Contributions
 

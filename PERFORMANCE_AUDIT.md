@@ -165,3 +165,89 @@ add missing driver/hardware/BC support. This renderer has no WebGL backend or
 texture transcoder. The fallback helps when the preferred selection is unavailable;
 the affected users' original environments were not available to reproduce.
 No FPS improvement is claimed for this startup correction.
+
+## Remaining daily quota pressure — Static Assets
+
+Confirmed architecture issue: all pack/script/shader network requests enter the
+Worker even though these files are static. Packing reduces HTTP count; edge
+cache reuse alone does not establish that requests are outside the Worker quota.
+
+`cloudflare/build_static.py` explicitly selects existing public client paths,
+verifies fingerprints/data versions and file-size/count limits, and copies the
+unchanged assets into an ignored static stage with generated startup metadata.
+`wrangler.toml` sets `run_worker_first =
+false`, `not_found_handling = "none"` and a distinct `STATIC` binding, preserving
+the private `ASSETS` R2 binding. `_headers` retains browser isolation and applies
+immutable cache policy only to the verified hash-addressed runtime, packs and
+logos (all staged shader pack names also have verified hashes). Original ranges,
+WASM and audio fall through to the existing handler. The bucket remains private.
+
+`verify_static.py` compares bodies, conditional responses, headers and routing;
+`test_static_build.py` covers allowlisting, original bytes, excluded originals/
+credentials/saves/audio, corruption, runtime hashes, oversized files and stage
+preservation. Local QA passed 365 protocol checks. Static Range compatibility
+was insufficient for audio, so those files were excluded before deployment.
+Generated packs and shader packs are fetched whole by their existing readers.
+
+Remaining quota cost: previously unvisited original resources still use dynamic
+range batches; WASM and selected audio use the Worker. Longer fixed walking/
+driving captures and additional demand-only packs remain the next highest-value
+HTTP-count task. The existing OPFS cache/manifest namespace is unchanged.
+
+## Duplicate startup metadata — fixed
+
+`io_worker.js::init` previously read manifest, pointer and index on every launch.
+`delivery-packs.js::loadBootstrap/fromIndex` now consumes one immutable, bounded,
+hash-validated manifest/index produced by `build_static.py`. `index.html` passes
+the frozen URL through `loader.js`; malformed/unavailable bootstrap data retains
+the original metadata fallback. Cold actual-worker QA measured three metadata
+HTTP requests becoming one; warm QA measured zero HTTP with one cached fetch call.
+
+The first full browser test revealed an additional metadata read in unchanged compiled
+`game.js::wasm_httpfs_manifest_js`: a synchronous XHR even though the IO worker
+had already loaded the same manifest. `io_worker.js` now transfers the validated
+UTF-8 manifest at readiness; `loader.js` seeds that function's existing byte cache
+before import. The native bridge releases the bytes after copying into WASM.
+Actual-bridge regression tests prove identical bytes, terminator and no XHR;
+the second full GTA VI test reached gameplay with zero metadata HTTP requests.
+No original file IDs, data version, cache namespace, saves or asset bytes changed.
+
+## CPU-only rendering — browser-dependent, not established
+
+`wgpu_worker.js::requestGameDevice` now requests the standard software fallback
+after hardware failure. `?renderer=cpu` selects only that path via the page and
+loader; known hardware adapters cannot masquerade as a successful CPU test.
+The same BC format and device requirements apply. Failure remains terminal and
+occurs before asset loading. `serve_cpu_qa.py` probes the real adapter/device;
+the mock cases in `test_graphics_startup.cjs` prove dispatch and error handling.
+
+Both actual desktop browser probes returned null software adapters. These are
+availability tests, not CPU gameplay benchmarks. No software renderer is bundled
+in this project, and the existing compiled engine's graphics backend is WebGPU.
+The API cannot create a browser-supplied implementation that is unavailable.
+Guaranteed CPU-only operation remains unresolved and requires engine/rendering
+support or a browser exposing a compatible software device. No browser security
+flags, driver changes or hardware acceleration settings were changed by this work.
+
+## Further GTA V streaming coverage — measured and appended
+
+The actual public GTA V audit continued making original-data requests after world
+readiness (17 individual reads / 49 batches at readiness, 81 / 119 at one minute).
+A local actual-engine 75-second capture found 111 normalized uncovered runs in
+49 archives, totaling 19,927,040 bytes. The capture fixture enables only the
+existing read recorder after normal pack/cache initialization; it does not change
+the release engine or omit prefetch. Footprint records contain asset names/ranges,
+not user files or asset contents.
+
+`cloudflare/demand-reads.json::extensions` and `build_packs.py::build` append those
+missing spans in three demand-only packs. Each extension is version-checked and
+subtracts earlier coverage; previous phases flush before the extension, preserving
+every old pack URL/body. Low graphics and startup counts stay unchanged. All new
+decoded slices matched original source files, and the recorded normalized footprint
+now has no missing runs. Regression tests enforce preservation and no overlap.
+The actual fresh-cache browser build reached gameplay without pack failures.
+
+The three new pack downloads use Static Assets; their whole bodies were verified
+in the actual public browser. Original unrecorded ranges and streaming hints remain
+the largest metered-read category. Whole-session request counts cannot be compared
+as an isolated speedup: cache state, NPC resources and capture duration differ.

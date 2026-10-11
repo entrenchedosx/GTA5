@@ -22,6 +22,7 @@ self.onmessage = (ev) => {
 	// The GPU worker must be up before the engine blocks this thread: Chrome fetches the script of a worker nested in a worker through
 	// the parent's event loop. It idles until the engine sends its start message (wgpu_backend.cpp: wgpu_start_worker).
 	const gq = new URLSearchParams({ runtime: 'delivery-1' });
+	if (m.softwareRendering) gq.set('renderer', 'cpu');
 	if (m.deliveryAudit) { gq.set('deliveryAudit', '1'); gq.set('role', 'gpu'); }		// invalidate the old worker cached under the unchanged snapshot build ID
 	if (m.profile) gq.set('profile', '1');
 	if (m.profile && m.profileDetail) gq.set('detail', '1');
@@ -43,12 +44,16 @@ self.onmessage = (ev) => {
 		if (failed || io) return;
 		io = new Worker(runtimeBase + '/io_worker.js?runtime=delivery-1' + (m.deliveryAudit ? '&deliveryAudit=1&role=io' : '') + (m.profile || m.deliveryAudit ? '&profile=1' : ''));
 		io.onmessage = (e) => {
+			if (failed || engineStarted) return;
 			if (e.data.error) { fail('Game data unavailable: ' + e.data.error); return; }
-			if (e.data.ready) { dataReady = true; maybeStart(); }
+			if (e.data.ready) {
+				if (e.data.manifestBytes) self.__httpfsManifest = e.data.manifestBytes;
+				dataReady = true; maybeStart();
+			}
 		};
 		io.onerror = (e) => { e.preventDefault(); fail('Game data worker failed: ' + e.message); };
 		bc0.postMessage({ label: 'Opening game data' });
-		io.postMessage({ init: true, base: self.location.origin + '/data/', packIndex: m.packIndex, cacheNamespace: m.cacheNamespace, noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
+		io.postMessage({ init: true, base: self.location.origin + '/data/', packIndex: m.packIndex, bootstrapURL: m.bootstrapURL, cacheNamespace: m.cacheNamespace, noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
 	};
 	gpu.onmessage = (e) => {
 		if (failed) return;

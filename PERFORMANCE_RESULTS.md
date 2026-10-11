@@ -252,3 +252,200 @@ The local GTA V page (`mode=sandbox&low=0&res=1280x720`) also reached gameplay.
 The runtime/entry was subsequently published to the existing domain; the actual
 public GTA VI page passed preflight and reached the first-frame stage without
 reported browser errors. Final world readiness is recorded below after verification.
+
+The actual public GTA VI page subsequently reached gameplay and rendered the
+world/character/HUD at 1280×720, normal graphics. Local evidence:
+`performance/graphics-public-gta6.jpg` (ignored). Source commit
+`af05d1db33510e7b90852f2a7037c6e4806c74c2` passed GitHub's Windows/Linux checks:
+[run 38173074815](https://github.com/entrenchedosx/GTA5/actions/runs/38173074815).
+
+## Daily Worker request allowance — Static Assets rollout
+
+The existing pack/cache optimizations reduce actual HTTP requests. Every network
+pack request still went through the metered Worker, so those savings alone did
+not remove the daily quota concern. [Cloudflare documents matching Static Assets
+requests as free and unlimited](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/).
+The new configuration serves allowlisted client files before invoking the Worker;
+missing original archive/range/batch paths continue using private R2.
+
+Final published catalogue: 6,963 files / 2,727,471,908 bytes, largest file 8,391,176 bytes.
+It contains 327 generated packs, their index/pointer, 12 frozen
+runtime scripts, 6,615 existing shader files, startup metadata, entry HTML and
+two SVG logos. File count and sizes are below the documented free-tier limits
+(20,000 files; 25 MiB each). No original world archive, WASM, save, credential,
+cache or audio recording enters the static catalogue. Original asset bytes are
+unchanged; the entry receives the generated bootstrap URL and the new combined
+metadata contains the original manifest/index. Runtime/pack/shader-pack/logo
+fingerprints are verified.
+
+Local Wrangler 4.149.0 validation completed 365 HTTP checks: 363 static responses
+and two intentional Worker responses (invalid batch and missing local WASM).
+Checks included all 324 pack HEADs, representative full body hash comparisons,
+entry/runtime/metadata conditional 304s, isolation headers and cache policies.
+Static responses are tagged `X-Game-Delivery: static`; fallback responses use
+`worker`. Static HEAD can omit Content-Length; the pack reader uses catalogue
+sizes and bounded, hashed body reads. Static Range returned the whole audio file
+in local QA, so MP3s remain on the tested R2 Range/If-Range handler.
+
+For the previously recorded normal startup pack coverage, the browser still
+needs 77 cold pack downloads; the intended metered Worker contribution is now
+zero for those pack paths. This is a routing/quota change, not an additional
+77-to-zero HTTP download reduction or an FPS improvement. Unrecorded resources,
+original range batches, oversized WASM and radio audio remain metered. No total
+daily billing reduction or guaranteed number of supported visitors is claimed
+without real usage data.
+
+Initial static version `7ea13de8-7063-4b4a-969e-c4b29dad6de0` was deployed at 100%.
+Its preview and `https://gta.ezgames.lol` each passed 42 HTTP checks: 40 static
+responses and two intentional Worker responses. Hosted HTML omits ETag but its
+complete body matched the staged SHA-256; runtime/pack/metadata conditional 304s
+were verified. Local bootstrap-stage coverage passed 367 checks, including all
+324 pack HEADs. Original archives, oversized WASM and radio MP3s retain the
+existing R2 handler. The static upload reused unchanged content on the final
+revision: six new bodies, 6,954 already present. No bucket public-access change,
+nameserver/DNS change, original archive upload or data deletion was performed.
+
+## Startup metadata reuse and the native manifest request
+
+The old IO initialization fetched mutable manifest, delivery pointer and hashed
+index separately. `build_static.py` creates a 706,492-byte, SHA-256-addressed
+bootstrap with exactly that manifest and index. The IO worker validates hash,
+version and ordered file catalogue, then explicitly reuses the browser cache.
+It retains the original metadata fallback on missing/corrupted bootstrap data.
+
+| Actual-worker metadata fixture | Fetch calls | Server HTTP requests | Resource transfer bytes |
+|---|---:|---:|---:|
+| Original three-file IO initialization, cold | 3 | 3 | 707,501 |
+| Combined IO initialization, cold | 1 | 1 | 706,792 |
+| Identical combined initialization, warm | 1 | 0 | 0 |
+
+This fixture runs the actual IO initialization, hashes and OPFS opening, with
+asset prefetch disabled only in the local fixture. These counts measure startup
+metadata, not an entire launch. Server request records agreed with browser
+Resource Timing. Ignored evidence: `.downloads/metadata-browser-results.json`
+and `.downloads/metadata-browser-requests.json`.
+
+The first real-game test additionally exposed a synchronous native-glue GET of
+`/data/manifest.json`. The loader now receives the validated manifest bytes by
+transfer and primes the compiled glue's existing one-use `__httpfsManifest`
+cache before import. The actual native function was regression-tested: identical
+bytes/NUL enter the WASM heap without XHR, and the cache is released after copying.
+Compiled `game.js` and WASM are unchanged. A repeat full GTA VI launch at normal
+graphics / 1280×720 reached gameplay with zero metadata HTTP requests and zero
+generated-pack GETs in the local server record; dynamic POST reads are outside
+that GET-only record. The GTA V map also reached gameplay locally. No FPS, CPU/GPU
+frame-time percentiles, or full-launch memory speedup is claimed for this work.
+
+The production GTA VI map reached gameplay at normal graphics / 1280×720 after
+promotion without reported browser warnings/errors. Evidence:
+`performance/quota-public-gta6.jpg` (ignored).
+
+## CPU-only / software WebGPU availability
+
+Automatic selection now tries `forceFallbackAdapter: true` after the three
+hardware preferences. `?renderer=cpu` requests only a software adapter and
+rejects an adapter explicitly marked as hardware. It preserves BC textures,
+the original feature/limit negotiation, gameplay and graphics settings.
+
+Actual desktop probes in the Codex Chromium browser and Edge both returned no
+software adapter. Each displayed `software-adapter` failure; no engine or game
+data was requested. The full page's CPU-only startup displayed an explicit
+recovery explanation and stopped before downloads. Ignored evidence:
+`.downloads/cpu-browser-{results,requests}.json`. Browser version numbers were
+not recorded for these probes; this was software selection on the existing
+desktop, not a physical GPU-less-machine test. Mock tests separately cover a
+compatible software device, rejected devices and hardware misselection.
+
+CPU-only gameplay has **not** been demonstrated and is unavailable in those
+tested configurations. [WebGPU does not guarantee a fallback adapter](https://gpuweb.github.io/types/interfaces/GPURequestAdapterOptions.html).
+This checkout has no native engine source, independent CPU rasterizer or WebGL
+backend. A guaranteed GPU-less port requires compatible software WebGPU supplied
+by the browser or additional engine/rendering implementation. No CPU FPS target,
+CPU memory figure or 60 FPS result is claimed.
+
+## Additional measured GTA V demand coverage
+
+The first public GTA V check reached gameplay in 27.1 seconds at normal graphics,
+1280×720, using a cache previously populated by GTA VI. At world readiness the
+IO audit had 69 fetch attempts (3 pack/metadata, 17 original-data, 49 batch POSTs).
+At the one-minute snapshot it had 205 (5 pack/metadata, 81 original-data,
+119 batches). These counters include browser cache hits; they are not a billing
+measurement. This exposed continued original-data streaming outside pack coverage.
+
+A separate local actual-engine capture recorded the first 75 seconds of reads
+after normal IO initialization, stationary on GTA V at the same settings. Its
+normalized footprint contained 111 runs across 49 archives / 19,927,040 bytes
+outside the previous index. The appended extension now covers every normalized
+read in that capture; remaining missing runs are zero. Three new demand-only
+packs contain 19,873,928 encoded bytes / 19,927,040 original bytes, split into
+113 indexed slices at pack boundaries. Every decoded slice matched its original
+source. All 267 previous normal pack descriptors/bodies and all 68 low-profile
+descriptors/bodies are unchanged. Startup remains 77 normal / 68 low downloads;
+normal demand coverage is now 193 packs, with 327 unique packs across profiles.
+
+`cloudflare/demand-reads.json` records only the missing normalized asset spans.
+`build_packs.py` appends extensions in separate phases and subtracts prior
+coverage, preserving old pack boundaries/URLs and preventing duplicate blocks.
+Regression tests cover overlap, preservation, original bytes, unchanged low
+graphics and rejection of a stale extension. No new prefetch or quality setting
+was introduced. Original assets, engine and saved data remain unchanged.
+
+Fresh isolated local-cache GTA V QA reached gameplay in 21.6 seconds, with zero
+pack failures or reported browser warnings/errors. This is correctness evidence,
+not a speed comparison with the partly warm public run. After roughly 106 seconds
+the audit had 356 IO fetch calls: 108 pack/metadata, 124 original-data and 124
+batches. Previously unvisited resources and speculative streaming still use the
+Worker; no zero-cost whole-game launch, visitor capacity or global FPS gain is
+claimed. Longer fixed routes remain the next request-coverage task.
+
+Preview `cb3eddd4-712e-405d-a6a8-5559d2fbdc78` passed 42 protocol checks. A public
+browser fetched all three complete new pack bodies (19,873,928 bytes) and matched
+their SHA-256 and static-delivery header. The Python network checker intermittently
+received incomplete large responses; full browser downloads and independent curl
+checks succeeded. This transport limitation is separate from the byte-validated
+pack build. A small `delivery-pack-check.html` canary in private R2 supplies that
+browser test; it is not part of normal startup and sends no telemetry.
+
+The version is deployed at 100%. Only three new packs, a new index and the mutable
+pointer were added/updated in private R2: 5 objects / 20,191,738 bytes. Static upload
+added seven bodies and reused 6,956, leaving original archives untouched. Ignored
+evidence is under `.downloads/extension-validation.json`, `gta5-request-footprint.json`,
+`new-pack-browser-checks.json`, `extended-local-gta5.json` and the upload/check records.
+
+The promoted coverage build also reached real gameplay on both public maps at
+normal graphics / 1280×720 in Codex Chromium 155. GTA V reached world readiness
+in 25.6 seconds with partially populated caches; its one-minute IO snapshot
+reported 234 fetch attempts / zero failures (4 pack/metadata, 91 original-data,
+139 batches). The following warm GTA VI launch reached readiness in 13.2 seconds;
+its roughly 22-second snapshot reported 7 attempts / zero failures. These are
+correctness and cache-context observations, not comparable route benchmarks or
+measured FPS gains. Screenshots are `performance/quota-final-public-gta5.jpg`
+and `quota-final-public-gta6.jpg` (ignored). Observed WASM capacity was about
+3.22 GB at GTA V readiness and 3.45 GB during the GTA VI check; no memory reduction
+or long-session bound is established here.
+
+The origin-wide audit BroadcastChannels can receive lingering messages from a
+preceding game during immediate same-origin navigation. CPU-only verification
+therefore uses a fresh preview origin, plus startup gating regression tests,
+rather than attributing previous-game counters to the failed CPU startup.
+
+Final production version `4f4f65c4-af5e-4fec-af41-a0f57586366a` retains that exact
+runtime/pack/bootstrap and changes only the CPU recovery card's hardware advice.
+Preview and production each passed 42 checks (40 static / two Worker).
+A fresh-preview-origin full-page Chromium 155 CPU test showed no software
+adapter, no IO worker and zero data fetches; `performance/cpu-final-unavailable.jpg`
+and `.downloads/cpu-final-preview.json` preserve this failed compatibility result.
+These are not evidence of CPU gameplay. The local suite passed all 14 JavaScript
+regressions, 13 script syntax checks, pack/static/radio builder checks and the
+Windows installer checks after the final change.
+
+Files created: `cloudflare/build_static.py`, `cloudflare/verify_static.py`,
+`performance/test_static_build.py`, `performance/serve_bootstrap_qa.py` and
+`performance/serve_cpu_qa.py`. Modified: `.gitignore`, the five project reports
+and guides (`README.md`, `DEVELOPMENT.md`, `PERFORMANCE_AUDIT.md`, this report,
+`CLOUDFLARE_DEPLOYMENT.md`), Cloudflare `build_packs.py`, `demand-reads.json`,
+`worker.js`, `wrangler.toml`, the canonical `index.html`, runtime
+`delivery-packs.js`, `io_worker.js`, `loader.js`, `wgpu_worker.js`, and regression
+`run_checks.py`, `test_delivery.cjs`, `test_graphics_startup.cjs`,
+`test_pack_build.py`, `test_startup.cjs`. Generated packs, staged releases, raw
+captures and screenshots remain ignored. Original engine/asset files are unchanged.

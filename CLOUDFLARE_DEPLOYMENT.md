@@ -162,3 +162,104 @@ For entry-only rollback, publish that staging directory with the existing
 uploader; old and new immutable runtime URLs remain valid. Local tests exercised
 missing API/adapters and timeouts without requesting game data. Both maps reached
 gameplay at normal graphics / 1280×720 locally.
+
+## Static Assets request-quota change
+
+Production graphics startup verification also reached the GTA VI world; source
+`af05d1d` passed GitHub checks on Windows and Linux. Static hosting is a separate
+versioned rollout using that same fixed client and unchanged pack contents.
+
+The final reviewed static stage is `.downloads/static-cpu-help`: 6,963 public
+client files / 2,727,471,908 bytes, maximum 8,391,176 bytes. It includes all 327 generated
+pack files, 6,615 shader files, 12 scripts, metadata, the homepage and two logos.
+The private R2 bucket and its entire original data tree are retained. No original
+archives, WASM or radio audio are re-uploaded. These already-served client files
+are replicated once into Cloudflare Static Assets; later uploads deduplicate
+unchanged file content. Exact paths/hashes are ignored in
+`.downloads/static-cpu-help-plan.json`.
+
+Configuration uses `run_worker_first = false`, `not_found_handling = "none"`,
+distinct `STATIC` and existing `ASSETS` bindings. `_headers` preserves isolation
+and supplies cache policy directly. Existing domains/routes/billing plan/bucket
+visibility stay unchanged. Radio audio is excluded because local Static Assets
+did not honor its Range reads. Missing original/range/batch paths still execute
+the existing Worker. Responses identify their delivery path with
+`X-Game-Delivery: static` or `worker`.
+
+Local validation passed 367 HTTP checks on the bootstrap stage, including every
+generated pack HEAD, representative byte hashes, conditional requests, isolation
+and cache policy. Initial upload encountered a fetch/connectivity failure before
+an asset session was established. Its retry uploaded the static catalogue into
+preview version `1dddf98d-4db0-4fd2-8c1e-12630f8092c5`, without promoting it.
+The final CPU-fallback/metadata revision reused 6,954 bodies and uploaded six
+new ones; preview version `7ea13de8-7063-4b4a-969e-c4b29dad6de0` passed 42 HTTP
+checks, then was deployed at 100%. The public `gta.ezgames.lol` domain passed
+the same 42 checks and the GTA VI map reached gameplay without reported browser
+warnings/errors. Hosted HTML omits ETag; its full body is verified instead.
+
+Final runtime: `/runtime/f35c0c0becced23264c8755bc20213ec78ba0e8f38d3fbfad03a0c64a72c98a6/`.
+Initial bootstrap: `/data/packs/bootstrap-39c15ebe9a66e33356a7d29e3022a36c5d887b4321744b1dca417cc347776127.json`.
+The private-R2 rollback entry was also updated through the reviewed uploader:
+13 new runtime/entry objects, 478,297 bytes; only `site/index.html` replaced.
+This R2 entry retains the legacy metadata path, so rollback does not depend on
+Static Assets. An intermediate metadata runtime was uploaded to R2 before the
+CPU request; its immutable keys remain harmless and are not referenced by the
+final entry. No original data, WASM, shaders or radio recordings were overwritten.
+Upload/preview/production records remain under ignored `.downloads/`.
+
+For rollback after promotion, deploy the previous Worker version
+`d241cb89-efe1-4b56-9b8c-39fa38e1ab28` at 100%. It still serves the fixed graphics
+entry from private R2 and needs no asset deletion. To roll back the graphics fix
+as well, additionally restore `.downloads/graphics-rollback/site/index.html`.
+Once Static Assets is active, R2-only HTML changes are shadowed by the deployed
+static homepage; rebuild/upload/promote a matching static version for all future
+client or pack-pointer releases. See DEVELOPMENT.md for the staging workflow.
+
+Software rendering is a browser-supplied fallback, automatically requested after
+hardware failure or exclusively with `?renderer=cpu`. Both actual tested browsers
+returned no software adapter; no CPU gameplay result is established. The site
+keeps an explicit pre-download failure for unsupported configurations. Publishing
+the fallback request does not provide a universal CPU renderer. See the audit
+and results for the tested limits and remaining engine-source requirement.
+
+### Follow-up measured coverage release
+
+The coverage version `cb3eddd4-712e-405d-a6a8-5559d2fbdc78` was promoted at 100%, using the same
+`f35c0c0b…` browser runtime. Its bootstrap is
+`/data/packs/bootstrap-54e8acbfc4d233c45e03ca0141e73dcc40e20b32f0851fa52554430ef72c18bb.json`;
+index is `index-318ac217634529f877d93c24969f5945645868763ebbc201abb20d54d536d54e.json`.
+It adds three demand-only packs for 111 measured missing normalized runs in
+49 GTA V archives. Old normal/low pack URLs and bytes are preserved; startup
+counts remain 77 / 68. New packs decode to 19,927,040 original bytes, fully compared
+against source slices, with no remaining uncovered runs in that capture.
+
+Private R2 changes were reviewed/executed as five objects / 20,191,738 bytes:
+three new packs, new index, mutable delivery pointer last. Static version upload
+added seven bodies and reused 6,956; preview and production each passed 42 checks.
+The actual public browser downloaded and SHA-256-verified every complete new pack.
+`site/delivery-pack-check.html` is a separate 1,820-byte R2 canary for that test;
+normal gameplay does not load it. A fresh isolated local-cache GTA V game reached
+gameplay without download/pack failures. Full-session request/FPS changes cannot
+be inferred from differing cache/NPC workloads; see PERFORMANCE_RESULTS.md.
+
+Coverage-only rollback: deploy `7ea13de8-7063-4b4a-969e-c4b29dad6de0` at 100% to
+restore its static catalogue/bootstrap. The new private-R2 files can remain.
+Full static-hosting rollback remains `d241cb89-efe1-4b56-9b8c-39fa38e1ab28`;
+its current R2 entry uses compatible legacy metadata and the latest private-R2
+pointer/packs. This restores metered Worker delivery; it does not erase caches,
+saves or original data.
+
+### Final CPU compatibility message release
+
+Current production version is `4f4f65c4-af5e-4fec-af41-a0f57586366a` at 100%.
+It preserves the coverage version's runtime, pack catalogue and bootstrap. Only
+the entry HTML changed: CPU-only adapter failure hides advice about GPU drivers
+and hardware acceleration. Private R2 replaced one entry / 40,139 bytes; Static
+Assets uploaded one entry and reused 6,962 files. Preview and production each
+passed 42 HTTP checks (40 static, two intentional Worker responses).
+
+The actual fresh-preview-origin CPU test in Chromium 155 returned no software
+adapter, reported zero IO/data fetches, created no IO worker and showed the
+specific recovery card. CPU gameplay remains unavailable in that tested browser.
+Rollback of this UI-only change: promote `cb3eddd4-712e-405d-a6a8-5559d2fbdc78`.
+All earlier coverage/static rollback versions above remain retained.

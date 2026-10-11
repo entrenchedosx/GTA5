@@ -766,13 +766,21 @@ async function init(m) {
 	base = m.base; bc = new BroadcastChannel('game-progress'); remoteLog = !!m.log; noHints = !!m.noHints;
 	if (typeof Atomics.waitAsync !== 'function') throw new Error('This browser cannot run the data worker. Update Chrome or Edge.');
 	bc.postMessage({ label: 'Checking game data', io: { state: 'manifest' } });
+	let bootstrap = null;
+	if (m.bootstrapURL && self.crypto && crypto.subtle) {
+		try { bootstrap = await DeliveryPacks.loadBootstrap(m.bootstrapURL, fetchRetry); }
+		catch (e) { log('[io] bootstrap unavailable: ' + e.message + '; checking original metadata'); }
+	}
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), 30000);
 	let j;
 	try {
-		const response = await fetchRetry(base + 'manifest.json', { cache: 'no-store', signal: controller.signal });
-		if (!response.ok) throw new Error('Game data manifest returned HTTP ' + response.status + '. Run Download-Game.cmd and keep the local server open.');
-		j = await response.json();
+		if (bootstrap) j = bootstrap.manifest;
+		else {
+			const response = await fetchRetry(base + 'manifest.json', { cache: 'no-store', signal: controller.signal });
+			if (!response.ok) throw new Error('Game data manifest returned HTTP ' + response.status + '. Run Download-Game.cmd and keep the local server open.');
+			j = await response.json();
+		}
 		if (!j || !Array.isArray(j.files) || !j.files.length || !j.files.every((f) => Array.isArray(f) && typeof f[0] === 'string' && Number.isSafeInteger(f[1]) && f[1] >= 0)) throw new Error('Game data manifest is invalid. Run Verify-Game.cmd.');
 	} catch (e) {
 		if (controller.signal.aborted) throw new Error('Game data manifest did not arrive within 30 seconds. Check that the local server is running.');
@@ -789,12 +797,16 @@ async function init(m) {
 	}
 	bc.postMessage({ label: 'Game data ready', io: { state: 'ready', cachedBytes: index.size * BS, persistentStore: !!sh } });
 	if (sh && m.packIndex && !m.record && typeof DecompressionStream !== 'undefined' && self.crypto && crypto.subtle) {
-		try { deliveryPacks = await DeliveryPacks.load(m.packIndex, dataVersion, j.files, m.bootset, fetchRetry); }
+		try { deliveryPacks = bootstrap ? await DeliveryPacks.fromIndex(bootstrap.index, dataVersion, j.files, m.bootset) : await DeliveryPacks.load(m.packIndex, dataVersion, j.files, m.bootset, fetchRetry); }
 		catch (e) { log('[io] packs unavailable: ' + e.message + '; using original file ranges'); }
 	}
 	if (sh && m.bootset && !m.record) {
 		if (deliveryPacks) prefetchPacks(); else prefetch(m.bootset);
 	}
+	// The compiled HTTP filesystem already accepts this one-use byte cache.
+	// Transfer the validated manifest to the loader instead of another sync XHR.
+	const manifestBytes = new TextEncoder().encode(JSON.stringify(j));
+	return manifestBytes.byteLength <= 4 * 1048576 ? manifestBytes : null;
 }
 
 // The page tells us when it is going away (pagehide): close the handles at once so the next load can take them.
@@ -836,7 +848,7 @@ self.onmessage = async (ev) => {
 	if (m.userdata) { userdataWrite(m.userdata.path, { data: m.userdata.data, mtime: m.userdata.mtime }); return; }
 	if (m.userdataDelete) { userdataWrite(m.userdataDelete, null); return; }
 	if (m.init) {
-		if (!ready) ready = init(m).then(() => { self.postMessage({ ready: true }); return true; }).catch((e) => {
+		if (!ready) ready = init(m).then((manifestBytes) => { self.postMessage({ ready: true, manifestBytes }, manifestBytes ? [manifestBytes.buffer] : []); return true; }).catch((e) => {
 			const error = e.message || String(e);
 			bc.postMessage({ error }); self.postMessage({ error });
 			return false;

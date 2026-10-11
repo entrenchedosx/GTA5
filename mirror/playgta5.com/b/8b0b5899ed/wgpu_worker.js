@@ -502,14 +502,18 @@ function graphicsFailure(code, message) { return Object.assign(new Error(message
 // A power preference is a hint. Some browsers cannot satisfy it even though
 // their default adapter works. Try complete adapter/device pairs so a rejected
 // device cannot start downloads or cause a second requestDevice on its adapter.
-async function requestGameDevice(api, descriptor, node = false) {
+async function requestGameDevice(api, descriptor, node = false, softwareOnly = false) {
 	if (!api) throw graphicsFailure('api', 'WebGPU is unavailable in this browser.');
 	const attempted = new Set();
 	let foundAdapter = false, missingFormats = false, deviceRejected = false;
-	for (const options of (node ? [{ powerPreference: 'high-performance' }] : [{ powerPreference: 'high-performance' }, {}, { powerPreference: 'low-power' }])) {
+	const softwareOptions = { forceFallbackAdapter: true };
+	const choices = softwareOnly ? [softwareOptions] : node ? [{ powerPreference: 'high-performance' }] : [{ powerPreference: 'high-performance' }, {}, { powerPreference: 'low-power' }, softwareOptions];
+	for (const options of choices) {
 		let candidate;
 		try { candidate = await api.requestAdapter(options); } catch (e) { continue; }
 		if (!candidate || attempted.has(candidate)) continue;
+		// A browser must not silently use hardware for the explicit CPU test.
+		if (softwareOnly && (candidate.info?.isFallbackAdapter ?? candidate.isFallbackAdapter) === false) continue;
 		attempted.add(candidate); foundAdapter = true;
 		// Original textures use BC formats; this renderer has no transcoding path.
 		if (!candidate.features.has('texture-compression-bc')) { missingFormats = true; continue; }
@@ -518,7 +522,8 @@ async function requestGameDevice(api, descriptor, node = false) {
 	}
 	if (deviceRejected) throw graphicsFailure('device', 'The browser could not create the graphics device.');
 	if (foundAdapter && missingFormats) throw graphicsFailure('formats', 'This graphics adapter cannot read the game’s BC textures.');
-	throw graphicsFailure('adapter', 'The browser did not provide a WebGPU adapter.');
+	if (softwareOnly) throw graphicsFailure('software-adapter', 'This browser did not provide a compatible CPU/software WebGPU adapter.');
+	throw graphicsFailure('adapter', 'The browser did not provide a hardware or compatible software WebGPU adapter.');
 }
 
 let deviceInit = null, deviceLost = null;
@@ -562,7 +567,7 @@ async function createDevice() {
 	// ?limits=name:value,... (browser): the same, lowered to a weaker device's limits (never below the WebGPU defaults)
 	if (!isNode) for (const kv of (new URLSearchParams(self.location.search).get('limits') || '').split(',').filter(Boolean)) { const [k, v] = kv.split(':'); limits[k] = +v; }
 	return { requiredFeatures, requiredLimits: limits };
-	}, isNode);
+	}, isNode, !isNode && new URLSearchParams(self.location.search).get('renderer') === 'cpu');
 	adapter = selected.adapter; device = selected.device;
 	const requiredFeatures = Array.from(device.features);
 	if (geometryArenaEnabled) geometryArena = new GeometryBufferArena(device, GPUBufferUsage.VERTEX | GPUBufferUsage.INDEX | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST);

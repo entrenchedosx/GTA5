@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
+const {createHash,webcrypto} = require('node:crypto');
 const root = path.join(__dirname, '..');
 const build = path.join(root, 'mirror/playgta5.com/b/8b0b5899ed');
 const ioSource = fs.readFileSync(path.join(build, 'io_worker.js'), 'utf8');
@@ -13,14 +14,18 @@ function ioSetup(fetcher) {
     constructor(name) { this.name = name; }
     postMessage(m) { if (this.name === 'game-progress') progress.push(m); }
   }
-  const self = { location: { search: '' }, postMessage(m) { messages.push(m); } };
+  const self = { location: { search: '' }, crypto:webcrypto, postMessage(m) { messages.push(m); } };
   const scope = { self, BroadcastChannel: Channel, navigator: {}, console, URLSearchParams,
     performance, fetch: fetcher, AbortController, Uint8Array, Int32Array, DataView, ArrayBuffer,
-    Map, Set, Atomics, Number, Math, Promise,
+    Map, Set, Atomics, Number, Math, Promise,crypto:webcrypto,TextEncoder,TextDecoder,Response,
     setTimeout(fn, ms) { const id = ++nextTimer; timers.set(id, {fn, ms}); return id; },
     clearTimeout(id) { timers.delete(id); } };
   const context = vm.createContext(scope);
-  scope.importScripts = name => vm.runInContext(fs.readFileSync(path.join(build, name), 'utf8'), context);
+  scope.importScripts = name => {
+    vm.runInContext(fs.readFileSync(path.join(build, name), 'utf8'), context);
+    // Real worker self is its global scope; this isolated mock is a separate object.
+    if (self.DeliveryPacks) scope.DeliveryPacks = self.DeliveryPacks;
+  };
   vm.runInContext(ioSource + `\nself.test = {
     get ready() { return ready; },
     get handles() { return [sh, jh]; },
@@ -32,10 +37,10 @@ function ioSetup(fetcher) {
   };`, context);
   return {self, scope, messages, progress, timers,
     flush(ms) { for (const [id, timer] of [...timers]) if (timer.ms === ms) { timers.delete(id); timer.fn(); } },
-    async init() { await self.onmessage({data:{init:true,base:'/data/',noStore:true}}); return self.test.ready; } };
+    async init(extra={}) { await self.onmessage({data:{init:true,base:'/data/',noStore:true,...extra}}); return self.test.ready; } };
 }
 
-function loaderSetup() {
+function loaderSetup(options={}) {
   const workers = [], messages = [], imports = [], timers = new Map();
   class Worker {
     constructor(url) { this.url = url; this.sent = []; workers.push(this); }
@@ -50,8 +55,8 @@ function loaderSetup() {
     importScripts(url) {imports.push(url);},
     setTimeout(fn, ms) { timers.set(1, {fn, ms}); return 1; }, clearTimeout(id) { timers.delete(id); },
   }));
-  self.onmessage({data:{base:'/b/test',args:[],canvas:{}}});
-  return {gpu:workers[0],get io(){return workers[1];},workers,messages,imports,timers};
+  self.onmessage({data:{base:'/b/test',args:[],canvas:{},...options}});
+  return {self,gpu:workers[0],get io(){return workers[1];},workers,messages,imports,timers};
 }
 
 // Keep the process alive until assertions finish; an unresolved fake-worker
@@ -59,6 +64,19 @@ function loaderSetup() {
 const guard = setTimeout(() => { console.error('FAIL: startup test did not finish'); process.exit(1); }, 30000);
 (async () => {
   const manifest = {version:'1',files:[['common/test.dat',16]]};
+  const hash=body=>createHash('sha256').update(body).digest('hex');
+  const bootstrap=JSON.stringify({schema:1,manifest,index:{schema:1,dataVersion:'1',fileFingerprint:hash(JSON.stringify(manifest.files)),profiles:{}}});
+  const bootstrapURL='/data/packs/bootstrap-'+hash(bootstrap)+'.json';
+  const bootstrapFetches=[];
+  const frozen=ioSetup(async(url,init)=>{bootstrapFetches.push(url);assert.equal(init.cache,'force-cache');return new Response(bootstrap);});
+  assert.equal(await frozen.init({bootstrapURL}),true);
+  assert.deepEqual(bootstrapFetches,[bootstrapURL],'real IO initialization fetches only combined metadata');
+  const manifestBytes=frozen.messages.find(m=>m.ready).manifestBytes;
+  assert.deepEqual(JSON.parse(new TextDecoder().decode(manifestBytes)),manifest,'handoff preserves every manifest field and file ID');
+  const recoveredFetches=[];
+  const recovered=ioSetup(async(url)=>{recoveredFetches.push(url);return url===bootstrapURL?new Response('damaged'):new Response(JSON.stringify(manifest));});
+  assert.equal(await recovered.init({bootstrapURL}),true);
+  assert.deepEqual(recoveredFetches,[bootstrapURL,'/data/manifest.json'],'damaged combined metadata falls back to the working original manifest');
   let fetches = 0;
   const warm = ioSetup(async () => { fetches++; return {ok:true,status:200,json:async()=>manifest}; });
   assert.equal(await warm.init(), true);
@@ -113,6 +131,8 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
   assert.deepEqual(Array.from(damaged.self.test.handles),[null,null]);
 
   const gated = loaderSetup();
+  const cpuLoader = loaderSetup({softwareRendering:true});
+  assert.equal(new URL(cpuLoader.gpu.url,'http://localhost').searchParams.get('renderer'),'cpu','CPU selection reaches the actual GPU worker');
   assert.equal(gated.workers.length,1,'no IO worker or data requests before graphics');
   gated.gpu.emit({loaded:true}); gated.gpu.emit({loaded:true});
   assert.equal(gated.gpu.sent.length,1,'graphics preflight requested exactly once');
@@ -122,8 +142,21 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
   gated.gpu.emit({graphicsReady:true}); gated.gpu.emit({graphicsReady:true});
   assert.equal(gated.workers.length,2); assert.equal(gated.io.sent.length,1);
   assert.equal(gated.timers.size,0); assert.equal(gated.imports.length,0);
-  gated.io.emit({ready:true}); gated.io.emit({ready:true}); gated.gpu.emit({loaded:true});
+  gated.io.emit({ready:true,manifestBytes}); gated.io.emit({ready:true}); gated.gpu.emit({loaded:true});
   assert.equal(gated.imports.length,1,'engine starts exactly once after actual graphics and data readiness');
+  assert.equal(gated.self.__httpfsManifest,manifestBytes,'loader primes the existing compiled filesystem cache before importing the engine');
+  const glue=fs.readFileSync(path.join(build,'game.js'),'utf8');
+  const manifestStart=glue.indexOf('function wasm_httpfs_manifest_js(');
+  assert.ok(manifestStart>=0);
+  const heap=new Uint8Array(4096);
+  const nativeScope={__httpfsManifest:gated.self.__httpfsManifest,HEAPU8:heap,TextEncoder,
+    growMemViews(){},XMLHttpRequest:class{constructor(){throw new Error('duplicate manifest XHR');}}};
+  vm.runInNewContext(glue.slice(manifestStart,glue.indexOf('function wasm_httpfs_io_start_js(',manifestStart)),nativeScope);
+  const length=nativeScope.wasm_httpfs_manifest_js(128,0);
+  assert.equal(length,manifestBytes.length);
+  assert.equal(nativeScope.wasm_httpfs_manifest_js(128,length+1),length);
+  assert.deepEqual(heap.subarray(128,128+length),manifestBytes,'actual compiled bridge writes identical metadata without an XHR');
+  assert.equal(heap[128+length],0);assert.equal(nativeScope.__httpfsManifest,undefined,'native bridge releases its one-use cache after copying');
   for (const kind of ['adapter','device','timeout','script']) {
     const loader=loaderSetup(); loader.gpu.emit({loaded:true});
     if(kind==='timeout') loader.timers.get(1).fn();
@@ -146,7 +179,7 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
 
   const html = fs.readFileSync(path.join(root,'mirror/playgta5.com/index.html'),'utf8');
   assert.ok(!/title\/art|ls-screens|ls-stage|@font-face|stopTitle|id="bar"/.test(html),'artwork, title animation and artificial progress bar are removed');
-  const elements = Object.fromEntries(['hud','loading','label','data','startup-help','startup-error','startup-reason','startup-retry'].map(id=>[id,{textContent:'',style:{},hidden:true,addEventListener(){},remove(){this.removed=true;}}]));
+  const elements = Object.fromEntries(['hud','loading','label','data','startup-help','startup-error','startup-reason','startup-steps','startup-retry'].map(id=>[id,{textContent:'',style:{},hidden:true,addEventListener(){},remove(){this.removed=true;}}]));
   const radioShell={hidden:true};
   let receive, watchdog, now=0;
   const statusScope = {radioShell,document:{getElementById:id=>id==='radio-shell'?radioShell:elements[id]},
@@ -175,5 +208,10 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
   assert.equal(elements['startup-help'].hidden,false,'device loss during gameplay shows recovery controls');
   assert.equal(radioShell.hidden,true);
   assert.match(elements['startup-reason'].textContent,/Downloads have stopped/);
+  assert.equal(elements['startup-steps'].hidden,false);
+  vm.runInContext(html.slice(html.indexOf('const hud ='),html.indexOf('// FPS counter,')),vm.createContext({...statusScope}));
+  receive({data:{error:'No software adapter',graphicsCode:'software-adapter'}});
+  assert.match(elements['startup-reason'].textContent,/CPU rendering requires/);
+  assert.equal(elements['startup-steps'].hidden,true,'CPU-only failure must not instruct users to rely on GPU drivers or hardware acceleration');
   console.log('PASS: cached startup progress, failed/timed-out manifests, cache lock cleanup, worker readiness/errors, and removal of title overlay');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>clearTimeout(guard));

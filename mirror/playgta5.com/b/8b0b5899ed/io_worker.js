@@ -20,7 +20,7 @@
 //   streamer's single reader thread); fetching it now, HINT_PAR at a time, turns ~3 reads/s (one round trip each) into as many as the link carries. See drainHints.
 'use strict';
 let mem, HEAP32, HEAPU8, table;
-let files = [], base = '', bc = null, pendingBytes = 0, lastPost = 0, noHints = false, dataQuery = '';		// noHints: ?nohints=1 (diagnostics), see drainHints; dataQuery: ?v=<manifest version> on every data URL
+let files = [], base = '', bc = null, pendingBytes = 0, pendingReadBytes = 0, progressTimer = 0, noHints = false, dataQuery = '';		// noHints: ?nohints=1 (diagnostics), see drainHints; dataQuery: ?v=<manifest version> on every data URL
 // Store block size 4 KB. The engine mounts ~1,200 archives at boot and reads only each one's table of contents (16 bytes, the entries, the names: median 3 KB, 4.9 MB for all
 // of them, measured with ?trace=1); fetching 256 KB (first version) or 16 KB blocks plus a growing read-ahead (second) made the boot download 25x larger for those files.
 // Read-ahead now only follows *large* sequential reads (streamed resources), see serve().
@@ -90,8 +90,20 @@ function noteRequest(off, len) {
 }
 function report(n) {
 	pendingBytes += n;
-	const now = performance.now();
-	if (now - lastPost > 400) { lastPost = now; bc.postMessage({ dl: pendingBytes }); pendingBytes = 0; }
+	scheduleProgress();
+}
+function reportRead(n) {
+	pendingReadBytes += n;
+	scheduleProgress();
+}
+function scheduleProgress() {
+	if (progressTimer) return;
+	// A trailing update also reports the last small read; no integer-MB rounding.
+	progressTimer = setTimeout(() => {
+		progressTimer = 0;
+		if (bc) bc.postMessage({ dl: pendingBytes, read: pendingReadBytes });
+		pendingBytes = pendingReadBytes = 0;
+	}, 400);
 }
 
 // ---- persistent store --------------------------------------------------------------------------------------------------------------------------------------
@@ -122,6 +134,7 @@ function indexRun(id, f, a, b, offset, got, fullBytes) {
 }
 
 async function openStore(version) {
+	let s = null, j = null;
 	try {
 		const root = await navigator.storage.getDirectory();
 		const dir = await root.getDirectoryHandle('gamedata', { create: true });
@@ -132,9 +145,8 @@ async function openStore(version) {
 				catch (e) { if (attempt >= 40 || e.name !== 'NoModificationAllowedError') throw e; await new Promise((r) => setTimeout(r, 250)); }		// up to 10 s
 			}
 		};
-		const s = await openHandle('store.bin');
-		let j;
-		try { j = await openHandle('journal.bin'); } catch (e) { s.close(); throw e; }
+		s = await openHandle('store.bin');
+		j = await openHandle('journal.bin');
 		const head = new DataView(new ArrayBuffer(16));
 		let ok = false;
 		if (j.getSize() >= 16) {
@@ -163,6 +175,9 @@ async function openStore(version) {
 		sh = s; jh = j;
 		log('[io] persistent store: ' + good + ' blocks (' + (good * BS / 1048576 | 0) + ' MB), store.bin ' + (storeEnd / 1048576 | 0) + ' MB');
 	} catch (e) {
+		// Failed journal replay must not leave the cache locked for the next load.
+		try { if (s) s.close(); } catch (_) {}
+		try { if (j) j.close(); } catch (_) {}
 		sh = jh = null;
 		log('[io] no persistent store (' + e.message + '): blocks are cached in memory only');
 	}
@@ -195,12 +210,22 @@ function dumpRecording() {
 // answer, or none, is retried up to 8 times with growing, jittered waits (~20 s in all). Only the start of a response is retried (nothing of its body has been used yet).
 async function fetchRetry(url, init) {
 	for (let attempt = 0; ; attempt++) {
+		if (init && init.signal && init.signal.aborted) throw new Error('Game data request timed out');
 		let res = null, err = null;
 		try { res = await fetch(url, init); } catch (e) { err = e; }
+		if (init && init.signal && init.signal.aborted) throw new Error('Game data request timed out');
 		if (res && res.status < 500 && res.status !== 429) return res;
 		if (attempt >= 7) { if (res) return res; throw err; }
 		netStat.retries = (netStat.retries || 0) + 1;
-		await new Promise((r) => setTimeout(r, Math.min(5000, 300 * 2 ** attempt) * (0.5 + Math.random())));
+		await new Promise((resolve, reject) => {
+			const signal = init && init.signal;
+			const abort = () => { clearTimeout(timer); reject(new Error('Game data request timed out')); };
+			const timer = setTimeout(() => { if (signal) signal.removeEventListener('abort', abort); resolve(); }, Math.min(5000, 300 * 2 ** attempt) * (0.5 + Math.random()));
+			if (signal) {
+				signal.addEventListener('abort', abort, { once: true });
+				if (signal.aborted) abort();
+			}
+		});
 	}
 }
 async function sha1Hex(s) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-1', new TextEncoder().encode(s))), (b) => b.toString(16).padStart(2, '0')).join(''); }
@@ -524,7 +549,12 @@ async function serve(slot) {
 		}
 	} catch (e) {
 		log('[io] read failed: ' + e.message);
+		if (bc && !readErrorShown) {
+			readErrorShown = true;
+			bc.postMessage({ error: 'Could not read game data (' + (files[id] ? files[id].path : id) + '): ' + e.message + '. Check the data installation with Verify-Game.cmd.' });
+		}
 	}
+	if (result > 0) reportRead(result);
 	views();
 	Atomics.store(HEAP32, w + 7, result);
 	Atomics.store(HEAP32, w, 2);
@@ -590,16 +620,33 @@ async function loop() {
 	}
 }
 
-let ready = null;
+let ready = null, readErrorShown = false;
 async function init(m) {
 	base = m.base; bc = new BroadcastChannel('game-progress'); remoteLog = !!m.log; noHints = !!m.noHints;
-	const j = await (await fetchRetry(base + 'manifest.json', { cache: 'no-store' })).json();
+	if (typeof Atomics.waitAsync !== 'function') throw new Error('This browser cannot run the data worker. Update Chrome or Edge.');
+	bc.postMessage({ label: 'Checking game data', io: { state: 'manifest' } });
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), 30000);
+	let j;
+	try {
+		const response = await fetchRetry(base + 'manifest.json', { cache: 'no-store', signal: controller.signal });
+		if (!response.ok) throw new Error('Game data manifest returned HTTP ' + response.status + '. Run Download-Game.cmd and keep the local server open.');
+		j = await response.json();
+		if (!j || !Array.isArray(j.files) || !j.files.length || !j.files.every((f) => Array.isArray(f) && typeof f[0] === 'string' && Number.isSafeInteger(f[1]) && f[1] >= 0)) throw new Error('Game data manifest is invalid. Run Verify-Game.cmd.');
+	} catch (e) {
+		if (controller.signal.aborted) throw new Error('Game data manifest did not arrive within 30 seconds. Check that the local server is running.');
+		throw e;
+	} finally { clearTimeout(timeout); }
 	files = j.files.map((f) => ({ path: f[0], size: f[1] }));
 	dataQuery = j.version ? '?v=' + encodeURIComponent(j.version) : ''; dataVersion = j.version ? String(j.version) : '';
 	files.forEach((f, i) => pathIndex.set(f.path, i));
 	recording = !!m.record; traceOn = !!m.trace;
 	if (remoteLog) startNetStats();
-	if (!m.noStore) await openStore(Number(String(j.version).replace(/\D/g, '')) || 0);
+	if (!m.noStore) {
+		bc.postMessage({ label: 'Opening cached game data', io: { state: 'cache' } });
+		await openStore(Number(String(j.version).replace(/\D/g, '')) || 0);
+	}
+	bc.postMessage({ label: 'Game data ready', io: { state: 'ready', cachedBytes: index.size * BS, persistentStore: !!sh } });
 	if (sh && m.bootset && !m.record) prefetch(m.bootset);
 }
 
@@ -641,11 +688,18 @@ self.onmessage = async (ev) => {
 	const m = ev.data;
 	if (m.userdata) { userdataWrite(m.userdata.path, { data: m.userdata.data, mtime: m.userdata.mtime }); return; }
 	if (m.userdataDelete) { userdataWrite(m.userdataDelete, null); return; }
-	if (m.init) { ready = init(m); return; }		// sent by loader.js as soon as the page starts
+	if (m.init) {
+		if (!ready) ready = init(m).then(() => { self.postMessage({ ready: true }); return true; }).catch((e) => {
+			const error = e.message || String(e);
+			bc.postMessage({ error }); self.postMessage({ error });
+			return false;
+		});
+		return;
+	}
 	if (!m.memory) return;
 	mem = m.memory; HEAP32 = new Int32Array(mem.buffer); HEAPU8 = new Uint8Array(mem.buffer);
 	table = m.table;
-	await ready;		// the store is open and the manifest is loaded
-	loop();
+	if (!await ready) return;		// the store is open and the manifest is loaded
+	loop().catch((e) => { bc.postMessage({ error: 'Game data worker stopped: ' + (e.message || e) }); });
 };
 self.postMessage({ loaded: true });

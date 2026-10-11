@@ -6,11 +6,20 @@ self.onmessage = (ev) => {
 	if (started) return;
 	started = true;
 	const m = ev.data;
+	const bc0 = new BroadcastChannel('game-progress');
+	let engineStarted = false, failed = false;
+	const fail = (message) => {
+		if (failed) return;
+		failed = true;
+		bc0.postMessage({ error: message });
+		console.error(message);
+		if (!engineStarted) { gpu.terminate(); io.terminate(); }
+	};
 	// ?cores=N (debug): pretend to be a machine with N logical cores; the engine sizes its worker pools from it
 	if (m.cores) Object.defineProperty(navigator, 'hardwareConcurrency', { value: m.cores });
 	// The GPU worker must be up before the engine blocks this thread: Chrome fetches the script of a worker nested in a worker through
 	// the parent's event loop. It idles until the engine sends its start message (wgpu_backend.cpp: wgpu_start_worker).
-	const gq = new URLSearchParams({ runtime: 'fullscreen-2' });		// invalidate the old worker cached under the unchanged snapshot build ID
+	const gq = new URLSearchParams({ runtime: 'startup-3' });		// invalidate the old worker cached under the unchanged snapshot build ID
 	if (m.profile) gq.set('profile', '1');
 	if (m.profile && m.profileDetail) gq.set('detail', '1');
 	if (m.profile) gq.set('revision', new URLSearchParams(self.location.search).get('revision') || '1');
@@ -24,13 +33,20 @@ self.onmessage = (ev) => {
 	if (m.gpuLimits) gq.set('limits', m.gpuLimits);		// ?limits=name:value,...: a smaller device (diagnosis of weaker GPUs)
 	const B = m.base || '';		// the page's URL prefix for everything it loads (index.html BASE): /b/<build> on the PHP host, empty otherwise
 	const gpu = new Worker(B + '/wgpu_worker.js' + (gq.toString() ? '?' + gq : ''));
-	const io = new Worker(B + '/io_worker.js' + (m.profile ? '?profile=1' : ''));
-	io.postMessage({ init: true, base: self.location.origin + '/data/', noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });		// starts the prefetch of the boot read set at once		// HTTP reads of all engine threads (platform/file/httpfs_wasm.cpp); same reason to create it up front
-	let loaded = 0;
-	io.onmessage = (e) => { if (e.data.loaded && ++loaded === 2) start(); };
-	gpu.onmessage = (e) => {
-		if (e.data.loaded && ++loaded === 2) start();
+	const io = new Worker(B + '/io_worker.js?runtime=startup-3' + (m.profile ? '&profile=1' : ''));
+	let dataReady = false, gpuLoaded = false;
+	const maybeStart = () => { if (!failed && !engineStarted && dataReady && gpuLoaded) { engineStarted = true; start(); } };
+	io.onmessage = (e) => {
+		if (e.data.error) { fail('Game data unavailable: ' + e.data.error); return; }
+		if (e.data.ready) { dataReady = true; maybeStart(); }
 	};
+	gpu.onmessage = (e) => {
+		if (e.data.loaded) { gpuLoaded = true; maybeStart(); }
+	};
+	io.onerror = (e) => { e.preventDefault(); fail('Game data worker failed: ' + e.message); };
+	gpu.onerror = (e) => { e.preventDefault(); fail('Graphics worker failed: ' + e.message); };
+	bc0.postMessage({ label: 'Opening game data' });
+	io.postMessage({ init: true, base: self.location.origin + '/data/', noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
 	// An overloaded host answers 503/500/429 (2026-10-06): retried up to 8 times with growing, jittered waits (~20 s in all) instead of compiling an error page.
 	const fetchWasm = async () => {
 		for (let attempt = 0; ; attempt++) {
@@ -42,7 +58,6 @@ self.onmessage = (ev) => {
 			await new Promise((r) => setTimeout(r, Math.min(5000, 300 * 2 ** attempt) * (0.5 + Math.random())));
 		}
 	};
-	const bc0 = new BroadcastChannel('game-progress');
 	const start = () => {
 		const bc = new BroadcastChannel('game-progress');
 		self.Module = {
@@ -146,5 +161,4 @@ self.onmessage = (ev) => {
 		console.log('loader: starting engine: ' + m.args.join(' ') + ' (cores ' + m.cores + ')');
 		importScripts(B + '/game.js');
 	};
-	gpu.onerror = (e) => console.error('gpu worker failed to load: ' + e.message);
 };

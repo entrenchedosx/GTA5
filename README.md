@@ -13,6 +13,8 @@ An existing browser game with GTA V and GTA VI (`env_test`) maps, a WebAssembly 
 
 Use a browser with WebGPU and hardware acceleration. First loading and shader preparation may take several minutes. Do not open `index.html` directly; the server supplies the isolation headers and asset-read endpoints required by the game.
 
+The illustrated loading screen has been removed. Small mode/map controls and startup status remain in the corner until gameplay is ready. `Game data read` includes completed reads from the browser cache; downloaded bytes are reported separately. It is a read counter, not an installation percentage.
+
 The installer retrieves checksum-verified archives from the existing [full-game data release](https://github.com/alihammoud21/playgta5/releases/tag/full-game-v1). That release belongs to a separate repository; **this repository does not host a new game-data release**. It installs only external assets and Python, preserving this repository's current renderer and launcher code. Differing existing asset files are rejected rather than overwritten.
 
 The 21 GB data tree, loading-screen media, bundled runtime, caches, saves, and raw benchmark captures are excluded from Git. Download ZIP contains the code and compiled WASM, but the separate data installation is still required. Shader sources, metadata and shader packs are included because the renderer needs them.
@@ -48,6 +50,7 @@ On other operating systems, install the external data on Windows or copy an exis
 ## Troubleshooting
 
 - **Missing data or a blank page:** complete `Download-Game.cmd`, then run `Verify-Game.cmd`.
+- **Startup stays at “Game data: 0 MB”:** update the client and refresh the page. Cached reads now advance the read counter. Missing/invalid data manifests, manifest timeouts and worker failures show an explicit error; follow that message. Keep the local server running. Repeated GPU-wait log lines alone do not show that loading is progressing.
 - **Port 8000 is occupied:** use the existing server or run `python serve_local.py --port 8001 --open` with your installed Python.
 - **WebGPU unavailable:** check browser hardware acceleration and WebGPU support.
 - **Fullscreen/windowed switches:** the game now keeps its desktop render resolution and fits the picture to the window, avoiding the compiled engine's resize crash. Borders preserve proportions when the window has a different shape. After updating, restart the local server and refresh the game; use Ctrl+Shift+R if an old page remains cached.

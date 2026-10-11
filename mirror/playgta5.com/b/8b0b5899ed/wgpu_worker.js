@@ -3071,6 +3071,7 @@ async function start(msg) {
 		await initDevice(msg);
 	} catch (e) {
 		logLine('init failed: ' + (e && e.stack || e));
+		if (!isNode) new BroadcastChannel('game-progress').postMessage({ error: 'Graphics startup failed: ' + (e && e.message || e) });
 		Atomics.store(i32, ringW + 2, 2);
 		// drain forever so the producers never block
 		for (;;) {

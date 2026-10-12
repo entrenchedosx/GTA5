@@ -516,3 +516,10 @@ IO worker or game-data/WASM requests. Corrected preview
 intentional Worker requests. Static catalogue: 6,967 files / 2,727,492,113 bytes,
 with the same 327 pack bodies. No CPU gameplay success is inferred from these
 checks. See deployment records for promotion/rollback.
+
+Version `f9d000c9-5e70-43e7-b1d5-17a7ab6b9176` is promoted at 100%; production
+passed the same 49 checks. Code commit `6fa6bd6` passed Windows/Linux CI and the
+local 16 JavaScript regression suites, 17 syntax checks, pack/static/radio builder
+checks and Windows installer checks. The hosted CPU diagnostic rendered and
+changed its image on camera input. Screenshot `performance/cpu-rasterizer-public.jpg`
+shows the explicitly labelled fixture, not actual CPU GTA gameplay.

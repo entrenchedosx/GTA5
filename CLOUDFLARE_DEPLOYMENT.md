@@ -251,7 +251,7 @@ saves or original data.
 
 ### Final CPU compatibility message release
 
-Current production version is `4f4f65c4-af5e-4fec-af41-a0f57586366a` at 100%.
+Production at that release was `4f4f65c4-af5e-4fec-af41-a0f57586366a` at 100%.
 It preserves the coverage version's runtime, pack catalogue and bootstrap. Only
 the entry HTML changed: CPU-only adapter failure hides advice about GPU drivers
 and hardware acceleration. Private R2 replaced one entry / 40,139 bytes; Static
@@ -305,3 +305,20 @@ or data versions are needed. Rollback: promote the preceding production version
 `4f4f65c4-af5e-4fec-af41-a0f57586366a` at 100%. Old immutable objects/caches remain;
 its static entry continues using its original runtime. Existing full static-
 hosting rollback instructions are unchanged.
+
+### CPU subset promotion record
+
+Current production version is `f9d000c9-5e70-43e7-b1d5-17a7ab6b9176` at 100%.
+Code commit `6fa6bd6ee21d2d42ad3b498bb54a87943d0e8ab4` passed the local suite
+and [Windows/Linux CI](https://github.com/entrenchedosx/GTA5/actions/runs/38212663818)
+before promotion. Private R2 then replaced only `site/index.html` / 40,673 bytes,
+SHA-256 `f683dd33e620849b4b0b6bdff87d66ed377923967c91846965a6919b2498f258`.
+Production passed all 49 checks (47 static / two intentional Worker responses).
+The real deployed diagnostic rendered its CPU-generated scene and responded to
+camera input. No full CPU game support is advertised or established by this release.
+
+Rollback retains the prior static production version, R2 objects, packs, caches
+and saves. `.downloads/static-cpu-subset-verified-plan.json` records the exact
+catalogue; upload and preview/production records are in ignored `.downloads/`.
+Original archives, WASM/shaders, data version, bucket privacy and domain/DNS
+configuration were not changed.

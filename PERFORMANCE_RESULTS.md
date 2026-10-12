@@ -340,7 +340,7 @@ The production GTA VI map reached gameplay at normal graphics / 1280×720 after
 promotion without reported browser warnings/errors. Evidence:
 `performance/quota-public-gta6.jpg` (ignored).
 
-## CPU-only / software WebGPU availability
+## Previous software WebGPU availability (d9f5655 baseline)
 
 Automatic selection now tries `forceFallbackAdapter: true` after the three
 hardware preferences. `?renderer=cpu` requests only a software adapter and
@@ -449,3 +449,70 @@ and guides (`README.md`, `DEVELOPMENT.md`, `PERFORMANCE_AUDIT.md`, this report,
 `run_checks.py`, `test_delivery.cjs`, `test_graphics_startup.cjs`,
 `test_pack_build.py`, `test_startup.cjs`. Generated packs, staged releases, raw
 captures and screenshots remain ignored. Original engine/asset files are unchanged.
+
+## Genuine CPU rasterizer subset — not full gameplay
+
+The new standalone CPU backend implements two existing unlit shader pairs plus
+clipping, triangle coverage, depth, perspective sampling and alpha. No WebGPU or
+WebGL device is used by that renderer. `/cpu-renderer-check.html` contains only
+synthetic test geometry. `?renderer=cpu` initializes the real CPU subset but
+refuses the native game before IO/WASM because complete compatibility is false.
+This is engineering progress, not fulfillment of the CPU gameplay objective.
+
+Hardware: AMD Ryzen 5 7500F, six cores / 12 logical processors, 15.5 GiB reported
+physical RAM, Windows. A physical GPU is still present. Chromium 155 and Edge 155
+actually omitted `navigator.gpu` on the allowlisted non-loopback HTTP fixture.
+No browser API was mocked and no flags/drivers/security settings were changed.
+This is an API-absence test; physical GPU-less operation and unaccelerated browser
+compositing are not verified. The JavaScript rasterizer computes the pixels on CPU.
+
+Same fixture camera yaw, 48 triangles, 30-frame warm-up, 120 measured frames,
+30 FPS cap. CPU work includes geometry, rasterization, pixel output and frame hash.
+Presented interval includes worker timer scheduling and other machine activity.
+
+| Browser / surface | CPU median / p95 (ms) | Interval median / p95 (ms) | Observed fixture FPS | Tracked typed arrays |
+|---|---:|---:|---:|---:|
+| Chromium 155, 320×180 | 1.20 / 1.50 | 34.0 / 47.6 | 27.31 | 471,776 bytes |
+| Chromium 155, 426×240 | 2.00 / 2.60 | 34.0 / 34.6 | 29.48 | 828,896 bytes |
+| Edge 155, 320×180, game tabs closed | 1.20 / 1.70 | 47.1 / 48.9 | 21.35 | 471,776 bytes |
+| Edge 155, 426×240 | 2.10 / 2.80 | 47.2 / 48.7 | 21.39 | 828,896 bytes |
+
+Edge intervals show scheduling delay despite much shorter CPU work. Earlier Edge
+runs overlapping native game loading had CPU p95 up to 7.3 ms; they are not used
+as the isolated row above. These sample runs are not an FPS promise or a game
+speedup. Camera input changed the 320×180 pixel hash from `3daefb17` to `6fee5296`;
+the 426×240 result at that yaw was `439c3b5a`. No screenshot/frame was used as input.
+Typed arrays are bounded/reused, but all JS/native canvas/compositor memory is
+not measurable here. Evidence is in ignored `.downloads/cpu-{chromium,edge}-*.json`
+and `performance/cpu-rasterizer-chromium.jpg`.
+
+The independent interpreter probe parsed 4,805 / 4,808 WGSL files and reproduced
+a compute barrier result of 1 rather than the correct 3. Its warmed simplest
+pixel invocation median/p95 was 0.0057 / 0.0146 ms (2,000 samples), projecting
+328.3 ms for one fully covered 320×180 pass. This projection excludes other game
+work. That library is vendored only for independent shader-port tests, never
+served to players. Static/actual-game requirements and exact missing components
+are documented in [CPU_RENDERER_STATUS.md](CPU_RENDERER_STATUS.md).
+
+The final local GPU entry reached gameplay on GTA V in 14.6 seconds at normal
+graphics / 1280×720, with previously populated caches and zero recorded failures.
+Its isolated 134-second command capture had 244 shader pairs and 38 opcode kinds.
+This is correctness/contract coverage, not a before/after frame-time benchmark.
+An attempted native lifecycle change was not retained after one same-tab GTA V→VI
+start stalled before any graphics commands. A fresh VI start reached gameplay
+in 11.9 seconds, and a later VI→V switch in 14.3 seconds, without recorded failures;
+the intermittent cause remains unknown. Original native navigation behavior is
+retained. No CPU-only GTA game FPS, full-game memory improvement or 60 FPS result is
+claimed. Existing tests pass, including the new CPU geometry, shader-reference,
+backend-selection/readiness gating checks.
+
+The public candidate on the existing origin also reached GTA V gameplay in
+22.6 seconds and GTA VI in 18.1 seconds at normal graphics / 1280×720, with partial
+existing caches and no reported download failures/browser warnings. The final
+release retains the original native navigation behavior. A fresh hosted CPU
+preflight initialized the genuine subset, reported `cpu-incomplete` and had no
+IO worker or game-data/WASM requests. Corrected preview
+`f9d000c9-5e70-43e7-b1d5-17a7ab6b9176` passed 49 delivery checks, 47 static and two
+intentional Worker requests. Static catalogue: 6,967 files / 2,727,492,113 bytes,
+with the same 327 pack bodies. No CPU gameplay success is inferred from these
+checks. See deployment records for promotion/rollback.

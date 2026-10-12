@@ -56,7 +56,7 @@ function loaderSetup(options={}) {
     setTimeout(fn, ms) { timers.set(1, {fn, ms}); return 1; }, clearTimeout(id) { timers.delete(id); },
   }));
   self.onmessage({data:{base:'/b/test',args:[],canvas:{},...options}});
-  return {self,gpu:workers[0],get io(){return workers[1];},workers,messages,imports,timers};
+  return {self,gpu:workers[0],get io(){return workers.find(worker=>worker.url.includes('/io_worker.js?'));},workers,messages,imports,timers};
 }
 
 // Keep the process alive until assertions finish; an unresolved fake-worker
@@ -132,7 +132,10 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
 
   const gated = loaderSetup();
   const cpuLoader = loaderSetup({softwareRendering:true});
-  assert.equal(new URL(cpuLoader.gpu.url,'http://localhost').searchParams.get('renderer'),'cpu','CPU selection reaches the actual GPU worker');
+  assert.ok(cpuLoader.gpu.url.includes('/cpu_worker.js?'),'explicit CPU mode starts the real CPU backend without a WebGPU worker');
+  cpuLoader.gpu.emit({loaded:true});cpuLoader.gpu.emit({graphicsReady:true});
+  assert.equal(cpuLoader.io,undefined,'a CPU readiness message without full game compatibility cannot open assets');
+  assert.ok(cpuLoader.gpu.terminated);
   assert.equal(gated.workers.length,1,'no IO worker or data requests before graphics');
   gated.gpu.emit({loaded:true}); gated.gpu.emit({loaded:true});
   assert.equal(gated.gpu.sent.length,1,'graphics preflight requested exactly once');
@@ -162,7 +165,14 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
     if(kind==='timeout') loader.timers.get(1).fn();
     else if(kind==='script') loader.gpu.onerror({message:'script failed',preventDefault(){}});
     else loader.gpu.emit({graphicsError:'Unavailable',graphicsCode:kind});
-    loader.gpu.emit({graphicsReady:true});
+    if(kind==='adapter'||kind==='device'){
+      assert.equal(loader.workers.length,2,'failed GPU selection tries the genuine CPU backend once');
+      const cpu=loader.workers[1];assert.ok(cpu.url.includes('/cpu_worker.js?'));
+      assert.ok(loader.gpu.terminated,'the GPU worker is stopped before starting CPU');
+      loader.gpu.emit({graphicsReady:true});assert.equal(loader.imports.length,0,'late GPU events cannot start the engine');
+      cpu.emit({loaded:true});cpu.emit({graphicsError:'Missing full CPU game operations',graphicsCode:'cpu-incomplete',cpuBackend:{gameCompatible:false}});
+      assert.ok(cpu.terminated);
+    }else loader.gpu.emit({graphicsReady:true});
     assert.equal(loader.io,undefined,'graphics failure downloads no data and creates no IO worker');
     assert.equal(loader.imports.length,0); assert.ok(loader.gpu.terminated);
     assert.equal(loader.timers.size,0); assert.ok(loader.messages.some(m=>m.error));
@@ -179,7 +189,7 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
 
   const html = fs.readFileSync(path.join(root,'mirror/playgta5.com/index.html'),'utf8');
   assert.ok(!/title\/art|ls-screens|ls-stage|@font-face|stopTitle|id="bar"/.test(html),'artwork, title animation and artificial progress bar are removed');
-  const elements = Object.fromEntries(['hud','loading','label','data','startup-help','startup-error','startup-reason','startup-steps','startup-retry'].map(id=>[id,{textContent:'',style:{},hidden:true,addEventListener(){},remove(){this.removed=true;}}]));
+  const elements = Object.fromEntries(['hud','loading','label','data','startup-help','startup-error','startup-reason','startup-steps','startup-retry','cpu-check-link'].map(id=>[id,{textContent:'',style:{},hidden:true,addEventListener(){},remove(){this.removed=true;}}]));
   const radioShell={hidden:true};
   let receive, watchdog, now=0;
   const statusScope = {radioShell,document:{getElementById:id=>id==='radio-shell'?radioShell:elements[id]},
@@ -213,5 +223,9 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
   receive({data:{error:'No software adapter',graphicsCode:'software-adapter'}});
   assert.match(elements['startup-reason'].textContent,/CPU rendering requires/);
   assert.equal(elements['startup-steps'].hidden,true,'CPU-only failure must not instruct users to rely on GPU drivers or hardware acceleration');
+  vm.runInContext(html.slice(html.indexOf('const hud ='),html.indexOf('// FPS counter,')),vm.createContext({...statusScope}));
+  receive({data:{error:'Incomplete CPU backend',graphicsCode:'cpu-incomplete'}});
+  assert.match(elements['startup-reason'].textContent,/full GTA gameplay support is incomplete/);
+  assert.equal(elements['cpu-check-link'].hidden,false);assert.equal(elements['startup-steps'].hidden,true);
   console.log('PASS: cached startup progress, failed/timed-out manifests, cache lock cleanup, worker readiness/errors, and removal of title overlay');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>clearTimeout(guard));

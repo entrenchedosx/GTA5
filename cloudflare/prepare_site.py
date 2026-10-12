@@ -22,6 +22,9 @@ def prepare(root, output, audio_dir=None):
     page = (site / 'index.html').read_text(encoding='utf-8')
     page = page.replace('const RUNTIME = BASE;', 'const RUNTIME = ' + json.dumps(prefix) + ';')
     (output / 'site/index.html').write_text(page, encoding='utf-8')
+    diagnostic = site / 'cpu-renderer-check.html'
+    if diagnostic.is_file():
+        (output / 'site/cpu-renderer-check.html').write_text(diagnostic.read_text(encoding='utf-8').replace('const RUNTIME = BASE;', 'const RUNTIME = ' + json.dumps(prefix) + ';'), encoding='utf-8')
     artwork = site / 'radio'
     logos = sorted(artwork.glob('*.svg'))
     for file in logos:

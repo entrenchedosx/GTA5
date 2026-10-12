@@ -26,7 +26,7 @@ def publish(site=None, packs=None, entry='site/index.html', execute=False, recor
             if not file.is_file(): continue
             key = file.relative_to(site).as_posix()
             if key == 'site/index.html': key = entry
-            if key != entry and not key.startswith(('site/runtime/', 'site/radio/')): raise ValueError('Unsafe site key')
+            if key != entry and key != 'site/cpu-renderer-check.html' and not key.startswith(('site/runtime/', 'site/radio/')): raise ValueError('Unsafe site key')
             selected.append((key, file))
     if packs:
         for file in sorted(packs.iterdir()):
@@ -52,7 +52,7 @@ def publish(site=None, packs=None, entry='site/index.html', execute=False, recor
         if immutable and exists: raise ValueError('Immutable key already exists with a different/missing hash: ' + key)
         changes.append({'key': key, 'bytes': file.stat().st_size, 'sha256': sha, 'replaces': exists})
     # Publish dependencies first and switch public pointers/entry HTML last.
-    changes.sort(key=lambda c: 3 if c['key'] == entry else 2 if c['key'] == 'data/delivery.json'
+    changes.sort(key=lambda c: 3 if c['key'] in [entry, 'site/cpu-renderer-check.html'] else 2 if c['key'] == 'data/delivery.json'
                  else 1 if '/packs/index-' in c['key'] else 0)
     if record:
         record.parent.mkdir(parents=True, exist_ok=True)

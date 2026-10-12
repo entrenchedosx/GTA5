@@ -37,7 +37,7 @@
 <div id="hud"></div>
 <div id="loading"><div id="modes" aria-label="Game mode"><button data-act="back"></button><button data-act="map5"></button><button data-act="map6"></button><button data-act="sandbox"></button><button data-act="story"></button></div><div id="label" role="status" aria-live="polite">Starting...</div><div id="data"></div></div>
 <div id="fps"></div>
-<div id="startup-help" role="alert" hidden><p id="startup-error"></p><p id="startup-reason"></p><ol id="startup-steps"><li>Open the game in an up-to-date desktop Chrome or Edge browser.</li><li>Turn on “Use graphics acceleration when available” in your browser’s System settings, then restart the browser.</li><li>Update your graphics driver and close other games or busy tabs before trying again.</li></ol><p><a href="https://developer.chrome.com/docs/web-platform/webgpu/troubleshooting-tips" target="_blank" rel="noopener noreferrer">Browser graphics troubleshooting</a></p><button id="startup-retry" type="button">Reload and try again</button></div>
+<div id="startup-help" role="alert" hidden><p id="startup-error"></p><p id="startup-reason"></p><p id="cpu-check-link" hidden><a href="/cpu-renderer-check.html">Open CPU renderer development check</a></p><ol id="startup-steps"><li>Open the game in an up-to-date desktop Chrome or Edge browser.</li><li>Turn on “Use graphics acceleration when available” in your browser’s System settings, then restart the browser.</li><li>Update your graphics driver and close other games or busy tabs before trying again.</li></ol><p><a href="https://developer.chrome.com/docs/web-platform/webgpu/troubleshooting-tips" target="_blank" rel="noopener noreferrer">Browser graphics troubleshooting</a></p><button id="startup-retry" type="button">Reload and try again</button></div>
 <div id="radio-shell" hidden><button id="radio-launcher" type="button" aria-expanded="false" aria-controls="radio-panel">RADIO</button><div id="radio-panel" hidden></div></div>
 <script type="module">
 // Page of the browser build. The engine runs in a dedicated worker (loader.js: its "main thread", where the static constructors and
@@ -173,8 +173,9 @@ document.getElementById('startup-retry').addEventListener('click', () => locatio
 			if (m.graphicsCode || m.gpuLost) {
 				const help = document.getElementById('startup-help');
 				document.getElementById('startup-error').textContent = label.textContent;
-				document.getElementById('startup-reason').textContent = m.graphicsCode === 'software-adapter' ? 'CPU rendering requires a compatible software WebGPU adapter supplied by your browser. This browser did not expose one. Downloads have stopped; your cached game data is kept.' : m.graphicsCode === 'formats' ? 'This game needs a graphics adapter with BC texture support. Try another compatible computer.' : 'The game requires WebGPU. Downloads have stopped; your cached game data is kept.';
-				document.getElementById('startup-steps').hidden = m.graphicsCode === 'software-adapter';
+				document.getElementById('startup-reason').textContent = m.graphicsCode === 'cpu-incomplete' ? 'The CPU backend renders a verified subset, but full GTA gameplay support is incomplete. It cannot run the game’s remaining shaders, compressed textures and rendering operations. Downloads have stopped; your cached game data is kept.' : m.graphicsCode === 'software-adapter' ? 'CPU rendering requires a compatible software WebGPU adapter supplied by your browser. This browser did not expose one. Downloads have stopped; your cached game data is kept.' : m.graphicsCode === 'formats' ? 'This game needs a graphics adapter with BC texture support. Try another compatible computer.' : 'Downloads have stopped; your cached game data is kept. A compatible rendering backend is required.';
+				document.getElementById('startup-steps').hidden = m.graphicsCode === 'software-adapter' || !!m.graphicsCode?.startsWith('cpu-');
+				document.getElementById('cpu-check-link').hidden = m.graphicsCode !== 'cpu-incomplete';
 				help.hidden = false; loading.hidden = true; radioShell.hidden = true;
 			}
 			return;
@@ -253,7 +254,7 @@ addEventListener('resize', fitGameCanvas);
 document.addEventListener('fullscreenchange', fitGameCanvas);
 if (!isSecureContext) { new BroadcastChannel('game-progress').postMessage({ error: 'Open the game over HTTPS, or use Launch-Local.cmd on this computer.', graphicsCode: 'secure-context' }); }
 else if (!crossOriginIsolated || typeof SharedArrayBuffer === 'undefined') { new BroadcastChannel('game-progress').postMessage({ error: 'Browser isolation is unavailable. Reload the HTTPS game page, or use Launch-Local.cmd for a local copy.', graphicsCode: 'isolation' }); }
-else if (!navigator.gpu || typeof canvas.transferControlToOffscreen !== 'function') { new BroadcastChannel('game-progress').postMessage({ error: 'This browser does not provide the graphics features this game needs.', graphicsCode: 'api' }); }
+else if (typeof canvas.transferControlToOffscreen !== 'function') { new BroadcastChannel('game-progress').postMessage({ error: 'This browser does not provide the canvas features this game needs.', graphicsCode: 'api' }); }
 else {
 	const offscreen = canvas.transferControlToOffscreen();
 	await dropOldCache();
@@ -316,7 +317,7 @@ const worker = gameWorker = new Worker(RUNTIME + '/loader.js?runtime=delivery-1'
 		cacheNamespace: q.get('deliveryAudit') === '1' ? q.get('cacheNamespace') : '',
 		packIndex: q.get('packs') === '0' ? '' : '/data/delivery.json',
 		bootstrapURL: DATA_BOOTSTRAP,
-		softwareRendering: q.get('renderer') === 'cpu',
+		softwareRendering: q.get('renderer') === 'cpu' || !navigator.gpu,
 		args: ['-rootdir=/game/', ...(q.get('nogpu') ? [] : ['-wgpu']), '-nodisplaycalibration', '-noSocialClub', '-pc:nosocialclub', ...(q.get('newgame') === '1' ? ['-noautoload'] : []), '-nonetwork', '-output', '-width=' + startSize[0], '-height=' + startSize[1], '-forceResolution', ...LOG_ARGS, ...ENGINE_ARGS, '-frameLimit=' + (q.get('fps') === '30' ? 2 : q.get('fps') === '0' ? 0 : 1),		// the game's own limiter: VSync 2 (its default) = 30 fps; 1 = 60 fps; ?fps=0 uncapped (diagnostics). Story Mode continues from the newest savegame (the engine skips that for Sandbox Mode); ?newgame=1 (-noautoload) starts it from the Prologue instead
 		 ...(cores <= 2 ? ['-numCores=' + cores] : []), ...(lowMemory ? LOW_ARGS : []), ...(q.get('args') || '').split(',').filter(Boolean)],
 		shotEvery: +(q.get('shot') || 0),

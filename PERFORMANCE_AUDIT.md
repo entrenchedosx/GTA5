@@ -212,7 +212,7 @@ Actual-bridge regression tests prove identical bytes, terminator and no XHR;
 the second full GTA VI test reached gameplay with zero metadata HTTP requests.
 No original file IDs, data version, cache namespace, saves or asset bytes changed.
 
-## CPU-only rendering — browser-dependent, not established
+## Previous software-adapter attempt — insufficient for CPU gameplay
 
 `wgpu_worker.js::requestGameDevice` now requests the standard software fallback
 after hardware failure. `?renderer=cpu` selects only that path via the page and
@@ -221,13 +221,12 @@ The same BC format and device requirements apply. Failure remains terminal and
 occurs before asset loading. `serve_cpu_qa.py` probes the real adapter/device;
 the mock cases in `test_graphics_startup.cjs` prove dispatch and error handling.
 
-Both actual desktop browser probes returned null software adapters. These are
-availability tests, not CPU gameplay benchmarks. No software renderer is bundled
-in this project, and the existing compiled engine's graphics backend is WebGPU.
-The API cannot create a browser-supplied implementation that is unavailable.
-Guaranteed CPU-only operation remains unresolved and requires engine/rendering
-support or a browser exposing a compatible software device. No browser security
-flags, driver changes or hardware acceleration settings were changed by this work.
+Both actual desktop browser probes returned null software adapters. These were
+availability tests, not CPU gameplay benchmarks. A standard fallback request
+cannot create an implementation the browser does not expose. The later genuine
+CPU subset below replaces the explicit CPU option's adapter request; full game
+support remains incomplete. No browser security flags, driver changes or hardware
+acceleration settings were changed.
 
 ## Further GTA V streaming coverage — measured and appended
 
@@ -251,3 +250,61 @@ The three new pack downloads use Static Assets; their whole bodies were verified
 in the actual public browser. Original unrecorded ranges and streaming hints remain
 the largest metered-read category. Whole-session request counts cannot be compared
 as an isolated speedup: cache state, NPC resources and capture duration differ.
+
+## Genuine CPU subset and complete-contract gap
+
+The new audit corrects the assumption that missing C++ source alone blocks all
+CPU porting. `game.js::wgpu_start_worker` and `wgpu_worker.js::runCommands` expose
+the actual geometry, constants, texture uploads, states and completion protocol.
+They are sufficient to attempt an independent backend, but a complete software
+implementation of that contract is missing. A shader interpreter alone does not
+provide the required raster/resource/query operations.
+
+The catalogue contains 4,808 translated programs, including 29 compute shaders.
+The actual GTA V capture used 38 opcode kinds, 207 shader pairs, multiple BC
+formats including BC7, and three active compute programs with 16×16 workgroups
+and barriers. The prototype's two shader pairs account for only about 0.96% of
+that first capture's draw attempts. A later per-page-token capture confirms the
+same broad requirements without mixing sessions. Source locations and counts are
+in [CPU_RENDERER_STATUS.md](CPU_RENDERER_STATUS.md).
+
+`wgsl_reflect@1.6.0` parsed 4,805 files, but had three entity-selection parser
+failures, literal-suffix binding/input integration issues, slow interpreted
+pixel execution and a reproduced workgroup-barrier correctness failure (1
+instead of 3). The active game compute shaders contain these barriers; sequential
+dispatch is not a safe drop-in. Native Dawn/SwiftShader also cannot be installed
+as a browser software device merely by wrapping the existing worker.
+
+Implemented: `cpu-rasterizer.js` performs clipping, raster coverage, depth,
+perspective interpolation, RGBA8 nearest sampling and alpha blending for two
+original unlit shader pairs. Their ports are independently checked by executing
+the exact WGSL, with immutable source/vendor hashes. `cpu-check-worker.js` renders
+an interactive synthetic fixture, using reusable bounded buffers and CPU pixel
+presentation. Actual Chromium/Edge contexts lacking WebGPU rendered it and
+responded to camera controls. The fixture is explicitly not GTA gameplay.
+
+`loader.js` selects `cpu_worker.js` for explicit CPU mode, or once after failed
+GPU initialization. The old GPU worker is stopped before replacement; late events
+are ignored. The CPU backend reports its actual incomplete contract, and the
+loader prevents IO/WASM from starting without full compatibility. Existing GPU
+readiness/device reuse, manifests, version, caches and native gameplay are kept.
+
+Remaining: native ring/resource consumer, full required shaders/animation,
+correct workgroup execution, BC texture decoding, MRT/deferred targets,
+depth/stencil, indirect draws, queries and readbacks. CPU GTA world loading,
+simulation/input/vehicles/HUD/audio and game frame times are not verified. The
+next concrete milestone is software replay of a captured real game frame with
+those semantics, then live native-engine integration. Obtaining the exact native
+backend/render-graph/build sources is an alternative route to a simpler CPU mode.
+
+## Renderer lifetime during navigation
+
+Origin-wide diagnostics received lingering prior-game messages after immediate
+navigation; worker state/resource lifetime could outlast the visible page.
+An attempted owner termination on pagehide was not retained after one same-tab
+GTA V→VI initialization stalled before any native graphics commands arrived.
+Fresh VI and a later VI→V switch succeeded, so the cause was not isolated.
+Original native cleanup remains intact. The diagnostic closes its own worker
+and reloads on back/forward restore; local actual-game captures attach per-page
+tokens. Native lifetime/initialization remains an open investigation; no
+memory/FPS improvement is claimed without a dedicated benchmark.

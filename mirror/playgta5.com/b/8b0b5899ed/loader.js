@@ -15,14 +15,13 @@ self.onmessage = (ev) => {
 		clearTimeout(graphicsTimer);
 		bc0.postMessage({ error: message, graphicsCode });
 		console.error(message);
-		if (!engineStarted) { gpu.terminate(); if (io) io.terminate(); }
+		if (!engineStarted) { if (gpu) gpu.terminate(); if (io) io.terminate(); }
 	};
 	// ?cores=N (debug): pretend to be a machine with N logical cores; the engine sizes its worker pools from it
 	if (m.cores) Object.defineProperty(navigator, 'hardwareConcurrency', { value: m.cores });
 	// The GPU worker must be up before the engine blocks this thread: Chrome fetches the script of a worker nested in a worker through
 	// the parent's event loop. It idles until the engine sends its start message (wgpu_backend.cpp: wgpu_start_worker).
 	const gq = new URLSearchParams({ runtime: 'delivery-1' });
-	if (m.softwareRendering) gq.set('renderer', 'cpu');
 	if (m.deliveryAudit) { gq.set('deliveryAudit', '1'); gq.set('role', 'gpu'); }		// invalidate the old worker cached under the unchanged snapshot build ID
 	if (m.profile) gq.set('profile', '1');
 	if (m.profile && m.profileDetail) gq.set('detail', '1');
@@ -37,7 +36,7 @@ self.onmessage = (ev) => {
 	if (m.gpuLimits) gq.set('limits', m.gpuLimits);		// ?limits=name:value,...: a smaller device (diagnosis of weaker GPUs)
 	const B = m.base || '';		// the page's URL prefix for everything it loads (index.html BASE): /b/<build> on the PHP host, empty otherwise
 	const runtimeBase = m.runtimeBase || B;
-	const gpu = new Worker(runtimeBase + '/wgpu_worker.js' + (gq.toString() ? '?' + gq : ''));
+	let gpu = null, cpuAttempted = false;
 	let dataReady = false, graphicsReady = false, graphicsRequested = false;
 	const maybeStart = () => { if (!failed && !engineStarted && dataReady && graphicsReady) { engineStarted = true; start(); } };
 	const openData = () => {
@@ -55,17 +54,34 @@ self.onmessage = (ev) => {
 		bc0.postMessage({ label: 'Opening game data' });
 		io.postMessage({ init: true, base: self.location.origin + '/data/', packIndex: m.packIndex, bootstrapURL: m.bootstrapURL, cacheNamespace: m.cacheNamespace, noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
 	};
-	gpu.onmessage = (e) => {
-		if (failed) return;
-		if (e.data.graphicsError) { fail('Graphics startup failed: ' + e.data.graphicsError, e.data.graphicsCode || 'device'); return; }
-		if (e.data.loaded && !graphicsRequested) { graphicsRequested = true; gpu.postMessage({ graphicsCheck: true }); }
-		if (e.data.graphicsReady && graphicsRequested && !graphicsReady) {
-			graphicsReady = true; clearTimeout(graphicsTimer); openData();
-		}
+	const checkBackend = (cpu) => {
+		if (failed || engineStarted) return;
+		if (cpu) cpuAttempted = true;
+		graphicsRequested = false; clearTimeout(graphicsTimer);
+		const selected = gpu = new Worker(runtimeBase + (cpu ? '/cpu_worker.js' : '/wgpu_worker.js') + '?' + gq);
+		selected.onmessage = (e) => {
+			if (failed || gpu !== selected) return;
+			if (e.data.graphicsError) {
+				const code = e.data.graphicsCode || 'device';
+				if (!cpuAttempted && !engineStarted && ['api','adapter','formats','device'].includes(code)) {
+					selected.terminate(); checkBackend(true); return;
+				}
+				if (e.data.cpuBackend) bc0.postMessage({ cpuBackend: e.data.cpuBackend });
+				fail('Graphics startup failed: ' + e.data.graphicsError, code); return;
+			}
+			if (e.data.loaded && !graphicsRequested) { graphicsRequested = true; selected.postMessage({ graphicsCheck: true }); }
+			if (e.data.graphicsReady && graphicsRequested && !graphicsReady) {
+				if (cpu && e.data.cpuBackend?.gameCompatible !== true) { fail('The CPU backend has not declared compatibility with the native game.', 'cpu-incomplete'); return; }
+				// The CPU subset cannot produce this event: it has no native ring
+				// consumer. A compatible full backend is required before IO/WASM.
+				graphicsReady = true; clearTimeout(graphicsTimer); openData();
+			}
+		};
+		selected.onerror = (e) => { if (gpu !== selected || failed) return; e.preventDefault(); fail('Graphics worker failed: ' + e.message, 'worker'); };
+		bc0.postMessage({ label: cpu ? 'Checking CPU rendering compatibility' : 'Checking graphics compatibility' });
+		graphicsTimer = setTimeout(() => fail('Graphics startup timed out. Restart the browser and try again.', 'timeout'), 30000);
 	};
-	gpu.onerror = (e) => { e.preventDefault(); fail('Graphics worker failed: ' + e.message, 'worker'); };
-	bc0.postMessage({ label: 'Checking graphics compatibility' });
-	graphicsTimer = setTimeout(() => fail('Graphics startup timed out. Restart the browser and try again.', 'timeout'), 30000);
+	checkBackend(!!m.softwareRendering);
 	// An overloaded host answers 503/500/429 (2026-10-06): retried up to 8 times with growing, jittered waits (~20 s in all) instead of compiling an error page.
 	const fetchWasm = async () => {
 		for (let attempt = 0; ; attempt++) {

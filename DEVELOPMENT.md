@@ -160,14 +160,40 @@ default adapter after forcing the preferred selection to fail. They must request
 no `/data/` or WASM before graphics succeeds. Mocked code stays outside the
 deployed runtime; normal gameplay uses the actual GPU worker/device.
 
-CPU compatibility uses WebGPU's `forceFallbackAdapter: true`, after hardware
-attempts or exclusively with `?renderer=cpu`. Required BC textures and game
-features/limits remain intact. A fallback adapter is not guaranteed by browsers.
-Run `python performance/serve_cpu_qa.py` to test the real software device without
-loading game assets. Its result must identify a real adapter/device; mocks are
-only regression coverage. Both tested browsers returned null in the actual
-probe, so no CPU gameplay or performance result is established. There is no
-bundled CPU renderer or WebGL backend, and no native source to build one here.
+The GPU path retains its existing browser software-adapter attempt, but explicit
+`?renderer=cpu` now starts `cpu_worker.js` and the genuine `cpu-rasterizer.js`.
+The subset initializes a CPU canvas and refuses full native compatibility before
+IO/WASM. Failed GPU adapter/device/format selection also tries CPU once, stopping
+the old worker and ignoring its late messages. This does not enable GTA gameplay
+without a full rendering backend; see [CPU_RENDERER_STATUS.md](CPU_RENDERER_STATUS.md).
+
+`/cpu-renderer-check.html` runs synthetic geometry through ports of two original
+shader pairs, on a 2D pixel surface. Benchmarks distinguish CPU work from presented
+intervals, with 30 warm-up and 120 measured frames at a 30 FPS cap. Its camera
+controls and resolution choices belong to the fixture, not native game systems.
+The default regression suite includes geometric edge/depth/clipping/sampling
+tests and independent execution of the original WGSL using a hash-pinned MIT
+test-only module under `performance/third_party/`.
+
+```sh
+node performance/audit_cpu_contract.cjs .downloads/cpu-contract.json
+node performance/probe_cpu_interpreter.cjs .downloads/cpu-interpreter.json
+python performance/serve_cpu_contract_qa.py --stage .downloads/static-cpu-subset-final --port 8891
+```
+
+The contract fixture records only opcode/format/shader metadata; its per-page
+tokens reject other sessions' messages. Open the actual map at `/index.html`
+and read hidden `#cpu-contract`. Capture instrumentation is never deployed.
+`--cpu-only --bind <local IPv4>` serves only the diagnostic and its two scripts
+on port 8880. A non-loopback HTTP origin actually omits WebGPU in the tested
+browsers, without mocking an adapter or changing flags. This is an API-absence
+fixture, not proof of a physical GPU-less device or disabled compositor.
+Stop this temporary server after QA. The earlier `serve_cpu_qa.py` remains a
+separate probe of browser-supplied software WebGPU, not the new CPU rasterizer.
+
+Native navigation cleanup remains unchanged after an intermittent startup stall
+during the attempted change. The CPU diagnostic terminates only its own worker
+and reloads on a back/forward-cache restore. Caches/saves keep their namespaces.
 
 ## Contributions
 

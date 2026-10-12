@@ -23,6 +23,10 @@ HEADERS = '''/*
   Cache-Control: no-cache
 /index.html
   Cache-Control: no-cache
+/cpu-renderer-check.html
+  Cache-Control: no-cache
+/cpu-renderer-check
+  Cache-Control: no-cache
 /data/manifest.json
   Cache-Control: no-cache
 /data/delivery.json
@@ -53,6 +57,8 @@ def select(root, site, packs, radio=None):
         selected[url] = file
 
     add('/index.html', site / 'site/index.html')
+    if (site / 'site/cpu-renderer-check.html').is_file():
+        add('/cpu-renderer-check.html', site / 'site/cpu-renderer-check.html')
     page = selected['/index.html'].read_text(encoding='utf-8')
     runtime = re.search(r'const RUNTIME = "(/runtime/[a-f0-9]{64})";', page)
     if not runtime:

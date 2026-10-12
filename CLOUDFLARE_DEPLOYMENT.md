@@ -263,3 +263,45 @@ adapter, reported zero IO/data fetches, created no IO worker and showed the
 specific recovery card. CPU gameplay remains unavailable in that tested browser.
 Rollback of this UI-only change: promote `cb3eddd4-712e-405d-a6a8-5559d2fbdc78`.
 All earlier coverage/static rollback versions above remain retained.
+
+### Genuine CPU subset release candidate
+
+Candidate `f9d000c9-5e70-43e7-b1d5-17a7ab6b9176` uses frozen runtime
+`/runtime/06d78fae0c7a38f33cf7e227d9de64cb7d08287a0f6755657196355def03388a/`.
+Stage `.downloads/static-cpu-subset-verified` contains 6,967 files /
+2,727,492,113 bytes, maximum 8,391,176 bytes; the same 327 packs and startup
+bootstrap/index are retained. Three CPU scripts and one diagnostic HTML were
+added. GPU worker, compiled glue/WASM, original assets and shaders are unchanged.
+The test-only MIT shader interpreter under `performance/third_party/` is not
+included in the public catalogue.
+
+This release implements a genuine CPU rasterizer subset, **not CPU GTA gameplay**.
+Explicit CPU mode initializes that backend and stops before IO/WASM because
+full native compatibility is false. The public diagnostic clearly renders a
+synthetic fixture. See CPU_RENDERER_STATUS.md for the missing command/shader/
+texture/query implementation and measured limits. Do not describe the update
+as a complete GPU-less game port.
+
+Private R2 first received 17 candidate objects / 498,545 bytes: 15 immutable
+runtime scripts, new diagnostic and `site/delivery-cpu-candidate.html`.
+The diagnostic then received its 4,514-byte back/forward restore update. The
+public candidate reached gameplay on GTA V (22.6 s) and GTA VI (18.1 s), normal
+graphics / 1280×720, with partially populated caches and zero reported download
+failures/browser warnings. These are correctness observations, not FPS gains.
+The entry promotion plan replaces only `site/index.html` / 40,673 bytes.
+
+Initial preview `2056f2cb-11b6-48fd-8c51-6bdb3bf6d804` uploaded six new static bodies
+and reused 6,961. It was not promoted: the canonical extensionless diagnostic URL
+needed an explicit no-cache header too. The corrected candidate above reused
+all bodies and passed 49 HTTP checks (47 static / two intentional Worker paths),
+including byte hashes, canonical HTML cache policy, conditional responses and
+isolation. Its real full-page CPU preflight initialized the subset, reported
+`cpu-incomplete`, and requested zero game data/WASM. The renderer diagnostic
+also drew actual generated pixels on the hosted preview.
+
+Promote the corrected candidate only after the documented checks. No changes to
+domains, DNS, permissions, private bucket access, original archive keys, billing
+or data versions are needed. Rollback: promote the preceding production version
+`4f4f65c4-af5e-4fec-af41-a0f57586366a` at 100%. Old immutable objects/caches remain;
+its static entry continues using its original runtime. Existing full static-
+hosting rollback instructions are unchanged.

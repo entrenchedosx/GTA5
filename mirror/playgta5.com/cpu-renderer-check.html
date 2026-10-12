@@ -1,0 +1,31 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CPU renderer development check</title>
+<style>body{margin:24px auto;max-width:900px;padding:0 18px;background:#10151c;color:#eee;font:16px/1.5 system-ui}h1{font-size:25px;margin-bottom:6px}p{margin:8px 0 18px}canvas{width:100%;max-width:850px;image-rendering:pixelated;background:#0e131b}label,button{margin-right:16px}button,select{font:inherit;padding:5px 10px}pre{white-space:pre-wrap;color:#aadac4;font:13px/1.5 monospace}a{color:#aad4ff}</style>
+<h1>CPU renderer development check</h1>
+<p>This renders a synthetic fixture using ports of two existing game shader pairs. <strong>GTA gameplay support is still incomplete.</strong> The game engine, physics, world archives and audio are not loaded here.</p>
+<p id="api">Checking browser context…</p>
+<canvas id="surface" width="320" height="180" aria-label="CPU generated 3D renderer fixture"></canvas>
+<p><label>Resolution <select id="resolution"><option value="320x180">320 × 180</option><option value="426x240">426 × 240</option></select></label><button id="left">Turn left</button><button id="right">Turn right</button><button id="near">Move closer</button><button id="far">Move away</button><button id="benchmark">Run benchmark</button></p>
+<pre id="status">Starting CPU renderer…</pre><pre id="benchmark-output"></pre><pre id="cpu-results" hidden></pre>
+<p>Clipping, depth, perspective UVs, texture sampling and CPU pixel output are active. The fixture is capped at 30 FPS. Missing game support includes the native rendering command consumer, remaining shaders, compressed textures, compute, deferred lighting and query/readback behaviour.</p>
+<p><a href="/">Return to the game</a></p>
+<script type="module">
+const BASE='/b/8b0b5899ed';
+const RUNTIME = BASE;
+const canvas=document.getElementById('surface'),worker=new Worker(RUNTIME+'/cpu-check-worker.js');
+const result=document.getElementById('cpu-results'),status=document.getElementById('status'),benchmark=document.getElementById('benchmark');
+let yaw=.45,distance=8,lastBenchmark=null;
+document.getElementById('api').textContent='WebGPU API exposed in this context: '+!!navigator.gpu+'. The renderer uses JavaScript CPU rasterization and a 2D pixel surface.';
+const offscreen=canvas.transferControlToOffscreen();worker.postMessage({init:true,canvas:offscreen,width:320,height:180},[offscreen]);
+worker.onmessage=({data})=>{
+  if(data.benchmark){lastBenchmark=data.benchmark;benchmark.disabled=false;document.getElementById('benchmark-output').textContent='Fixture benchmark: CPU median '+lastBenchmark.cpuMedianMs.toFixed(2)+' ms; p95 '+lastBenchmark.cpuP95Ms.toFixed(2)+' ms. Presented interval median '+lastBenchmark.intervalMedianMs.toFixed(2)+' ms; p95 '+lastBenchmark.intervalP95Ms.toFixed(2)+' ms; '+lastBenchmark.fps.toFixed(1)+' FPS (30 FPS cap). These are fixture results, not game FPS.';}
+  status.textContent='CPU frame '+data.cpuFrameMs.toFixed(2)+' ms · '+data.resolution.join(' × ')+' · '+data.triangles+' triangles · '+data.fragments+' shaded pixels · '+(data.typedArrayBytes/1048576).toFixed(2)+' MiB tracked buffers · pixel hash '+data.pixelHash+(benchmark.disabled?' · benchmark '+(data.benchmarkProgress||0)+'/120':'');
+  result.textContent=JSON.stringify({...data,benchmark:lastBenchmark,browser:navigator.userAgent,secureContext:isSecureContext,gpuApiExposed:!!navigator.gpu,gameplayLoaded:false});
+};
+worker.onerror=e=>{status.textContent='CPU check failed: '+e.message;benchmark.disabled=false;};
+document.getElementById('left').onclick=()=>worker.postMessage({yaw:yaw-=.2});document.getElementById('right').onclick=()=>worker.postMessage({yaw:yaw+=.2});
+document.getElementById('near').onclick=()=>worker.postMessage({distance:distance=Math.max(3,distance-.5)});document.getElementById('far').onclick=()=>worker.postMessage({distance:distance=Math.min(12,distance+.5)});
+document.getElementById('resolution').onchange=e=>{lastBenchmark=null;document.getElementById('benchmark-output').textContent='';benchmark.disabled=false;const [width,height]=e.target.value.split('x').map(Number);worker.postMessage({init:true,width,height});};
+benchmark.onclick=()=>{benchmark.disabled=true;worker.postMessage({benchmark:true});};
+addEventListener('pagehide',()=>worker.terminate());
+addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
+</script>

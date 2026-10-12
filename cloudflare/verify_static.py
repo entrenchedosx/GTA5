@@ -23,6 +23,8 @@ def verify(base, stage, plan, record, coverage=False):
         checks.append({'path':path,'method':method,'status':status,'delivery':meta.get('X-Game-Delivery'),'bytes':len(body)})
         return status, meta, body
     selected=['/index.html','/data/manifest.json','/data/delivery.json']
+    if '/cpu-renderer-check.html' in entries:
+        selected.append('/cpu-renderer-check.html')
     selected += [p for p in entries if p.startswith(('/runtime/','/data/packs/index-','/data/packs/bootstrap-'))]
     pack_urls=[p for p in entries if p.startswith('/data/packs/') and p.endswith('.bin')]
     selected += sorted(pack_urls,key=lambda p:entries[p]['bytes'])[:3]
@@ -38,7 +40,7 @@ def verify(base, stage, plan, record, coverage=False):
         etag=headers.get('ETag')
         # Hosted HTML can omit validators even when its body is byte-identical.
         # Keep it no-cache and verify every byte; hashed assets still need ETags.
-        if path == '/index.html' and not etag:
+        if path.endswith('.html') and not etag:
             checks[-1]['conditional']='Hosted HTML omitted ETag; full body verified'
             continue
         assert etag, path

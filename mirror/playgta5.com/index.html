@@ -61,7 +61,8 @@ async function acquireGameLease(locks) {
 	});
 }
 if (!await acquireGameLease(navigator.locks)) {
-	document.getElementById('modes').hidden = true;
+	document.getElementById('modes').remove();
+	document.getElementById('quality-panel').remove();
 	document.getElementById('label').textContent = 'The game is already open in another tab. Close that tab, then reload this one.';
 } else {
 // Page of the browser build. The engine runs in a dedicated worker (loader.js: its "main thread", where the static constructors and

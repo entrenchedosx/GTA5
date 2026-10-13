@@ -596,9 +596,25 @@ full; the user freed space and the unchanged installer check passed. The QA
 server is not Cloudflare Static Assets; its responses cannot satisfy delivery
 routing header/hash checks. Those checks must run against the release preview.
 
+Public release verification: Windows/Linux CI passed for `1b54c65`; preview
+and production each passed 49 HTTP checks (47 static and two intentional Worker
+responses). Public canary GTA V and VI reached gameplay at normal 1280×720 in
+31.74 and 38.07 seconds respectively, using partially populated persistent
+caches, with zero reported GPU validation errors. After promotion, the actual
+production entry reached GTA VI in **13.98 seconds warm**, with no console
+errors/warnings observed. Its later steady window had median **19.97 ms**, p95
+**32.01 ms**, mean **21.40 ms** (46.7 FPS). This is an observation in a different
+cache/session state, not evidence that these host changes accelerated native
+rendering. Full physical-device gameplay/audio/physics regression coverage
+remains outstanding.
+
+The raw WAT output and growing browser cache contributed to disk exhaustion
+during the initial investigation. Analysis output was regenerated directly into
+gzip, the affected run was excluded from causal comparisons, and release checks
+were rerun after the user freed space. No assets or user work were deleted.
+
 Physical iPhone 11 Pro: user reports iOS 26.x; exact minor, time to gameplay,
 FPS/frame percentiles, resident memory and sustained session duration are
 **unverified**. A13 native BC texture support and memory64/3 GiB requirements
 remain compatibility work, not a completed mobile port. No claim of 60 FPS or
 full CPU-only gameplay is made for this update.
-

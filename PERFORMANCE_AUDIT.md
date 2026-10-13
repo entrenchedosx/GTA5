@@ -357,4 +357,3 @@ a compatible native rebuild. Full WebGL/CPU gameplay backends are absent.
 Real-device long sessions, physics/audio pause-resume QA and low-end hardware
 FPS remain unverified. Desktop CPU render preparation is substantially heavier
 than GPU pass time in the tested scenes; no native binary speedup is claimed.
-

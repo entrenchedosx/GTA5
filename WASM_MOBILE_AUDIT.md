@@ -131,3 +131,24 @@ Do not publish analysis outputs, tooling, credentials or original world archives
 Existing immutable packs, manifests, shader URLs and private R2 data are retained.
 Use the versioned static-asset release and explicit frozen stage described in
 `CLOUDFLARE_DEPLOYMENT.md`; deployment is not proof of mobile support.
+
+## Changed files and verification scope
+
+Runtime: `mirror/playgta5.com/index.html`,
+`mirror/playgta5.com/b/8b0b5899ed/loader.js`, and
+`mirror/playgta5.com/b/8b0b5899ed/io_worker.js`.
+
+Regression/audit tooling: `performance/run_checks.py`, `test_input.cjs`,
+`test_resize.cjs`, `test_memory_packs.cjs`, `test_runtime_compatibility.cjs`,
+`test_stream_recovery.cjs`, and `check_social_links.py` (all under `performance/`).
+
+Documentation: `README.md`, `WASM_MOBILE_AUDIT.md`, `PERFORMANCE_AUDIT.md`,
+`PERFORMANCE_RESULTS.md`, and `CLOUDFLARE_DEPLOYMENT.md`.
+
+Code was pushed as `1b54c6511ae6649b99cccb87f947704fb454be9e`. Both Windows and
+Linux CI passed; local code-only checks and the actual local server test passed.
+Preview and production each passed 49 delivery checks. Actual public GPU tests
+reached gameplay on both maps; original engine hash remains unchanged. Current
+production version is `85865fff-f58f-492d-bcc4-fa283446899d`; retained rollback
+is `f9d000c9-5e70-43e7-b1d5-17a7ab6b9176`. Physical iPhone gameplay is not
+verified, and this investigation does not mark the full mobile mission complete.

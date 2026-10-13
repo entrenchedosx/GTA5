@@ -4,6 +4,8 @@ An existing browser game with GTA V and GTA VI (`env_test`) maps, a WebAssembly 
 
 **The native C++ engine source and its build configuration are not available.** This is a working compiled client with editable browser workers; it is not a reproducible native-engine source release.
 
+**iPhone 11 Pro gameplay is not yet supported or verified.** The A13 GPU lacks the native BC texture path required by this renderer, and the engine requires shared memory64 with a 3 GiB initial heap. Touch controls and conservative mobile defaults are implemented; startup now checks the WASM/BigInt interface before downloading game data. See [official WABT findings and mobile compatibility limits](WASM_MOBILE_AUDIT.md). Low-memory devices use demand-only streaming by default; the RAM fallback can use verified asset packs without persistent storage.
+
 Play the hosted build at [gta.ezgames.lol](https://gta.ezgames.lol/). It uses the existing Cloudflare Worker and private R2 bucket. The delivery layer combines recorded startup reads into 77 bounded downloads at normal graphics, and fetches measured map-region packs only on demand. The local disk cache reuses those original file blocks across visits; gameplay settings and asset contents are preserved. The full launch includes requests outside those 77 startup packs.
 
 The source includes an optional two-station browser radio panel with original SVG artwork. It loads only when opened and fetches each MP3 only after station selection. The maintainer confirmed public streaming rights for both recordings, which are served on the hosted site and kept outside Git. See [station mapping, local setup and distribution limits](RADIO_STATIONS.md). The compiled game engine's own vehicle-radio wheel is outside the available source.

@@ -322,3 +322,41 @@ and saves. `.downloads/static-cpu-subset-verified-plan.json` records the exact
 catalogue; upload and preview/production records are in ignored `.downloads/`.
 Original archives, WASM/shaders, data version, bucket privacy and domain/DNS
 configuration were not changed.
+### 13 October 2026: WASM/mobile audit and low-memory loading release
+
+Code commit `1b54c6511ae6649b99cccb87f947704fb454be9e` passed Windows and Linux
+[CI checks](https://github.com/entrenchedosx/GTA5/actions/runs/38360978088).
+Version `85865fff-f58f-492d-bcc4-fa283446899d` was promoted to **100%** production
+traffic after its preview passed 49 HTTP checks (47 Static Assets responses and
+two intentional Worker responses). Both public canary maps reached gameplay
+at 1280×720, normal graphics, without reported GPU validation errors. This is
+not a claim of full mobile support, CPU gameplay or a measured FPS speedup.
+
+The promoted production site also passed all **49** HTTP checks. Its real root
+entry reached GTA VI in 13.98 seconds with a warm persistent cache, no reported
+GPU validation errors and no observed console warnings/errors. Raw verification
+records remain ignored under `.downloads/mobile-audit-*-checks.json`.
+
+Frozen runtime:
+`/runtime/710ab54b4225a0e276af4bb0d6d0ef55fd86c8284c2cce47363efaad5b8921f0/`.
+Static stage `.downloads/static-mobile-audit-final`: 6,967 files / 2,727,504,101
+bytes, maximum 8,391,176 bytes. Wrangler uploaded three changed static bodies
+and reused 6,964. Original WASM, shader/asset bytes, all 327 immutable packs,
+metadata version and bootstrap URL are unchanged. The stage reuses hardlinks
+to previously frozen asset bodies, never editable original asset files.
+
+Private R2 candidate upload: 17 objects / 510,603 bytes, including immutable
+runtime scripts, updated diagnostic reference and `site/delivery-mobile-audit.html`.
+The final entry upload replaced only `site/index.html` / 45,742 bytes. No bucket
+permissions, credentials, domains, routing or original archives were changed.
+
+Rollback: promote retained version `f9d000c9-5e70-43e7-b1d5-17a7ab6b9176` to
+100% with the normal `wrangler versions deploy <version>@100%` workflow. Its
+Static Assets snapshot includes the previous entry and runtime; immutable
+resources and game data remain compatible. For an R2-only fallback rollback,
+the previous entry remains in `.downloads/cpu-subset-release-site/site/index.html`;
+review and publish that retained site stage through the same uploader. Never
+delete data, reset Git history or invalidate all caches to roll back.
+
+See `WASM_MOBILE_AUDIT.md`, `PERFORMANCE_AUDIT.md` and `PERFORMANCE_RESULTS.md`
+for exact scope, measurements and remaining iPhone/native-source limitations.

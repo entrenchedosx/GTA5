@@ -50,6 +50,20 @@
 <div id="startup-help" role="alert" hidden><p id="startup-error"></p><p id="startup-reason"></p><p id="cpu-check-link" hidden><a href="/cpu-renderer-check.html">Open CPU renderer development check</a></p><ol id="startup-steps"><li>Open the game in an up-to-date desktop Chrome or Edge browser.</li><li>Turn on “Use graphics acceleration when available” in your browser’s System settings, then restart the browser.</li><li>Update your graphics driver and close other games or busy tabs before trying again.</li></ol><p><a href="https://developer.chrome.com/docs/web-platform/webgpu/troubleshooting-tips" target="_blank" rel="noopener noreferrer">Browser graphics troubleshooting</a></p><button id="startup-retry" type="button">Reload and try again</button></div>
 <div id="radio-shell" hidden><button id="radio-launcher" type="button" aria-expanded="false" aria-controls="radio-panel">RADIO</button><div id="radio-panel" hidden></div></div>
 <script type="module">
+// Fixed native broadcast channels require one active game per origin.
+async function acquireGameLease(locks) {
+	if (!locks || typeof locks.request !== 'function') return true;
+	return new Promise(resolve => {
+		locks.request('gta5-active-runtime', { mode: 'exclusive', ifAvailable: true }, async lock => {
+			resolve(!!lock);
+			if (lock) await new Promise(() => {}); // Released when the document closes.
+		}).catch(() => resolve(false));
+	});
+}
+if (!await acquireGameLease(navigator.locks)) {
+	document.getElementById('modes').hidden = true;
+	document.getElementById('label').textContent = 'The game is already open in another tab. Close that tab, then reload this one.';
+} else {
 // Page of the browser build. The engine runs in a dedicated worker (loader.js: its "main thread", where the static constructors and
 // main() run and which may block); the page only owns the canvas, which is transferred to that worker and on to the GPU worker.
 // Query string: ?args=-flag1,-flag2=value (added to the engine command line), ?shot=N (screenshot of every N-th present to the dev server).
@@ -628,6 +642,7 @@ function installInput(memory, block) {
 		document.addEventListener('visibilitychange', () => { if (document.hidden) { touches.clear(); camera=null; releaseAll(); Atomics.store(w,LOCKED,0); Atomics.store(w,FOCUS,0); } else Atomics.store(w,FOCUS,1); });
 	}
 }
+} // Exclusive game document lease.
 </script>
 </body>
 </html>

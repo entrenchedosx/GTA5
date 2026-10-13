@@ -1,0 +1,30 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const html = fs.readFileSync('mirror/playgta5.com/index.html', 'utf8');
+const helper = html.slice(html.indexOf('async function acquireGameLease'), html.indexOf('if (!await acquireGameLease'));
+const ctx = { Promise }; vm.createContext(ctx); vm.runInContext(helper, ctx);
+(async () => {
+  assert.equal(await ctx.acquireGameLease(undefined), true);
+  let held = false, pending;
+  const locks = { request(name, options, callback) {
+    assert.equal(name, 'gta5-active-runtime');
+    assert.equal(options.ifAvailable, true);
+    const lock = held ? null : {};
+    if (lock) held = true;
+    const result = callback(lock);
+    if (lock) pending = result;
+    return result;
+  }};
+  assert.equal(await ctx.acquireGameLease(locks), true);
+  assert.equal(await ctx.acquireGameLease(locks), false);
+  let released = false; pending.then(() => released = true);
+  await Promise.resolve(); assert.equal(released, false);
+  held = false;
+  assert.equal(await ctx.acquireGameLease(locks), true);
+  assert.equal(await ctx.acquireGameLease({request: () => Promise.reject(new Error('unavailable'))}), false);
+  assert(html.indexOf('if (!await acquireGameLease') < html.indexOf("new BroadcastChannel('game-fps')"));
+  assert(html.includes('} // Exclusive game document lease.'));
+  console.log('PASS: exclusive runtime lease, duplicate refusal and lifetime');
+})().catch(e => { console.error(e); process.exitCode = 1; });

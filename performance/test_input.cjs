@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 const html = fs.readFileSync(path.join(__dirname, '../mirror/playgta5.com/index.html'), 'utf8');
-const source = html.slice(html.indexOf('function installInput('), html.lastIndexOf('</script>'));
+const source = html.slice(html.indexOf('function installInput('), html.indexOf('} // Exclusive game document lease.'));
 function setup(profile, automatic=false, mobile=false) {
  const handlers = new Map(), mouseHandlers = new Map();
  const add = (map, type, fn) => { if (!map.has(type)) map.set(type, []); map.get(type).push(fn); };

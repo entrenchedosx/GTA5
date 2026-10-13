@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const html = fs.readFileSync('mirror/playgta5.com/index.html','utf8');
-const input = html.slice(html.indexOf('function installInput('),html.lastIndexOf('</script>'));
+const input = html.slice(html.indexOf('function installInput('),html.indexOf('} // Exclusive game document lease.'));
 function setup(query='liveResize=1') {
   const handlers=new Map(), timers=new Map(), messages=[];
   let clock=0, nextTimer=0, requested=[1920,1080];

@@ -1,9 +1,21 @@
-# Rights and distribution notice
+MIT License
 
-The project owner states that a rights-holder agreement authorizes use, modification, recoding and distribution of the GTA code and assets covered by that agreement. The stated conditions require the project to remain free and prohibit profiting from it.
+Copyright (c) 2026 entrenchedosx
 
-This repository publishes the available project code for inspection and collaboration. The agreement itself has not been supplied in this checkout. This notice records the owner's stated authorization and conditions; it does not substitute for that agreement, expand its scope, grant ownership of GTA intellectual property, or relicense third-party components under MIT or another assumed license.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-GTA names, game content and related intellectual property remain subject to their applicable rights-holder terms. Third-party restrictions and notices continue to apply. The separately downloaded Python runtime includes its own `LICENSE.txt`.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-This project is not an official release of, or an endorsement by, Rockstar Games or Take-Two. There are no paid features or monetization mechanisms in this repository.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

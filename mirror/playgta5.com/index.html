@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>game</title>
 <style>
 	html, body { margin: 0; height: 100%; background: #000; color: #ccc; font: 12px monospace; overflow: hidden; }
@@ -30,6 +31,11 @@
 	#radio-launcher, .web-radio button { color: inherit; font: inherit; cursor: pointer; }
 	#radio-launcher { padding: 8px 13px; border: 1px solid #82765f; border-radius: 6px; background: rgba(16,17,17,.94); box-shadow: 0 3px 14px #0009; font-weight: 800; letter-spacing: .09em; }
 	#radio-launcher:hover, #radio-launcher:focus-visible { border-color: #f0bd64; }
+	#touch-controls { position: fixed; inset: 0; pointer-events: none; z-index: 12; touch-action: none; }
+	#touch-controls button { pointer-events: auto; touch-action: none; color: white; background: #171a1ecc; border: 1px solid #999; border-radius: 8px; min-width: 46px; min-height: 42px; font: 13px system-ui; }
+	.touch-move, .touch-actions { position: absolute; bottom: max(12px, env(safe-area-inset-bottom)); display: grid; gap: 5px; }
+	.touch-move { left: max(12px, env(safe-area-inset-left)); grid-template-columns: repeat(3, 46px); }
+	.touch-actions { right: max(12px, env(safe-area-inset-right)); grid-template-columns: repeat(2, auto); }
 </style>
 </head>
 <body>
@@ -44,6 +50,23 @@
 // main() run and which may block); the page only owns the canvas, which is transferred to that worker and on to the GPU worker.
 // Query string: ?args=-flag1,-flag2=value (added to the engine command line), ?shot=N (screenshot of every N-th present to the dev server).
 const q = new URLSearchParams(location.search);
+// Safari does not expose deviceMemory. Treat touch-only devices conservatively;
+// explicit low/res/fps query settings remain available for matched benchmarks.
+const mobileProfile = navigator.maxTouchPoints > 0 && matchMedia('(pointer: coarse)').matches;
+function runtimeCompatibility() {
+	try {
+		// Match the compiled glue's constructor and BigInt descriptor too.
+		// Some browsers accept i64 instructions before exposing this JS API.
+		new WebAssembly.Memory({ initial: 1n, maximum: 1n, shared: true, address: 'i64' });
+		// Generated with official WABT from shared memory64 + SIMD + bulk memory
+		// + atomic load. Execute the i64 ABI with BigInt, not just API detection.
+		const bytes = new Uint8Array([0,97,115,109,1,0,0,0,1,6,1,96,1,126,1,127,3,2,1,0,5,4,1,7,1,1,7,9,1,5,112,114,111,98,101,0,0,10,38,1,36,0,253,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,26,66,0,65,0,66,0,252,11,0,32,0,254,16,2,0,11]);
+		const instance = new WebAssembly.Instance(new WebAssembly.Module(bytes));
+		if (instance.exports.probe(0n) !== 0) throw new Error('Incorrect i64 ABI result');
+		return '';
+	} catch (e) { return 'This browser cannot run this engine’s shared 64-bit WebAssembly memory and BigInt interface. No game data was downloaded. Engine compatibility requires a rebuild for this browser.'; }
+}
+const runtimeError = isSecureContext && crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined' ? runtimeCompatibility() : '';
 // URL prefix of everything this page loads (loader, workers, engine, shaders): empty on the dev server; on the PHP host (phase3/host/index.php) it puts the page's own
 // text `/b/8b0b5899ed` through str_replace to `/b/<build id>`, so those files are cached for ever under URLs that change when the build does.
 const BASE = '/b/8b0b5899ed'.charAt(0) === '_' ? '' : '/b/8b0b5899ed';
@@ -254,6 +277,7 @@ addEventListener('resize', fitGameCanvas);
 document.addEventListener('fullscreenchange', fitGameCanvas);
 if (!isSecureContext) { new BroadcastChannel('game-progress').postMessage({ error: 'Open the game over HTTPS, or use Launch-Local.cmd on this computer.', graphicsCode: 'secure-context' }); }
 else if (!crossOriginIsolated || typeof SharedArrayBuffer === 'undefined') { new BroadcastChannel('game-progress').postMessage({ error: 'Browser isolation is unavailable. Reload the HTTPS game page, or use Launch-Local.cmd for a local copy.', graphicsCode: 'isolation' }); }
+else if (runtimeError) { new BroadcastChannel('game-progress').postMessage({ error: runtimeError, graphicsCode: 'wasm-compatibility' }); }
 else if (typeof canvas.transferControlToOffscreen !== 'function') { new BroadcastChannel('game-progress').postMessage({ error: 'This browser does not provide the canvas features this game needs.', graphicsCode: 'api' }); }
 else {
 	const offscreen = canvas.transferControlToOffscreen();
@@ -265,7 +289,7 @@ else {
 	// Shadows off (-shadowQuality=-1, engine level 0 below the menu's lowest; SettingsManager.cpp, wasm): the cascade shadow pass was a third of all draws (Node, 1366x600:
 	// 600-900 of 1,300-2,900 per frame), and a 4-core Chromebook spent ~110 us per draw. ?shadows=1 keeps them at the lowest level.
 	const lowParam = q.get('low');
-	lowMemory = lowParam === '1' || (lowParam !== '0' && navigator.deviceMemory && navigator.deviceMemory <= 4);
+	lowMemory = lowParam === '1' || (lowParam !== '0' && (mobileProfile || (navigator.deviceMemory && navigator.deviceMemory <= 4)));
 	const LOW_ARGS = ['-textureQuality=0', '-pedVariety=0', '-vehicleVariety=0', '-shadowQuality=' + (q.get('shadows') === '1' ? 0 : -1), '-reflectionQuality=0', '-particleQuality=0',
 		'-grassQuality=0', '-cityDensity=0', '-lodScale=0', '-pedLodBias=0', '-vehicleLodBias=0'];
 	const cores = +(q.get('cores') || 0) || (lowMemory ? 2 : navigator.hardwareConcurrency);
@@ -279,6 +303,7 @@ postLog('[page env] ' + JSON.stringify({ deviceMemory: navigator.deviceMemory, c
 wantSize = () => {
 	const forced = /^(\d+)x(\d+)$/.exec(q.get('res') || '');
 	if (forced) return [+forced[1], +forced[2]];
+	if (mobileProfile) return [640, 360];
 	const sc = Math.max(0.25, Math.min(2, +(q.get('scale') || 1)));
 	const live = q.get('liveResize') === '1';
 	let w = (live ? innerWidth : Math.max(innerWidth, screen.width)) * devicePixelRatio * sc;
@@ -317,8 +342,9 @@ const worker = gameWorker = new Worker(RUNTIME + '/loader.js?runtime=delivery-1'
 		cacheNamespace: q.get('deliveryAudit') === '1' ? q.get('cacheNamespace') : '',
 		packIndex: q.get('packs') === '0' ? '' : '/data/delivery.json',
 		bootstrapURL: DATA_BOOTSTRAP,
+		demandOnly: q.get('prefetch') === '0' || (q.get('prefetch') !== '1' && (lowMemory || mobileProfile)),
 		softwareRendering: q.get('renderer') === 'cpu' || !navigator.gpu,
-		args: ['-rootdir=/game/', ...(q.get('nogpu') ? [] : ['-wgpu']), '-nodisplaycalibration', '-noSocialClub', '-pc:nosocialclub', ...(q.get('newgame') === '1' ? ['-noautoload'] : []), '-nonetwork', '-output', '-width=' + startSize[0], '-height=' + startSize[1], '-forceResolution', ...LOG_ARGS, ...ENGINE_ARGS, '-frameLimit=' + (q.get('fps') === '30' ? 2 : q.get('fps') === '0' ? 0 : 1),		// the game's own limiter: VSync 2 (its default) = 30 fps; 1 = 60 fps; ?fps=0 uncapped (diagnostics). Story Mode continues from the newest savegame (the engine skips that for Sandbox Mode); ?newgame=1 (-noautoload) starts it from the Prologue instead
+		args: ['-rootdir=/game/', ...(q.get('nogpu') ? [] : ['-wgpu']), '-nodisplaycalibration', '-noSocialClub', '-pc:nosocialclub', ...(q.get('newgame') === '1' ? ['-noautoload'] : []), '-nonetwork', '-output', '-width=' + startSize[0], '-height=' + startSize[1], '-forceResolution', ...LOG_ARGS, ...ENGINE_ARGS, '-frameLimit=' + (q.get('fps') === '30' || (!q.has('fps') && mobileProfile) ? 2 : q.get('fps') === '0' ? 0 : 1),		// the game's own limiter: VSync 2 (its default) = 30 fps; 1 = 60 fps; ?fps=0 uncapped (diagnostics). Story Mode continues from the newest savegame (the engine skips that for Sandbox Mode); ?newgame=1 (-noautoload) starts it from the Prologue instead
 		 ...(cores <= 2 ? ['-numCores=' + cores] : []), ...(lowMemory ? LOW_ARGS : []), ...(q.get('args') || '').split(',').filter(Boolean)],
 		shotEvery: +(q.get('shot') || 0),
 		shotRt: q.get('shotrt') === '1',		// ?shotrt=1 (with ?shot=N): every render target of one frame after the world is shown to the dev server's shots/ (wgpu_worker.js)
@@ -497,7 +523,9 @@ function installInput(memory, block) {
 	const locked = () => document.pointerLockElement === canvas;
 	canvas.addEventListener('mousedown', (e) => {
 		if (benchmarkInputLocked) return;
-		if (!locked()) { canvas.requestPointerLock({ unadjustedMovement: true }).catch(() => canvas.requestPointerLock()); }
+		if (!locked() && typeof canvas.requestPointerLock === 'function') {
+			try { Promise.resolve(canvas.requestPointerLock({ unadjustedMovement: true })).catch(() => { try { Promise.resolve(canvas.requestPointerLock()).catch(() => {}); } catch (e) {} }); } catch (e) {}
+		}
 		Atomics.or(w, BTN, 1 << [0, 2, 1, 3, 4][e.button]);
 		e.preventDefault();
 	});
@@ -536,6 +564,26 @@ function installInput(memory, block) {
 		const n = Math.trunc(wheelAccum);
 		if (n) { wheelAccum -= n; Atomics.add(w, DZ, n); }
 	}, { passive: false });
+	if (typeof mobileProfile !== 'undefined' && mobileProfile) {
+		const controls = document.createElement('div'); controls.id = 'touch-controls';
+		const move = document.createElement('div'), actions = document.createElement('div');
+		move.className = 'touch-move'; actions.className = 'touch-actions';
+		controls.append(move, actions); document.body.append(controls);
+		const touches = new Map();
+		for (const [label, vk, group] of [['Left',65,move],['Forward',87,move],['Right',68,move],['Run',16,move],['Back',83,move],['Jump / brake',32,move],['Enter car',70,actions],['Interact',69,actions],['Radio wheel',81,actions],['Pause',27,actions]]) {
+			const button = document.createElement('button'); button.type = 'button'; button.textContent = label; group.append(button);
+			button.addEventListener('pointerdown', e => { e.preventDefault(); if (benchmarkInputLocked) return; button.setPointerCapture(e.pointerId); touches.set(e.pointerId,vk); Atomics.store(keys,vk,0x80); Atomics.store(w,FOCUS,1); });
+			const up = e => { const code=touches.get(e.pointerId); touches.delete(e.pointerId); if (code && ![...touches.values()].includes(code)) Atomics.store(keys,code,0); };
+			for (const type of ['pointerup','pointercancel','lostpointercapture']) button.addEventListener(type,up);
+		}
+		let camera = null;
+		canvas.style.touchAction = 'none';
+		canvas.addEventListener('pointerdown', e => { if (e.pointerType !== 'touch' || benchmarkInputLocked || camera) return; e.preventDefault(); canvas.setPointerCapture(e.pointerId); camera={id:e.pointerId,x:e.clientX,y:e.clientY}; Atomics.store(w,LOCKED,1); });
+		canvas.addEventListener('pointermove', e => { if (!camera || camera.id!==e.pointerId || benchmarkInputLocked) return; const r=canvas.getBoundingClientRect(); Atomics.add(w,DX,Math.round((e.clientX-camera.x)*W/r.width)); Atomics.add(w,DY,Math.round((e.clientY-camera.y)*H/r.height)); camera.x=e.clientX; camera.y=e.clientY; });
+		const releaseCamera = e => { if (camera?.id===e.pointerId) { camera=null; Atomics.store(w,LOCKED,0); } };
+		for (const type of ['pointerup','pointercancel','lostpointercapture']) canvas.addEventListener(type,releaseCamera);
+		document.addEventListener('visibilitychange', () => { if (document.hidden) { touches.clear(); camera=null; releaseAll(); Atomics.store(w,LOCKED,0); Atomics.store(w,FOCUS,0); } else Atomics.store(w,FOCUS,1); });
+	}
 }
 </script>
 </body>

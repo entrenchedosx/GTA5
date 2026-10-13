@@ -36,7 +36,7 @@ self.onmessage = (ev) => {
 	if (m.gpuLimits) gq.set('limits', m.gpuLimits);		// ?limits=name:value,...: a smaller device (diagnosis of weaker GPUs)
 	const B = m.base || '';		// the page's URL prefix for everything it loads (index.html BASE): /b/<build> on the PHP host, empty otherwise
 	const runtimeBase = m.runtimeBase || B;
-	let gpu = null, cpuAttempted = false;
+	let gpu = null, cpuAttempted = false, gpuFailure = '';
 	let dataReady = false, graphicsReady = false, graphicsRequested = false;
 	const maybeStart = () => { if (!failed && !engineStarted && dataReady && graphicsReady) { engineStarted = true; start(); } };
 	const openData = () => {
@@ -52,7 +52,7 @@ self.onmessage = (ev) => {
 		};
 		io.onerror = (e) => { e.preventDefault(); fail('Game data worker failed: ' + e.message); };
 		bc0.postMessage({ label: 'Opening game data' });
-		io.postMessage({ init: true, base: self.location.origin + '/data/', packIndex: m.packIndex, bootstrapURL: m.bootstrapURL, cacheNamespace: m.cacheNamespace, noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
+		io.postMessage({ init: true, base: self.location.origin + '/data/', packIndex: m.packIndex, bootstrapURL: m.bootstrapURL, cacheNamespace: m.cacheNamespace, noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints || !!m.demandOnly, demandOnly: !!m.demandOnly, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
 	};
 	const checkBackend = (cpu) => {
 		if (failed || engineStarted) return;
@@ -64,10 +64,11 @@ self.onmessage = (ev) => {
 			if (e.data.graphicsError) {
 				const code = e.data.graphicsCode || 'device';
 				if (!cpuAttempted && !engineStarted && ['api','adapter','formats','device'].includes(code)) {
+					gpuFailure = e.data.graphicsError;
 					selected.terminate(); checkBackend(true); return;
 				}
 				if (e.data.cpuBackend) bc0.postMessage({ cpuBackend: e.data.cpuBackend });
-				fail('Graphics startup failed: ' + e.data.graphicsError, code); return;
+				fail('Graphics startup failed: ' + (gpuFailure ? gpuFailure + '. ' : '') + e.data.graphicsError, code); return;
 			}
 			if (e.data.loaded && !graphicsRequested) { graphicsRequested = true; selected.postMessage({ graphicsCheck: true }); }
 			if (e.data.graphicsReady && graphicsRequested && !graphicsReady) {

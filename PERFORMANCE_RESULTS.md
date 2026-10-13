@@ -523,3 +523,82 @@ local 16 JavaScript regression suites, 17 syntax checks, pack/static/radio build
 checks and Windows installer checks. The hosted CPU diagnostic rendered and
 changed its image on camera input. Screenshot `performance/cpu-rasterizer-public.jpg`
 shows the explicitly labelled fixture, not actual CPU GTA gameplay.
+# 13 October 2026: WABT and low-memory streaming measurements
+
+See `WASM_MOBILE_AUDIT.md` for immutable engine hash, WABT findings and iPhone
+limitations. Measurements below are Windows / Ryzen 5 7500F / Chromium 155,
+hardware WebGPU (`nvidia`, `blackwell`; browser did not expose a device name).
+They are not measurements on a physically GPU-less device or iPhone.
+
+Initial actual browser observations, `profile=1`, sandbox, 1280×720, `low=0`:
+
+| Scene | World-ready time | Frame median / p95 | Renderer CPU mean | GPU passes mean |
+|---|---:|---:|---:|---:|
+| GTA V | 19.15 s | 15.79 / 17.80 ms | 10.51 ms | 0.945 ms |
+| GTA VI | 16.43 s | 29.44 / 39.73 ms | 27.00 ms | 1.661 ms |
+
+These are diagnostic observations, not a before/after speedup. GTA V reused
+some cache data; GTA VI encountered disk exhaustion and switched to RAM cache.
+The native heap remained 3 GiB or grew beyond it. Renderer CPU active wall time
+excludes explicit waits and does not isolate native simulation/physics. GPU
+timestamp samples are asynchronous, every 30 frames. No GPU or shader bytes
+were changed. Original WASM validates with WABT and its SHA-256 is unchanged.
+
+The revised RAM fallback was compared with the frozen previous release in
+sequential actual GTA VI browser sessions: `low=1`, `res=640x360`, `fps=30`,
+`nocache=1`, stationary input held by the existing automatic benchmark. Both
+used partially warm immutable browser caches; original range reads remain
+`no-store`. These runs are **not** authoritative low-end hardware results.
+
+| Observation | Previous release | Revised memory packs |
+|---|---:|---:|
+| World-ready time | 24.29 s | 26.02 s |
+| Snapshot nearest 75 s from navigation | 74.74 s | 74.87 s |
+| Data-fetch attempts at that snapshot | 11,694 | 6,692 |
+| Cumulative reported fetched bytes at that snapshot | 2,710,288,745 | 1,710,867,217 |
+| Engine reads at that snapshot | 17,498 | 15,346 |
+| Later settled observation, engine reads | 17,547 | 17,564 |
+| Attempts at settled observation | 11,749 | 8,886 |
+| Fetched bytes at settled observation | 2,724,462,953 | 2,282,003,217 |
+
+The settled observations show approximately **24.4% fewer attempts**, with
+similar read counts, texture/buffer accounting and continued world streaming.
+They are approximate workload coverage, not proof of identical unique archive
+reads. The 75-second difference includes different streaming progress and must
+not be described as an equivalent-coverage 42.8% saving. Fetched bytes include
+repeated RAM misses and pack transfers, not unique installed or resident data.
+They can exceed the nominal initial-data target without downloading the entire
+20 GB library. Native heap capacities eventually reached approximately 3.65 GiB
+in both runs; this is still unsuitable evidence of mobile memory stability.
+
+No loading-time improvement is established: the revised ready time was slower
+in this pair. The revised later steady window measured median 31.29 ms / p95
+37.95 ms (about 31.5 FPS with the native 30 FPS setting), CPU mean 25.05 ms and
+sampled GPU mean 1.44 ms. Different stream progress, dynamic scene contents and
+benchmark phases prevent claiming a matched frame-time improvement. One
+intermediate fallback fetched 4 KiB uncovered blocks and regressed requests;
+it was rejected and corrected to the original coalesced 256 KiB reads before
+release. GTA V also reached gameplay in the staged memory-pack test; its
+intermediate loading metrics are not claimed as final benchmark improvements.
+
+Deterministic actual-worker regression: 12 concurrent archive reads without
+OPFS change from **12 range requests to one verified pack**, with byte-for-byte
+equal data and zero additional warm-cache requests. Corrupt packs recover to
+original ranges. Unpacked neighboring blocks share one original-sized read.
+The retained block cache stays at 48 MiB; up to four bounded 8 MiB pack downloads
+and transient decompression/copy buffers are additional memory, not included
+in that cache limit. Native/WGPU memory is separate and substantially larger.
+
+Release checks: 19 JavaScript regression suites, 17 JavaScript/inline syntax
+checks, social URL audit, pack/static/radio builder checks and Windows installer
+checks pass locally. An earlier installer check failed because the disk was
+full; the user freed space and the unchanged installer check passed. The QA
+server is not Cloudflare Static Assets; its responses cannot satisfy delivery
+routing header/hash checks. Those checks must run against the release preview.
+
+Physical iPhone 11 Pro: user reports iOS 26.x; exact minor, time to gameplay,
+FPS/frame percentiles, resident memory and sustained session duration are
+**unverified**. A13 native BC texture support and memory64/3 GiB requirements
+remain compatibility work, not a completed mobile port. No claim of 60 FPS or
+full CPU-only gameplay is made for this update.
+

@@ -308,3 +308,53 @@ Original native cleanup remains intact. The diagnostic closes its own worker
 and reloads on back/forward restore; local actual-game captures attach per-page
 tokens. Native lifetime/initialization remains an open investigation; no
 memory/FPS improvement is claimed without a dedicated benchmark.
+# 13 October 2026: engine, low-memory loading and mobile audit
+
+See `WASM_MOBILE_AUDIT.md` for official WABT versions, verified original module
+hash, structural findings and physical-device support limits. Native engine,
+shader bytes and original assets remain unchanged.
+
+Confirmed host problems and focused changes:
+
+- `io_worker.js::streamRanges`: the user's new idle-body timer did not bound
+  waiting for batched response headers. A blackholed POST could still stop all
+  reads in that group forever. Both batch paths now use bounded header waits;
+  range batches recover through bounded individual requests.
+- `stallGuardedRead`: cancellation was attempted before rejecting the timeout.
+  A throwing cancellation could leave the caller pending. Reject first and
+  contain cancellation failure; actual-worker regression covers this case.
+- `startPack`: publish cache offsets only after all pack writes succeed, keeping
+  the user's numeric short-write checks and short-read repair logic.
+- `init/getMemBlock/readWithoutStore`: OPFS absence previously disabled packs.
+  A bounded RAM pack path retains the 48 MiB block cache, verified pack hashes,
+  shared in-flight downloads and original-byte fallback. Uncovered areas retain
+  256 KiB reads; overlapping reads share those downloads. An intermediate 4 KiB
+  fallback was rejected during browser testing and was not deployed.
+- `index.html/loader.js`: low/touch devices default to demand-only streaming,
+  skipping eager boot packs and native read-ahead hints. Explicit `prefetch=1`
+  restores eager loading for controlled comparisons. Files are still fetched
+  when the engine requests them; no complete-library preload is introduced.
+- Safari often omits `deviceMemory`; touch-only devices previously fell through
+  to desktop sizing, multiplying targets by Retina pixel ratio. Conservative
+  mobile defaults now select the existing low-quality profile, 640×360 and
+  native 30 FPS pacing. Desktop settings remain unchanged.
+- The native shared-memory64/BigInt ABI is executed in a tiny startup probe,
+  including the glue's memory constructor. Unsupported browsers get a specific
+  error before workers or asset loading. The user's recalled BigInt error has
+  not been reproduced on the actual phone, so its exact cause remains unverified.
+- Pointer-lock APIs may return void or be absent; the old direct `.catch()`
+  assumption could throw. Calls now handle both return forms and failures.
+  Touch controls use the existing shared input block and release input on
+  cancellation/backgrounding. GPU errors remain visible if CPU fallback fails.
+
+The social audit checks 21 served UI source files; none contained social URLs.
+A separate original-WASM HTTP social URL scan also found zero. No social
+elements were removed merely to make a report say they were removed.
+
+Remaining major limitations: iPhone A13 lacks the renderer's native BC texture
+path; shared memory64 plus a 3 GiB initial heap still needs device validation or
+a compatible native rebuild. Full WebGL/CPU gameplay backends are absent.
+Real-device long sessions, physics/audio pause-resume QA and low-end hardware
+FPS remain unverified. Desktop CPU render preparation is substantially heavier
+than GPU pass time in the tested scenes; no native binary speedup is claimed.
+

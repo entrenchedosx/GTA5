@@ -234,6 +234,31 @@ async function fetchRetry(url, init) {
 	}
 }
 async function sha1Hex(s) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-1', new TextEncoder().encode(s))), (b) => b.toString(16).padStart(2, '0')).join(''); }
+// Reads one stream chunk, rejecting when no bytes arrive within STALL_MS.
+// School filters and proxies sometimes blackhole a connection: no bytes, no
+// error, forever. Every streaming consumer below uses this so a dead stream
+// is retried or failed visibly instead of wedging the boot silently. Even a
+// very slow link delivers chunks constantly, so 30 s of silence means stuck.
+const STALL_MS = 30000;
+const isStall = (e) => !!e && typeof e.message === 'string' && e.message.indexOf('stalled response from') === 0;
+async function fetchHeaders(url, init) {
+	const ctrl = new AbortController();
+	const timer = setTimeout(() => ctrl.abort(), 2 * STALL_MS);
+	try { return await fetchRetry(url, { ...init, signal: ctrl.signal }); }
+	catch (e) { if (ctrl.signal.aborted) throw new Error('stalled response from ' + url + ' (no headers)'); throw e; }
+	finally { clearTimeout(timer); }
+}
+function stallGuardedRead(reader, label) {
+	return new Promise((resolve, reject) => {
+		const timer = setTimeout(() => {
+			reject(new Error('stalled response from ' + label));
+			Promise.resolve().then(() => reader.cancel()).catch(() => {});
+		}, STALL_MS);
+		reader.read().then(
+			(r) => { clearTimeout(timer); resolve(r); },
+			(e) => { clearTimeout(timer); reject(e); });
+	});
+}
 let dataVersion = '';		// the manifest's version (set when it is loaded): part of a cached batch's name
 // One POST /data/batch answers a list of block runs with one streamed body: thousands of small archive pieces cost one round trip per batch instead of one each.
 // The boot set's batches are the same for every visitor (`wanted` marks the files this visitor still needs; the rest of the batch is read and dropped), so the host keeps each one as a
@@ -252,13 +277,13 @@ function batchFetch(runsIn, compressed, wanted) {
 		const consume = async (reader) => {
 			let ri = 0, inRun = 0;
 			while (ri < runs.length && lens[ri] === 0) ri++;
-			for (;;) {
-				const { done, value } = await reader.read();
-				if (done) break;
-				report(value.length);
-				for (let pos = 0; pos < value.length && ri < runs.length;) {
+		for (;;) {
+			const { done, value } = await stallGuardedRead(reader, 'batch');
+			if (done) break;
+			report(value.length);
+			for (let pos = 0; pos < value.length && ri < runs.length;) {
 					const r = runs[ri], n = Math.min(value.length - pos, lens[ri] - inRun);
-					if (!r.skip) { sh.write(value.subarray(pos, pos + n), { at: r.offset + inRun }); tally(r.f, n); }
+					if (!r.skip) { storeWrite(value.subarray(pos, pos + n), r.offset + inRun); tally(r.f, n); }
 					inRun += n; pos += n;
 					if (inRun === lens[ri]) { ri++; inRun = 0; while (ri < runs.length && lens[ri] === 0) ri++; }
 				}
@@ -273,7 +298,7 @@ function batchFetch(runsIn, compressed, wanted) {
 			} catch (e) { /* not built yet or unusable: the POST below builds and sends it (blocks written so far are written again at the same places) */ }
 		}
 		if (!cached) {
-			const res = await fetchRetry(base + (compressed ? 'batch?gz=1' + (dataVersion ? '&c=1&v=' + encodeURIComponent(dataVersion) : '') : 'batch'), { method: 'POST', priority: 'low', body });
+			const res = await fetchHeaders(base + (compressed ? 'batch?gz=1' + (dataVersion ? '&c=1&v=' + encodeURIComponent(dataVersion) : '') : 'batch'), { method: 'POST', priority: 'low', body });
 			if (!res.ok) throw new Error('HTTP ' + res.status + ' for a batch');
 			// the length of each range as sent (a range is clamped at the end of the server's copy of the file); without the header, the lengths asked for
 			const sent = (res.headers.get('X-Run-Lengths') || '').split(',').map(Number);
@@ -393,13 +418,13 @@ async function streamRanges(group) {
 	if (group.length === 1) { await individual(group[0]); return; }
 	try {
 		const body = JSON.stringify(group.map(r => [r.f.path, r.start, r.end]));
-		const res = await fetchRetry(base + 'batch?exact=1', { method: 'POST', body, priority: group.every(r => r.low) ? 'low' : 'high' });
+		const res = await fetchHeaders(base + 'batch?exact=1', { method: 'POST', body, priority: group.every(r => r.low) ? 'low' : 'high' });
 		if (!res.ok || !res.body) throw new Error('Range batch HTTP ' + res.status);
 		const lengths = group.map(r => r.end - r.start + 1), reader = res.body.getReader();
 		let at = 0, inRun = 0;
 		try {
 			for (;;) {
-				const { done, value } = await reader.read(); if (done) break;
+				const { done, value } = await stallGuardedRead(reader, 'range batch'); if (done) break;
 				report(value.length);
 				for (let pos = 0; pos < value.length;) {
 					if (at >= group.length) throw new Error('Oversized range batch');
@@ -423,19 +448,32 @@ async function streamRanges(group) {
 }
 
 async function fetchRangeRaw(f, start, end, onChunk, whole, low, individual = false) {
+	// A stalled transfer restarts here with a fresh request a few times, then
+	// fails visibly (see stallGuardedRead). Retried chunks rewrite identical
+	// bytes, so resume is safe.
+	for (let attempt = 0; ; attempt++) {
+		try { return await fetchRangeOnce(f, start, end, onChunk, whole, low, individual); }
+		catch (e) {
+			if (!isStall(e) || attempt >= 2) throw e;
+			netStat.stallRetries = (netStat.stallRetries || 0) + 1;
+			log('[io] stalled fetch, retrying (' + (attempt + 1) + '/3): ' + f.path + ' [' + start + '-' + end + ']');
+		}
+	}
+}
+async function fetchRangeOnce(f, start, end, onChunk, whole, low, individual) {
 	if (deliveryPacks && !individual) return queueRange(f, start, end, onChunk, whole, low);
 	const url = base + f.path.split('/').map(encodeURIComponent).join('/') + dataQuery;		// ?v=<manifest version>: the same URL always has the same bytes, so the host (and Cloudflare, with a rule for /data/) may cache it for ever
 	// no-store: the host's own static serving of a range (Apache, host/data/.htaccess) sends no Cache-Control, and Chrome would keep every 206 in its HTTP cache next to this store
 	const init = { cache: 'no-store', priority: low ? 'low' : 'high' };
 	if (!whole) init.headers = { Range: 'bytes=' + start + '-' + end };		// whole: the server sends a compressed copy, the browser decodes it
-	const res = await fetchRetry(url, init);
+	const res = await fetchHeaders(url, init);
 	if (res.status !== 206 && res.status !== 200) throw new Error('HTTP ' + res.status + ' for ' + f.path);
 	let skip = res.status === 200 ? start : 0;		// a server that ignores Range sends the whole file
 	const total = end - start + 1;
 	const reader = res.body.getReader();
 	let pos = 0;
 	for (;;) {
-		const { done, value } = await reader.read();
+		const { done, value } = await stallGuardedRead(reader, f.path);
 		if (done) break;
 		report(value.length); tally(f, value.length);
 		let chunk = value;
@@ -483,7 +521,7 @@ async function ensureBlocks(id, first, last, low) {
 			const slice = deliveryPacks || wholeFile || low ? b - a + 1 : SLICE_BLOCKS, jobs = [];
 			for (let s = a; s <= b; s += slice) {
 				const e = Math.min(b, s + slice - 1), pos = (s - a) * BS, n = (e - s) * BS + blockLen(f, e);
-				jobs.push(fetchRange(f, s * BS, s * BS + n - 1, (chunk, at) => sh.write(chunk, { at: offset + pos + at }), wholeFile, low).then((g) => [g, n]));
+				jobs.push(fetchRange(f, s * BS, s * BS + n - 1, (chunk, at) => storeWrite(chunk, offset + pos + at), wholeFile, low).then((g) => [g, n]));
 			}
 			let got = 0;
 			for (const [g, n] of await Promise.all(jobs)) { got += g; if (g < n) break; }		// a short slice: the file ends there
@@ -509,6 +547,16 @@ async function ensureBlocks(id, first, last, low) {
 
 const seq = new Map();		// file id -> { end: offset after the last read, ahead: current read-ahead bytes }
 let sharedReadFails = false;
+let storeShortfalls = 0;		// self-healed store reads this session (see serve)
+const isStoreShortfall = (e) => !!e && typeof e.message === 'string' && e.message.indexOf('store read returned') === 0;
+// Writes must land fully: a short write (full disk, quota, faulty managed
+// storage) must fail the fetch loudly instead of poisoning the block index.
+// Older browsers return undefined instead of a byte count; only a numeric
+// short count is conclusive, so undefined is accepted as before.
+function storeWrite(chunk, at) {
+	const w = sh.write(chunk, { at });
+	if (w !== undefined && w !== chunk.length) throw new Error('store write returned ' + w + ' of ' + chunk.length);
+}
 // Copies [off, off + len) of file id from the store into the heap at dst.
 function readFromStore(id, off, len, dst) {
 	let done = 0;
@@ -580,8 +628,12 @@ function startPack(pack, low = true) {
 			netStat.packProcessingMs = (netStat.packProcessingMs || 0) + performance.now() - t0;
 			report(pack.encodedBytes);
 			for (const r of jobs) {
-				sh.write(bytes.subarray(r.source, r.source + r.length), { at: r.offset });
+				storeWrite(bytes.subarray(r.source, r.source + r.length), r.offset);
 				tally(files[r.id], r.length);
+			}
+			// Publish no offsets until every write succeeds. A short write in a
+			// later run must not leave earlier runs indexed as a complete pack.
+			for (const r of jobs) {
 				indexRun(r.id, files[r.id], r.first, r.last, r.offset, r.length, r.length);
 			}
 			netStat.packs = (netStat.packs || 0) + 1; scheduleFlush();
@@ -605,6 +657,21 @@ async function prefetchPacks() {
 }
 
 // ---- without a store ---------------------------------------------------------------------------------------------------------------------------------------
+const memRangePromises = new Map();
+function getMemRange(id,start) {
+	const key=id*1048576+start/MBS;
+	if (memRangePromises.has(key)) return memRangePromises.get(key);
+	const f=files[id];
+	const p=(async()=>{
+		let data=new Uint8Array(Math.min(MBS,f.size-start));
+		const got=await fetchRange(f,start,start+data.length-1,(chunk,at)=>data.set(chunk,at));
+		if (got<data.length) { shrink(f,start+got);data=data.subarray(0,got); }
+		return data;
+	})();
+	memRangePromises.set(key,p);
+	p.then(()=>memRangePromises.delete(key),()=>memRangePromises.delete(key));
+	return p;
+}
 async function getMemBlock(id, block) {
 	const key = id * 1048576 + block;
 	const hit = memCache.get(key);
@@ -613,9 +680,25 @@ async function getMemBlock(id, block) {
 	if (!p) {
 		const f = files[id];
 		p = (async () => {
-			let data = new Uint8Array(Math.min(MBS, f.size - block * MBS));
-			let got = await fetchRange(f, block * MBS, block * MBS + data.length - 1, (chunk, at) => data.set(chunk, at));
-			if (got < data.length) { shrink(f, block * MBS + got); data = data.subarray(0, got); }
+			const blockBytes = deliveryPacks ? BS : MBS;
+			if (deliveryPacks) {
+				await Promise.all(deliveryPacks.forBlocks(id, block, block).map(startMemPack));
+				const packed = memCache.get(key);
+				if (packed) return packed;
+			}
+			// Unpacked areas keep the original 256 KiB read-ahead. Fetching just
+			// 4 KiB here multiplies uncovered-region requests by up to 64.
+			const start = Math.floor(block * blockBytes / MBS) * MBS;
+			const data = await getMemRange(id,start);
+			if (deliveryPacks) {
+				for (let at=0;at<data.length;at+=BS) {
+					const blockKey=id*1048576+(start+at)/BS;
+					if (memCache.has(blockKey)) continue;
+					const part=data.slice(at,at+BS);memCache.set(blockKey,part);memBytes+=part.length;
+				}
+				while (memBytes>48*1048576) { const old=memCache.keys().next().value;memBytes-=memCache.get(old).length;memCache.delete(old); }
+				return memCache.get(key) || data.slice(block*BS-start,block*BS-start+BS);
+			}
 			memCache.set(key, data); memBytes += data.length;
 			while (memBytes > 48 * 1048576) { const old = memCache.keys().next().value; memBytes -= memCache.get(old).length; memCache.delete(old); }
 			return data;
@@ -626,12 +709,41 @@ async function getMemBlock(id, block) {
 	return p;
 }
 
+// OPFS is optional. Keep validated original pack blocks in the same bounded
+// RAM cache; neither the whole library nor a decoded pack is retained.
+function startMemPack(pack) {
+	if (packPromises.has(pack)) return packPromises.get(pack);
+	if (deliveryPacks.failed.has(pack)) return Promise.resolve();
+	const p = (async () => {
+		const release = await packSlot(false);
+		try {
+			const bytes = await deliveryPacks.download(pack, fetchRetry);
+			report(pack.encodedBytes);
+			for (const [id,start,length,source] of pack.runs) {
+				for (let at=0; at<length; at+=BS) {
+					const key=id*1048576+(start+at)/BS;
+					if (memCache.has(key)) continue;
+					const data=bytes.slice(source+at,source+Math.min(length,at+BS));
+					memCache.set(key,data);memBytes+=data.length;
+					while (memBytes>48*1048576) { const old=memCache.keys().next().value;memBytes-=memCache.get(old).length;memCache.delete(old); }
+				}
+			}
+			netStat.packs=(netStat.packs||0)+1;
+		} catch (e) {
+			deliveryPacks.failed.add(pack);netStat.packFailures=(netStat.packFailures||0)+1;
+			log('[io] RAM pack failed: '+e.message+'; using original file ranges');
+		} finally { release();packPromises.delete(pack); }
+	})();
+	packPromises.set(pack,p);return p;
+}
+
 async function readWithoutStore(id, off, len, dst) {
+	const blockBytes = deliveryPacks ? BS : MBS;
 	let done = 0;
 	while (done < len) {
-		const pos = off + done, block = Math.floor(pos / MBS);
+		const pos = off + done, block = Math.floor(pos / blockBytes);
 		const data = await getMemBlock(id, block);
-		const inBlock = pos - block * MBS, n = Math.min(len - done, data.length - inBlock);
+		const inBlock = pos - block * blockBytes, n = Math.min(len - done, data.length - inBlock);
 		if (n <= 0) break;
 		HEAPU8.set(data.subarray(inBlock, inBlock + n), dst + done);
 		done += n;
@@ -682,17 +794,39 @@ async function serve(slot) {
 					const waited = performance.now() - waitStart;
 					netStat.demandMiss++; netStat.demandWaitMs += waited; if (cold) netStat.cold++;
 					if (waited > 1500 && netStat.slowLogged++ < 60) log('[io] slow read ' + (waited | 0) + ' ms (' + (cold ? 'not hinted' : 'hinted, not finished') + '): ' + f.path + ' at ' + off + ' for ' + len + ' bytes, in flight ' + netStat.active);
+				if (waited > 15000 && bc) bc.postMessage({ label: 'Waiting for game data over a slow connection (' + (waited / 1000 | 0) + ' s): ' + f.path });
 				}
-				if (off + len > f.size) len = Math.max(0, f.size - off);		// the file turned out shorter than the manifest says (shrink)
+			if (off + len > f.size) len = Math.max(0, f.size - off);		// the file turned out shorter than the manifest says (shrink)
+			try {
 				readFromStore(id, off, len, dst);
-				result = len;
+			} catch (e) {
+				if (!isStoreShortfall(e)) throw e;
+				// The store indexed these blocks but the bytes are gone (wiped or
+				// faulty managed disks, quota pressure and storage faults do this
+				// on shared computers): drop the suspect blocks and fetch them
+				// again once instead of failing the boot.
+				const first = Math.floor(off / BS), last = Math.max(first, Math.floor((off + len - 1) / BS));
+				for (let b = first; b <= last; b++) { index.delete(id * 1048576 + b); inflight.delete(id * 1048576 + b); }
+				storeShortfalls++;
+				log('[io] store shortfall (' + e.message + '), refetching blocks ' + first + '-' + last + ' of ' + f.path);
+				bc.postMessage({ label: 'Repairing cached game data' });
+				await ensureBlocks(id, first, last);
+				views();
+				try {
+					readFromStore(id, off, len, dst);
+				} catch (e2) {
+					if (!isStoreShortfall(e2)) throw e2;
+					throw new Error(e2.message + ' (the local disk cache looks broken on this computer; reload with ?nocache=1 added to the page address to bypass it)');
+				}
+			}
+			result = len;
 			} else result = await readWithoutStore(id, off, len, dst);
 		}
 	} catch (e) {
 		log('[io] read failed: ' + e.message);
 		if (bc && !readErrorShown) {
 			readErrorShown = true;
-			bc.postMessage({ error: 'Could not read game data (' + (files[id] ? files[id].path : id) + '): ' + e.message + '. Check the data installation with Verify-Game.cmd.' });
+			bc.postMessage({ error: 'Could not read game data (' + (files[id] ? files[id].path : id) + '): ' + e.message + '. Check the data installation with Verify-Game.cmd. On a school, library or other shared computer, reload the page with ?nocache=1 added to the address instead.' });
 		}
 	}
 	if (result > 0) reportRead(result);
@@ -796,11 +930,11 @@ async function init(m) {
 		await openStore(Number(String(j.version).replace(/\D/g, '')) || 0, m.cacheNamespace);
 	}
 	bc.postMessage({ label: 'Game data ready', io: { state: 'ready', cachedBytes: index.size * BS, persistentStore: !!sh } });
-	if (sh && m.packIndex && !m.record && typeof DecompressionStream !== 'undefined' && self.crypto && crypto.subtle) {
+	if (m.packIndex && !m.record && typeof DecompressionStream !== 'undefined' && self.crypto && crypto.subtle) {
 		try { deliveryPacks = bootstrap ? await DeliveryPacks.fromIndex(bootstrap.index, dataVersion, j.files, m.bootset) : await DeliveryPacks.load(m.packIndex, dataVersion, j.files, m.bootset, fetchRetry); }
 		catch (e) { log('[io] packs unavailable: ' + e.message + '; using original file ranges'); }
 	}
-	if (sh && m.bootset && !m.record) {
+	if (sh && m.bootset && !m.record && !m.demandOnly) {
 		if (deliveryPacks) prefetchPacks(); else prefetch(m.bootset);
 	}
 	// The compiled HTTP filesystem already accepts this one-use byte cache.

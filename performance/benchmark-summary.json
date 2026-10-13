@@ -1347,5 +1347,88 @@
       "Nearby texture completion not instrumented",
       "Capacity and logical allocations are not resident memory"
     ]
+  },
+  "lowEndProductionRelease20261013": {
+    "version": "5156a958-ecd6-48c8-8c53-9376c7de4e1a",
+    "maps": [
+      {
+        "map": "gta5",
+        "worldReadyMs": 23865.629999876022,
+        "cacheState": "warm existing production store",
+        "latestResolution": [
+          640,
+          360
+        ],
+        "io": {
+          "timeMs": 56086.609999895096,
+          "fetchedBytes": 4919296,
+          "engineReads": 15549,
+          "networkMisses": 19,
+          "networkWaitMs": 7552.845000267029,
+          "fetches": 28,
+          "activeFetches": 0,
+          "activePackDownloads": 0,
+          "queuedPacks": 0,
+          "persistentStore": true,
+          "rangeBatches": 5,
+          "rangeRequestsSaved": 6,
+          "packs": 1,
+          "packFailures": 0,
+          "packLoadAndValidationMs": 1489.5099999904633,
+          "storeBytes": 3315239449,
+          "wasmBytes": 3221225472,
+          "decompressionMs": null,
+          "note": "HTTP body decompression is performed by the browser; archive decompression is inside WASM."
+        },
+        "deliveryRequests": 24,
+        "errors": [],
+        "limitations": [
+          "Compatibility check, not matched before/after benchmark",
+          "Textures and geometry continue loading after world-ready",
+          "No radio playback started in this repeat"
+        ]
+      },
+      {
+        "map": "gta6",
+        "worldReadyMs": 21474.175000190735,
+        "cacheState": "warm existing production store",
+        "latestResolution": [
+          640,
+          360
+        ],
+        "io": {
+          "timeMs": 54086.799999952316,
+          "fetchedBytes": 8192,
+          "engineReads": 17532,
+          "networkMisses": 1,
+          "networkWaitMs": 137.09500002861023,
+          "fetches": 1,
+          "activeFetches": 0,
+          "activePackDownloads": 0,
+          "queuedPacks": 0,
+          "persistentStore": true,
+          "rangeBatches": 0,
+          "rangeRequestsSaved": 0,
+          "packs": 0,
+          "packFailures": 0,
+          "packLoadAndValidationMs": 0,
+          "storeBytes": 3315247641,
+          "wasmBytes": 3919642624,
+          "decompressionMs": null,
+          "note": "HTTP body decompression is performed by the browser; archive decompression is inside WASM."
+        },
+        "deliveryRequests": 2,
+        "errors": [],
+        "limitations": [
+          "Compatibility check, not matched before/after benchmark",
+          "Textures and geometry continue loading after world-ready",
+          "No radio playback started in this repeat"
+        ]
+      }
+    ],
+    "previewStrictDeliveryChecks": 51,
+    "productionBodyIsolationChecks": 25,
+    "strictProductionRouting": "incomplete: one byte-identical diagnostic script has stale edge-cache Worker label",
+    "physicalDevices": "Neither Dell nor iPhone available"
   }
 }

@@ -357,3 +357,8 @@ a compatible native rebuild. Full WebGL/CPU gameplay backends are absent.
 Real-device long sessions, physics/audio pause-resume QA and low-end hardware
 FPS remain unverified. Desktop CPU render preparation is substantially heavier
 than GPU pass time in the tested scenes; no native binary speedup is claimed.
+
+
+## Low-end profiles and streaming coverage
+
+See [the low-end update](LOW_END_OPTIMISATION.md) for confirmed request amplification, fixes, real launch resolutions, frame-time measurements, WABT findings and explicit physical-device limitations. Original native WASM and assets are unchanged; live resolution changes and iPhone/CPU-only gameplay are not established.

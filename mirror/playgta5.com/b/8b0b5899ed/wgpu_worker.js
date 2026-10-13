@@ -140,6 +140,22 @@ let gpu = null, adapter = null, device = null;
 let mem = null, memBuffer = null, i32 = null, u32 = null, f32 = null, u8 = null, ringBase = 0, ringSize = 0;
 let canvas = null, canvasCtx = null, canvasFormat = null, blit = null, canvasConfigured = false;
 let fpsChannel = null, fpsOverlayN = 0, fpsOverlayT = 0;
+let qualityLastPresent = 0, qualityReadySince = 0;
+const qualityFrames = [];
+function qualitySample(now) {
+	const dt = qualityLastPresent ? now - qualityLastPresent : 0;
+	qualityLastPresent = now;
+	if (!worldSent || pipelinesPending || dt > 1000) { qualityReadySince = 0; qualityFrames.length = 0; return; }
+	if (!qualityReadySince) qualityReadySince = now;
+	if (now - qualityReadySince < 15000 || dt <= 0) return;
+	qualityFrames.push(dt); if (qualityFrames.length > 240) qualityFrames.shift();
+}
+function qualitySummary() {
+	const sorted = qualityFrames.slice().sort((a,b) => a-b);
+	return { ready: sorted.length >= 10, samples: sorted.length,
+		median: sorted.length ? sorted[Math.floor((sorted.length-1)*0.5)] : null,
+		p95: sorted.length ? sorted[Math.ceil(sorted.length*0.95)-1] : null };
+}
 let encoder = null, pass = null, passKey = '';
 let errorCount = 0, errorCount0 = 0, clampedDraws = 0, clampedDraws0 = 0;
 const errorKinds = new Map();		// normalised message -> { n, msg }
@@ -513,7 +529,7 @@ async function requestGameDevice(api, descriptor, node = false, softwareOnly = f
 		try { candidate = await api.requestAdapter(options); } catch (e) { continue; }
 		if (!candidate || attempted.has(candidate)) continue;
 		// A browser must not silently use hardware for the explicit CPU test.
-		if (softwareOnly && (candidate.info?.isFallbackAdapter ?? candidate.isFallbackAdapter) === false) continue;
+		if (softwareOnly && (candidate.info?.isFallbackAdapter ?? candidate.isFallbackAdapter) !== true) continue;
 		attempted.add(candidate); foundAdapter = true;
 		// Original textures use BC formats; this renderer has no transcoding path.
 		if (!candidate.features.has('texture-compression-bc')) { missingFormats = true; continue; }
@@ -665,7 +681,7 @@ function profileResources() {
 	const t0 = performance.now();
 	const thresholds = [1024, 4096, 16384, 65536, 262144, 1048576];
 	const r = { gpuBuffers: 0, bufferBytes: 0, constantShadows: 0, constantShadowBytes: 0,
-		bufferSizeBins: Array(7).fill(0), textures: 0, textureBytes: 0,
+		bufferSizeBins: Array(7).fill(0), textures: 0, textureBytes: 0, textureFormats: {}, bcDecodedTextureBytes: 0,
 		proxyTextures: 0, proxyTextureBytes: 0, counterBuffers: 0, pooledBuffers: 0, pooledBufferBytes: 0, physicalGpuBuffers: 0,
 		shaderModules: shaderModuleCount, pipelines: pipelineCount, compiledAhead: aheadMade, aheadUsed, bufferBindKinds: {}, arena: geometryArena?.snapshot() || null,
 		programsWithFast: progsWithFast.size, objectTableLength: objs.a.length, objectsAlive: objs.size };
@@ -680,6 +696,12 @@ function profileResources() {
 			if (o.counter) r.counterBuffers++;
 		} else if (o.kind === 'texture') {
 			r.textures++; r.textureBytes += o.bytes || 0;
+			const format = o.desc.format, entry = r.textureFormats[format] || (r.textureFormats[format] = { count: 0, bytes: 0 });
+			entry.count++; entry.bytes += o.bytes || 0;
+			if (format.startsWith('bc')) {
+				const decodedFormat = format.startsWith('bc4') ? 'r8unorm' : format.startsWith('bc5') ? 'rg8unorm' : format.startsWith('bc6') ? 'rgba16float' : 'rgba8unorm';
+				r.bcDecodedTextureBytes += textureBytes({ ...o.desc, format: decodedFormat });
+			}
 			for (const key of ['proxy_depth', 'proxy_stencil', 'proxy_fdepth']) if (o[key]) {
 				r.proxyTextures++; r.proxyTextureBytes += textureBytes({ ...o[key].desc, format: o[key].format });
 			}
@@ -2808,6 +2830,7 @@ async function present(id) {
 	presentCount++;
 	{
 		const tn = performance.now();
+		qualitySample(tn);
 		if (lastPresentT) {
 			const dt = tn - lastPresentT;
 			if (dt > frameMax) frameMax = dt;
@@ -2852,7 +2875,7 @@ async function present(id) {
 		if (!fpsOverlayT) { fpsOverlayT = tn; fpsOverlayN = 0; }
 		else if (tn - fpsOverlayT >= 500) {
 			if (!fpsChannel) fpsChannel = new BroadcastChannel('game-fps');
-			fpsChannel.postMessage({ fps: fpsOverlayN * 1000 / (tn - fpsOverlayT) });
+			fpsChannel.postMessage({ fps: fpsOverlayN * 1000 / (tn - fpsOverlayT), quality: qualitySummary() });
 			fpsOverlayN = 0; fpsOverlayT = tn;
 		}
 	}

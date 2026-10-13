@@ -55,12 +55,15 @@ fitScope.innerWidth=1920;fitScope.innerHeight=1080;fitScope.fitForTest();
 assert.equal(fitScope.canvas.style.width,'1920px');assert.equal(fitScope.canvas.style.height,'1080px');
 fitScope.innerWidth=0;fitScope.innerHeight=0;fitScope.fitForTest();assert.equal(fitScope.canvas.style.width,'1920px');
 const sizing=html.slice(html.indexOf('wantSize = () => {'),html.indexOf('startSize = wantSize();'));
-const sizeScope={q:new URLSearchParams(),innerWidth:800,innerHeight:600,devicePixelRatio:1,screen:{width:1920,height:1080},lowMemory:false,mobileProfile:false,Math};
+const sizeScope={q:new URLSearchParams(),innerWidth:800,innerHeight:600,devicePixelRatio:1,screen:{width:1920,height:1080},lowMemory:false,mobileProfile:false,qualityExplicit:true,qualityRequested:false,qualityConfig:{size:[960,540]},Math};
 vm.runInContext(sizing,vm.createContext(sizeScope));assert.deepEqual(Array.from(sizeScope.wantSize()),[1920,1080],'startup uses desktop detail even in a small window');
 sizeScope.q=new URLSearchParams('res=1280x720');assert.deepEqual(Array.from(sizeScope.wantSize()),[1280,720]);
 sizeScope.q=new URLSearchParams();sizeScope.mobileProfile=true;sizeScope.devicePixelRatio=3;
 assert.deepEqual(Array.from(sizeScope.wantSize()),[640,360],'mobile avoids multiplying native targets by Retina pixel ratio');
 sizeScope.q=new URLSearchParams('res=800x450');assert.deepEqual(Array.from(sizeScope.wantSize()),[800,450],'explicit benchmark resolution wins on mobile');
+
+sizeScope.q=new URLSearchParams();sizeScope.qualityExplicit=false;sizeScope.qualityRequested=true;sizeScope.mobileProfile=false;
+assert.deepEqual(Array.from(sizeScope.wantSize()),[960,540],'automatic profile supplies native startup dimensions');
 
 // Execute the actual presentation preamble across unchanged and changed sizes.
 const worker=fs.readFileSync('mirror/playgta5.com/b/8b0b5899ed/wgpu_worker.js','utf8');

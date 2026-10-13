@@ -360,3 +360,14 @@ delete data, reset Git history or invalidate all caches to roll back.
 
 See `WASM_MOBILE_AUDIT.md`, `PERFORMANCE_AUDIT.md` and `PERFORMANCE_RESULTS.md`
 for exact scope, measurements and remaining iPhone/native-source limitations.
+
+
+## 2026-10-13 low-end candidate
+
+Candidate Worker version: `a572dfe9-4b9e-4362-b164-76b03be8f1a8`. Preview: https://a572dfe9-gta5-browser.aawad11-ma.workers.dev/ . The preview passed 51 delivery checks (49 Static Assets and two intended Worker responses). Production remains `85865fff-f58f-492d-bcc4-fa283446899d` until gameplay/CI checks finish.
+
+Runtime: `/runtime/2bb726cf7a0b7ad177d5916974777d084d4ffe2f42845da8d8521478fcc21f22/`. Frozen stage `.downloads/static-lowend-preview`, plan `.downloads/static-lowend-preview-plan.json`: 6,968 versioned entries plus routing headers, with original 327 pack bodies, shaders, manifest and bootstrap unchanged. Upload added six changed bodies and reused 6,962. Original WASM remains on private R2.
+
+Use the established reviewed R2 publisher for immutable runtime/canary dependencies, then the entry pointer last. Promote the tested version with `wrangler versions deploy a572dfe9-4b9e-4362-b164-76b03be8f1a8@100% --config cloudflare/wrangler.toml`; preserve variables/secrets and routing.
+
+Rollback this candidate to the retained production version `85865fff-f58f-492d-bcc4-fa283446899d@100%` through the same versions-deploy command. For R2-only fallback, the retained prior entry is in `.downloads/mobile-audit-final-site/site/index.html`; review/publish only that entry through the existing publisher. Never delete assets, reset Git, force-push or invalidate immutable caches. Physical school-PC and iPhone results remain unverified.

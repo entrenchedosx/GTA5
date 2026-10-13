@@ -25,7 +25,10 @@
 	#startup-help a { color: #a9d2ff; }
 	#startup-help button { padding: 7px 12px; color: #fff; background: #303b48; border: 1px solid #75879b; border-radius: 4px; cursor: pointer; font: inherit; }
 	#hud { position: fixed; left: 8px; bottom: 8px; max-width: 60vw; white-space: pre-wrap; opacity: .8; pointer-events: none; }
-	#fps { position: fixed; left: 8px; top: 6px; display: none; color: #0f0; font: bold 18px/1.2 Consolas, monospace; font-variant-numeric: tabular-nums; text-shadow: 1px 1px 2px #000, 0 0 3px #000; pointer-events: none; z-index: 10; }
+	#fps { position: fixed; left: 8px; top: 64px; display: none; color: #0f0; font: bold 18px/1.2 Consolas, monospace; font-variant-numeric: tabular-nums; text-shadow: 1px 1px 2px #000, 0 0 3px #000; pointer-events: none; z-index: 10; }
+	#quality-panel { position: fixed; top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); z-index: 14; background: #171a1ecc; border-radius: 5px; padding: 6px; font: 12px system-ui; max-width: 65vw; }
+	#quality-panel select, #quality-panel button { color: white; background: #272a30; border: 1px solid #777; border-radius: 4px; font: inherit; padding: 4px; }
+	#quality-note { display: block; margin-top: 3px; }
 	#radio-shell { position: fixed; top: 12px; right: 12px; z-index: 15; font: 12px/1.4 system-ui, sans-serif; color: #f3efe7; }
 	#radio-shell[hidden], #radio-panel[hidden] { display: none; }
 	#radio-launcher, .web-radio button { color: inherit; font: inherit; cursor: pointer; }
@@ -43,6 +46,7 @@
 <div id="hud"></div>
 <div id="loading"><div id="modes" aria-label="Game mode"><button data-act="back"></button><button data-act="map5"></button><button data-act="map6"></button><button data-act="sandbox"></button><button data-act="story"></button></div><div id="label" role="status" aria-live="polite">Starting...</div><div id="data"></div></div>
 <div id="fps"></div>
+<div id="quality-panel" data-performance-control="true"><label>Graphics <select id="quality-mode" aria-label="Graphics quality"><option value="auto">Auto</option><option value="performance">Performance</option><option value="low">Low</option><option value="balanced">Balanced</option><option value="high">High</option></select></label><button id="quality-apply" type="button" hidden>Apply and reload</button><span id="quality-note" role="status"></span></div>
 <div id="startup-help" role="alert" hidden><p id="startup-error"></p><p id="startup-reason"></p><p id="cpu-check-link" hidden><a href="/cpu-renderer-check.html">Open CPU renderer development check</a></p><ol id="startup-steps"><li>Open the game in an up-to-date desktop Chrome or Edge browser.</li><li>Turn on “Use graphics acceleration when available” in your browser’s System settings, then restart the browser.</li><li>Update your graphics driver and close other games or busy tabs before trying again.</li></ol><p><a href="https://developer.chrome.com/docs/web-platform/webgpu/troubleshooting-tips" target="_blank" rel="noopener noreferrer">Browser graphics troubleshooting</a></p><button id="startup-retry" type="button">Reload and try again</button></div>
 <div id="radio-shell" hidden><button id="radio-launcher" type="button" aria-expanded="false" aria-controls="radio-panel">RADIO</button><div id="radio-panel" hidden></div></div>
 <script type="module">
@@ -72,6 +76,42 @@ const runtimeError = isSecureContext && crossOriginIsolated && typeof SharedArra
 const BASE = '/b/8b0b5899ed'.charAt(0) === '_' ? '' : '/b/8b0b5899ed';
 const RUNTIME = BASE; // prepare_site.py substitutes a content-addressed runtime.
 const DATA_BOOTSTRAP = ''; // build_static.py inserts a frozen manifest/index URL.
+await import(RUNTIME + '/quality-profile.js');
+let storedQuality = {};
+try { const saved = JSON.parse(localStorage.getItem('gta-quality-v1') || '{}'); if (saved && typeof saved === 'object' && !Array.isArray(saved)) storedQuality = saved; } catch (e) {}
+const qualityMap = q.get('map') === 'env_test' ? 'env_test' : 'gta5';
+const qualityCandidate = q.get('quality') || storedQuality.mode || 'auto';
+const qualityMode = typeof qualityCandidate === 'string' && (qualityCandidate === 'auto' || Object.hasOwn(GameQuality.profiles, qualityCandidate)) ? qualityCandidate : 'auto';
+const selectedQuality = GameQuality.choose({ mode: qualityMode, memory: navigator.deviceMemory, mobile: mobileProfile, software: q.get('renderer') === 'cpu', saved: q.get('autoProfile') || storedQuality[qualityMap] });
+const qualityConfig = GameQuality.profiles[selectedQuality];
+const qualityExplicit = q.has('low') || q.has('res') || q.has('scale') || q.has('args') || q.has('fps');
+const qualityRequested = Object.hasOwn(GameQuality.profiles, qualityMode) || !qualityExplicit;
+const qualityTarget = mobileProfile || (!qualityExplicit && qualityMode === 'auto' && (q.get('autoTarget') === '30' || (!q.has('autoTarget') && storedQuality[qualityMap + 'Target'] === 30))) ? 30 : 60;
+const qualitySelect = document.getElementById('quality-mode'), qualityApply = document.getElementById('quality-apply'), qualityNote = document.getElementById('quality-note');
+qualitySelect.value = Object.hasOwn(GameQuality.profiles, qualityMode) ? qualityMode : 'auto';
+qualityNote.textContent = qualityExplicit ? 'Custom settings' : selectedQuality + ' · ' + qualityTarget + ' FPS target · applies at launch';
+const saveQuality = () => { try { localStorage.setItem('gta-quality-v1', JSON.stringify(storedQuality)); } catch (e) {} };
+qualitySelect.addEventListener('change', () => { storedQuality.mode = qualitySelect.value; saveQuality(); qualityApply.hidden = false; qualityNote.textContent = 'Reload to apply graphics settings'; });
+qualityApply.addEventListener('click', () => {
+	const url = new URL(location.href);
+	for (const key of ['quality','low','res','scale','fps','autoProfile','autoTarget']) url.searchParams.delete(key);
+	url.searchParams.set('quality', qualitySelect.value);
+	// The URL carries the selection too: managed/private browsers can reject
+	// localStorage, and a reload must still apply the settings shown here.
+	if (qualitySelect.value === 'auto' && qualityPending) { url.searchParams.set('autoProfile', qualityController.profile); url.searchParams.set('autoTarget', String(qualityController.target)); }
+	location.href = url.href;
+});
+const qualityController = new GameQuality.Controller(selectedQuality, { target: qualityTarget, ceiling: q.get('renderer') === 'cpu' ? 'performance' : mobileProfile ? 'low' : !navigator.deviceMemory || navigator.deviceMemory <= 8 ? 'low' : 'high' });
+let qualityPending = false;
+new BroadcastChannel('game-fps').addEventListener('message', ({data}) => {
+	if (qualityPending || qualityMode !== 'auto' || qualityExplicit || q.get('autoBenchmark') === '1' || document.visibilityState !== 'visible') return;
+	const next = qualityController.observe(data.quality);
+	if (!next) return;
+	qualityPending = true; // Do not assess an unapplied profile as if it were running.
+	storedQuality[qualityMap] = next; storedQuality[qualityMap + 'Target'] = qualityController.target; saveQuality();
+	qualityNote.textContent = next + ' · ' + qualityController.target + ' FPS target recommended · reload to apply'; qualityApply.hidden = false;
+});
+document.addEventListener('visibilitychange', () => qualityController.reset());
 const radioShell = document.getElementById('radio-shell'), radioLauncher = document.getElementById('radio-launcher'), radioPanel = document.getElementById('radio-panel');
 let radioController = null, radioModule = null;
 radioLauncher.addEventListener('click', async () => {
@@ -154,7 +194,7 @@ const act = (a) => {
 };
 modesEl.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b && !b.hidden) act(b.dataset.act); });
 addEventListener('keydown', (e) => {
-	if (startCommitted || e.target?.closest?.('#radio-shell') || e.ctrlKey || e.altKey || e.metaKey || !document.getElementById('loading')) return;
+	if (startCommitted || e.target?.closest?.('#radio-shell,#quality-panel') || e.ctrlKey || e.altKey || e.metaKey || !document.getElementById('loading')) return;
 	const b = modeButtons.find((x) => !x.hidden && ACTS[x.dataset.act][2].includes(e.code));
 	if (!b) return;
 	act(b.dataset.act);
@@ -289,11 +329,11 @@ else {
 	// Shadows off (-shadowQuality=-1, engine level 0 below the menu's lowest; SettingsManager.cpp, wasm): the cascade shadow pass was a third of all draws (Node, 1366x600:
 	// 600-900 of 1,300-2,900 per frame), and a 4-core Chromebook spent ~110 us per draw. ?shadows=1 keeps them at the lowest level.
 	const lowParam = q.get('low');
-	lowMemory = lowParam === '1' || (lowParam !== '0' && (mobileProfile || (navigator.deviceMemory && navigator.deviceMemory <= 4)));
-	const LOW_ARGS = ['-textureQuality=0', '-pedVariety=0', '-vehicleVariety=0', '-shadowQuality=' + (q.get('shadows') === '1' ? 0 : -1), '-reflectionQuality=0', '-particleQuality=0',
+	lowMemory = lowParam === '1' || (lowParam !== '0' && (qualityRequested ? qualityConfig.low : mobileProfile || (navigator.deviceMemory && navigator.deviceMemory <= 4)));
+	const LOW_ARGS = ['-textureQuality=' + (qualityRequested && qualityConfig.low ? qualityConfig.texture : 0), '-pedVariety=0', '-vehicleVariety=0', '-shadowQuality=' + (q.get('shadows') === '1' ? 0 : -1), '-reflectionQuality=0', '-particleQuality=0',
 		'-grassQuality=0', '-cityDensity=0', '-lodScale=0', '-pedLodBias=0', '-vehicleLodBias=0'];
 	const cores = +(q.get('cores') || 0) || (lowMemory ? 2 : navigator.hardwareConcurrency);
-	if (lowMemory) hud.textContent = 'Low-memory device (' + (navigator.deviceMemory || '?') + ' GB reported): close other tabs. If the tab shows "Aw, Snap!" or SIGILL it ran out of memory.';
+	if (lowMemory) hud.textContent = 'Reduced graphics profile';
 postLog('[page env] ' + JSON.stringify({ deviceMemory: navigator.deviceMemory, cores: navigator.hardwareConcurrency, usingCores: cores, low: lowMemory, isolated: crossOriginIsolated, ua: navigator.userAgent.slice(0, 120), screen: screen.width + 'x' + screen.height + '@' + devicePixelRatio }));
 // Keep engine targets at the startup display resolution: live resizing the
 // compiled engine traps in WASM on the GTA VI map. Fullscreen/windowed changes
@@ -303,6 +343,7 @@ postLog('[page env] ' + JSON.stringify({ deviceMemory: navigator.deviceMemory, c
 wantSize = () => {
 	const forced = /^(\d+)x(\d+)$/.exec(q.get('res') || '');
 	if (forced) return [+forced[1], +forced[2]];
+	if (qualityRequested && !q.has('scale') && q.get('liveResize') !== '1') return qualityConfig.size.slice();
 	if (mobileProfile) return [640, 360];
 	const sc = Math.max(0.25, Math.min(2, +(q.get('scale') || 1)));
 	const live = q.get('liveResize') === '1';
@@ -344,7 +385,7 @@ const worker = gameWorker = new Worker(RUNTIME + '/loader.js?runtime=delivery-1'
 		bootstrapURL: DATA_BOOTSTRAP,
 		demandOnly: q.get('prefetch') === '0' || (q.get('prefetch') !== '1' && (lowMemory || mobileProfile)),
 		softwareRendering: q.get('renderer') === 'cpu' || !navigator.gpu,
-		args: ['-rootdir=/game/', ...(q.get('nogpu') ? [] : ['-wgpu']), '-nodisplaycalibration', '-noSocialClub', '-pc:nosocialclub', ...(q.get('newgame') === '1' ? ['-noautoload'] : []), '-nonetwork', '-output', '-width=' + startSize[0], '-height=' + startSize[1], '-forceResolution', ...LOG_ARGS, ...ENGINE_ARGS, '-frameLimit=' + (q.get('fps') === '30' || (!q.has('fps') && mobileProfile) ? 2 : q.get('fps') === '0' ? 0 : 1),		// the game's own limiter: VSync 2 (its default) = 30 fps; 1 = 60 fps; ?fps=0 uncapped (diagnostics). Story Mode continues from the newest savegame (the engine skips that for Sandbox Mode); ?newgame=1 (-noautoload) starts it from the Prologue instead
+		args: ['-rootdir=/game/', ...(q.get('nogpu') ? [] : ['-wgpu']), '-nodisplaycalibration', '-noSocialClub', '-pc:nosocialclub', ...(q.get('newgame') === '1' ? ['-noautoload'] : []), '-nonetwork', '-output', '-width=' + startSize[0], '-height=' + startSize[1], '-forceResolution', ...LOG_ARGS, ...ENGINE_ARGS, '-frameLimit=' + (q.get('fps') === '30' || (!q.has('fps') && qualityTarget === 30) ? 2 : q.get('fps') === '0' ? 0 : 1),		// Native pacing: 2 = 30 fps, 1 = 60 fps, ?fps=0 uncapped. Auto may recommend 30 after sustained failure at minimum quality; apply on reload.
 		 ...(cores <= 2 ? ['-numCores=' + cores] : []), ...(lowMemory ? LOW_ARGS : []), ...(q.get('args') || '').split(',').filter(Boolean)],
 		shotEvery: +(q.get('shot') || 0),
 		shotRt: q.get('shotrt') === '1',		// ?shotrt=1 (with ?shot=N): every render target of one frame after the world is shown to the dev server's shots/ (wgpu_worker.js)
@@ -488,8 +529,9 @@ function installInput(memory, block) {
 	const held = new Set();
 	let benchmarkInputLocked = q.get('profile') === '1' && q.get('autoBenchmark') === '1';
 	const syncFlyAlias = () => { for (const [src, target] of Object.entries(FLY_ALIAS)) Atomics.store(keys, VK[target], held.has(src) || held.has(target) ? 0x80 : 0); };
+	const overlayInput = (e) => !!e.target?.closest?.('#radio-shell,#quality-panel');
 	addEventListener('keydown', (e) => {
-		if (passThrough(e) || e.target?.closest?.('#radio-shell')) return;
+		if (passThrough(e) || overlayInput(e)) return;
 		if (benchmarkInputLocked) return;
 		e.preventDefault();
 		const vk = VK[e.code];
@@ -507,7 +549,7 @@ function installInput(memory, block) {
 	addEventListener('keyup', (e) => {
 		if (passThrough(e)) return;
 		if (benchmarkInputLocked) return;
-		e.preventDefault();
+		if (!overlayInput(e)) e.preventDefault();
 		const vk = VK[e.code];
 		if (vk) Atomics.store(keys, vk, 0);
 		held.delete(e.code); syncFlyAlias();
@@ -534,7 +576,7 @@ function installInput(memory, block) {
 	document.addEventListener('pointerlockchange', () => { trace('pointer lock ' + (locked() ? 'on' : 'off')); Atomics.store(w, LOCKED, locked() ? 1 : 0); });
 	addEventListener('mousemove', (e) => {
 		const r = canvas.getBoundingClientRect();
-		if (benchmarkInputLocked) {
+		if (benchmarkInputLocked || overlayInput(e)) {
 			if (!locked()) { Atomics.store(w, MX, Math.max(0, Math.min(W - 1, Math.round((e.clientX - r.left) * W / r.width)))); Atomics.store(w, MY, Math.max(0, Math.min(H - 1, Math.round((e.clientY - r.top) * H / r.height)))); }
 			return;
 		}
@@ -558,6 +600,7 @@ function installInput(memory, block) {
 	// scrolling) accumulate. The engine consumes one notch per frame (browser_input_wasm.cpp), so a long scroll keeps scrolling for a few frames.
 	let wheelAccum = 0;
 	addEventListener('wheel', (e) => {
+		if (overlayInput(e)) return;
 		e.preventDefault();
 		if (benchmarkInputLocked) return;
 		wheelAccum += -e.deltaY / (e.deltaMode === 0 ? 100 : e.deltaMode === 1 ? 3 : 1);

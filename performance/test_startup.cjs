@@ -132,10 +132,16 @@ const guard = setTimeout(() => { console.error('FAIL: startup test did not finis
 
   const gated = loaderSetup();
   const cpuLoader = loaderSetup({softwareRendering:true});
-  assert.ok(cpuLoader.gpu.url.includes('/cpu_worker.js?'),'explicit CPU mode starts the real CPU backend without a WebGPU worker');
-  cpuLoader.gpu.emit({loaded:true});cpuLoader.gpu.emit({graphicsReady:true});
+  assert.ok(cpuLoader.gpu.url.includes('/wgpu_worker.js?'),'explicit CPU mode first tries the complete WebGPU backend');
+  assert.equal(new URL(cpuLoader.gpu.url,'https://example.test').searchParams.get('renderer'),'cpu','the GPU selector must request software only');
+  cpuLoader.gpu.emit({loaded:true});cpuLoader.gpu.emit({graphicsError:'No verified software adapter',graphicsCode:'software-adapter'});
+  const cpuFallback=cpuLoader.workers[1];assert.ok(cpuFallback.url.includes('/cpu_worker.js?'));
+  cpuFallback.emit({loaded:true});cpuFallback.emit({graphicsReady:true});
   assert.equal(cpuLoader.io,undefined,'a CPU readiness message without full game compatibility cannot open assets');
   assert.ok(cpuLoader.gpu.terminated);
+  assert.ok(cpuFallback.terminated);
+  const softwareLoader=loaderSetup({softwareRendering:true});softwareLoader.gpu.emit({loaded:true});softwareLoader.gpu.emit({graphicsReady:true});
+  assert.ok(softwareLoader.io,'a verified compatible software WebGPU device uses the existing complete renderer and opens assets');
   assert.equal(gated.workers.length,1,'no IO worker or data requests before graphics');
   gated.gpu.emit({loaded:true}); gated.gpu.emit({loaded:true});
   assert.equal(gated.gpu.sent.length,1,'graphics preflight requested exactly once');

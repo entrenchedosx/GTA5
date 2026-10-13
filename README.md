@@ -21,13 +21,19 @@ Bundling and reusing the local cache reduce actual browser requests. The live de
 
 Use a browser with WebGPU and hardware acceleration. First loading and shader preparation may take several minutes. Do not open `index.html` directly; the server supplies the isolation headers and asset-read endpoints required by the game.
 
-`?renderer=cpu` now starts a genuine JavaScript CPU rasterizer, with no WebGPU device. Its verified subset does **not** implement the complete native game's rendering contract, so it stops before game-data/WASM downloads and reports incomplete support. Failed GPU selection tries that backend once after stopping the GPU worker. Devices without a compatible full renderer still cannot play GTA. The separate [CPU development check](https://gta.ezgames.lol/cpu-renderer-check.html) renders an interactive synthetic fixture using two original shader pairs; its results are not game FPS. See [exact support, measurements and remaining implementation](CPU_RENDERER_STATUS.md).
+`?renderer=cpu` first checks for a verified compatible browser software-WebGPU adapter and uses the existing complete renderer if one is available. It never accepts a positively identified hardware adapter or an unknown adapter type as CPU proof. If unavailable, the genuine JavaScript CPU rasterizer subset is tried; it cannot implement the full game's rendering contract and stops before expensive downloads. No complete WebGL2 or independent CPU game backend is provided. The [CPU development check](https://gta.ezgames.lol/cpu-renderer-check.html) remains a synthetic fixture, not game FPS. See [CPU status](CPU_RENDERER_STATUS.md) and [current low-end limitations](LOW_END_OPTIMISATION.md).
 
 The illustrated loading screen has been removed. Small mode/map controls and startup status remain in the corner until gameplay is ready. `Game data read` includes completed reads from the browser cache; downloaded bytes are reported separately. It is a read counter, not an installation percentage.
 
 The installer retrieves checksum-verified archives from the existing [full-game data release](https://github.com/alihammoud21/playgta5/releases/tag/full-game-v1). That release belongs to a separate repository; **this repository does not host a new game-data release**. It installs only external assets and Python, preserving this repository's current renderer and launcher code. Differing existing asset files are rejected rather than overwritten.
 
 The 21 GB data tree, loading-screen media, bundled runtime, caches, saves, and raw benchmark captures are excluded from Git. Download ZIP contains the code and compiled WASM, but the separate data installation is still required. Shader sources, metadata and shader packs are included because the renderer needs them.
+
+## Automatic graphics
+
+The Graphics selector provides Auto, Performance, Low, Balanced and High. Auto starts conservatively on 8 GB/unknown-memory and touch devices, records real frame times and recommends a better launch configuration. Apply and reload uses real native render dimensions; fullscreen changes only presentation. Live resolution changes still crash the native engine and are disabled. A sustained failure at minimum quality can recommend native 30 FPS pacing. These are targets, not guaranteed FPS.
+
+Low graphics now reuses broader verified asset-pack coverage and keeps a bounded queue of reads already requested by the engine. Speculative look-ahead and bulk startup prefetch remain off. See [measurements, settings and limitations](LOW_END_OPTIMISATION.md). Physical school-PC and iPhone performance remain unverified.
 
 ## Maps and settings
 

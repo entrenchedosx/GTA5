@@ -27,6 +27,7 @@ self.onmessage = (ev) => {
 	if (m.profile && m.profileDetail) gq.set('detail', '1');
 	if (m.profile) gq.set('revision', new URLSearchParams(self.location.search).get('revision') || '1');
 	gq.set('bufferArena', m.bufferArena === false ? '0' : '1');
+	if (m.softwareRendering) gq.set('renderer', 'cpu');
 	if (m.slots) gq.set('slots', m.slots);
 	if (m.syncPipelines) gq.set('syncpipelines', '1');
 	if (m.remoteLog) gq.set('log', '1');		// ?log=1 on the page: its log lines go to the dev server (off by default)
@@ -52,7 +53,7 @@ self.onmessage = (ev) => {
 		};
 		io.onerror = (e) => { e.preventDefault(); fail('Game data worker failed: ' + e.message); };
 		bc0.postMessage({ label: 'Opening game data' });
-		io.postMessage({ init: true, base: self.location.origin + '/data/', packIndex: m.packIndex, bootstrapURL: m.bootstrapURL, cacheNamespace: m.cacheNamespace, noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints || !!m.demandOnly, demandOnly: !!m.demandOnly, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
+		io.postMessage({ init: true, base: self.location.origin + '/data/', packIndex: m.packIndex, bootstrapURL: m.bootstrapURL, cacheNamespace: m.cacheNamespace, noStore: !!m.noStore, record: !!m.record, trace: !!m.trace, log: !!m.remoteLog, noHints: !!m.noHints, queuedOnly: !!m.demandOnly, hintConcurrency: m.lowMemory ? 4 : 16, demandOnly: !!m.demandOnly, bootset: m.lowMemory ? 'bootset_low.json' : 'bootset.json' });
 	};
 	const checkBackend = (cpu) => {
 		if (failed || engineStarted) return;
@@ -63,7 +64,7 @@ self.onmessage = (ev) => {
 			if (failed || gpu !== selected) return;
 			if (e.data.graphicsError) {
 				const code = e.data.graphicsCode || 'device';
-				if (!cpuAttempted && !engineStarted && ['api','adapter','formats','device'].includes(code)) {
+				if (!cpuAttempted && !engineStarted && ['api','adapter','formats','device','software-adapter'].includes(code)) {
 					gpuFailure = e.data.graphicsError;
 					selected.terminate(); checkBackend(true); return;
 				}
@@ -82,7 +83,9 @@ self.onmessage = (ev) => {
 		bc0.postMessage({ label: cpu ? 'Checking CPU rendering compatibility' : 'Checking graphics compatibility' });
 		graphicsTimer = setTimeout(() => fail('Graphics startup timed out. Restart the browser and try again.', 'timeout'), 30000);
 	};
-	checkBackend(!!m.softwareRendering);
+	// Explicit CPU mode must first reach requestGameDevice's verified software
+	// adapter path. The incomplete CPU subset is only the final fallback.
+	checkBackend(false);
 	// An overloaded host answers 503/500/429 (2026-10-06): retried up to 8 times with growing, jittered waits (~20 s in all) instead of compiling an error page.
 	const fetchWasm = async () => {
 		for (let attempt = 0; ; attempt++) {

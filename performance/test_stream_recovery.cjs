@@ -8,7 +8,7 @@ const scope={self:{location:{search:''},postMessage(){}},URLSearchParams,navigat
   fetch(url,init){requests++;return new Promise((resolve,reject)=>init.signal.addEventListener('abort',()=>reject(Error('aborted')),{once:true}));}};
 const context=vm.createContext(scope);scope.importScripts=()=>{};
 vm.runInContext(source+`\nself.test={stallGuardedRead,fetchHeaders,storeWrite,streamRanges,init,
- installStore(writer){sh={write:writer};},getIndex(){return index.size;},setBase(){base='/data/';}}`,context);
+ installStore(writer){sh={write:writer};},getIndex(){return index.size;},hintConfig(){return {queuedOnly,hintBudget};},setBase(){base='/data/';}}`,context);
 const api=scope.self.test;
 const flush=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
 (async()=>{
@@ -39,5 +39,9 @@ const flush=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
   api.installStore(()=>1);
   await api.init({base:'/data/',bootstrapURL:'/bootstrap',packIndex:'/index',bootset:'bootset_low.json',noStore:true,demandOnly:true});
   await flush();assert.equal(requests,0,'demand-only initialization downloads no unrequested data');
+  await api.init({base:'/data/',bootstrapURL:'/bootstrap',noStore:true,demandOnly:true,queuedOnly:true,hintConcurrency:999});
+  assert.equal(api.hintConfig().queuedOnly,true);assert.equal(api.hintConfig().hintBudget,16,'concurrency cannot exceed conservative cap');
+  await api.init({base:'/data/',bootstrapURL:'/bootstrap',noStore:true,demandOnly:true,queuedOnly:true});assert.equal(api.hintConfig().hintBudget,4);
+
   console.log('PASS: stalled body cancellation failure, stalled batch headers, bounded fallback retries and short store writes');
 })().catch(e=>{console.error(e);process.exitCode=1;});

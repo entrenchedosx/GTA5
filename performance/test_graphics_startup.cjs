@@ -52,6 +52,9 @@ function adapter(device, features=['texture-compression-bc']) {
   const hardware=adapter(run.device);hardware.info={isFallbackAdapter:false};
   await assert.rejects(run.requestGameDevice({async requestAdapter(){return hardware;}},()=>({}),false,true),e=>e.code==='software-adapter');
   assert.equal(hardware.requests.length,0,'CPU mode cannot accept hardware mislabeled as a fallback');
+  const hidden=adapter(run.device);hidden.info={};
+  await assert.rejects(run.requestGameDevice({async requestAdapter(){return hidden;}},()=>({}),false,true),e=>e.code==='software-adapter');
+  assert.equal(hidden.requests.length,0,'a hidden adapter type is not proof of CPU rendering');
   await assert.rejects(run.requestGameDevice({async requestAdapter(){return null;}},()=>({}),false,true),e=>e.code==='software-adapter');
   const rejected={features:new Set(['texture-compression-bc']),calls:0,async requestDevice(){this.calls++;throw Error('device unavailable');}};
   const fallback=adapter(run.device); let at=0;

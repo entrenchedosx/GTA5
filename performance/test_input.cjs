@@ -50,3 +50,10 @@ automatic.emit('keydown',{code:'KeyW',key:'w'}); automatic.emit('mousemove',{cli
 assert.equal(automatic.keys[87],0); assert.equal(automatic.words[2],0); assert.equal(automatic.words[3],0);
 automatic.emit('performance-benchmark-input',{detail:{locked:false}}); automatic.emit('keydown',{code:'KeyW',key:'w'}); assert.equal(automatic.keys[87],128);
 console.log('PASS: benchmark releases held input, blocks movement/camera/wheel/button writes, restores input, and is absent from normal gameplay');
+
+const overlay=setup(false),target={closest(){return true;}};
+let prevented=false;overlay.emit('keydown',{target,code:'KeyW',key:'w',preventDefault(){prevented=true;}});assert.equal(overlay.keys[87],0);assert.equal(prevented,false);
+overlay.emit('mousemove',{target,clientX:200,clientY:100,movementX:200,movementY:100});assert.equal(overlay.words[2],0);assert.equal(overlay.words[3],0);assert.equal(overlay.words[0],200,'absolute position rebases without camera rotation');
+overlay.emit('wheel',{target,deltaY:100,deltaMode:0,preventDefault(){prevented=true;}});assert.equal(overlay.words[4],0);assert.equal(prevented,false);
+overlay.emit('keydown',{code:'KeyW',key:'w'});assert.equal(overlay.keys[87],128);overlay.emit('keyup',{target,code:'KeyW',key:'w',preventDefault(){prevented=true;}});assert.equal(overlay.keys[87],0,'opening controls cannot leave movement held');assert.equal(prevented,false);
+console.log('PASS: normal graphics/radio overlays preserve browser controls, suppress camera/wheel/game keys and release previously held movement');

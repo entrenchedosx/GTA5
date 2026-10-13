@@ -22,7 +22,7 @@
   class DeliveryPacks {
     constructor(packs, files) {
       if (!Array.isArray(packs) || packs.length > 1000) throw new Error('Invalid pack index');
-      this.packs = packs; this.byFile = new Map(); this.failed = new Set();
+      this.packs = packs; this.byFile = new Map(); this.failed = new Set(); this.fallback = null;
       for (const pack of packs) {
         if ((pack.prefetch !== undefined && typeof pack.prefetch !== 'boolean') || !/^\/data\/packs\/[a-f0-9]{64}\.bin$/.test(pack.url) || !pack.url.includes(pack.sha256) || !/^[a-f0-9]{64}$/.test(pack.decodedSha256) ||
             !Number.isSafeInteger(pack.bytes) || pack.bytes <= 0 || pack.bytes > MAX_BYTES ||
@@ -51,7 +51,15 @@
       // intersecting range rather than scanning the entire world index.
       let a = 0, b = ranges.length;
       while (a < b) { const m = Math.floor((a + b) / 2); if (ranges[m].last < first) a = m + 1; else b = m; }
-      for (let i = a; i < ranges.length && ranges[i].first <= last; i++) if (!this.failed.has(ranges[i].pack)) selected.add(ranges[i].pack);
+      let cursor = first;
+      const fill = (start, end) => { if (this.fallback && start <= end) for (const pack of this.fallback.forBlocks(id, start, end)) selected.add(pack); };
+      for (let i = a; i < ranges.length && ranges[i].first <= last; i++) {
+        const range = ranges[i];
+        if (this.failed.has(range.pack)) continue;
+        fill(cursor, Math.min(last, range.first - 1));
+        selected.add(range.pack); cursor = Math.max(cursor, range.last + 1);
+      }
+      fill(cursor, last);
       return [...selected];
     }
     async download(pack, fetchImpl) {
@@ -72,7 +80,22 @@
     }
     static async fromIndex(index, version, manifestFiles, profile) {
       await this.validateIndex(index, version, manifestFiles);
-      return new DeliveryPacks(index.profiles[profile], manifestFiles.map(f => ({ path: f[0], size: f[1] })));
+      const files = manifestFiles.map(f => ({ path: f[0], size: f[1] }));
+      const selected = new DeliveryPacks(index.profiles[profile], files);
+      // Low graphics changes which slices the engine reads, not the validity of
+      // normal-quality packs. Reuse broader recorded coverage only for gaps.
+      // Keep selected.packs unchanged: eager startup prefetch remains specific
+      // to this profile and never downloads the extra catalogue speculatively.
+      if (profile === 'bootset_low.json' && Array.isArray(index.profiles['bootset.json'])) {
+        selected.fallback = new DeliveryPacks(index.profiles['bootset.json'], files);
+        selected.fallback.failed = selected.failed;
+        const key = p => JSON.stringify([p.url, p.sha256, p.decodedSha256, p.bytes, p.encodedBytes, p.runs]);
+        const primary = new Map(selected.packs.map(p => [key(p), p]));
+        // Equal bodies/layouts share promise and failure identity even when
+        // profile-specific prefetch flags differ in the JSON catalogue.
+        for (const ranges of selected.fallback.byFile.values()) for (const range of ranges) range.pack = primary.get(key(range.pack)) || range.pack;
+      }
+      return selected;
     }
     static async loadBootstrap(url, fetchImpl) {
       if (!/^\/data\/packs\/bootstrap-[a-f0-9]{64}\.json$/.test(url)) throw new Error('Invalid bootstrap URL');

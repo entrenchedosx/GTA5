@@ -152,3 +152,8 @@ reached gameplay on both maps; original engine hash remains unchanged. Current
 production version is `85865fff-f58f-492d-bcc4-fa283446899d`; retained rollback
 is `f9d000c9-5e70-43e7-b1d5-17a7ab6b9176`. Physical iPhone gameplay is not
 verified, and this investigation does not mark the full mobile mission complete.
+
+
+## 2026-10-13 bounded texture decoder and native limitations
+
+See [the low-end update](LOW_END_OPTIMISATION.md) for confirmed request amplification, fixes, real launch resolutions, frame-time measurements, WABT findings and explicit physical-device limitations. Original native WASM and assets are unchanged; live resolution changes and iPhone/CPU-only gameplay are not established.

@@ -194,3 +194,8 @@ Full CPU gameplay remains the unfinished objective. The next implementation
 milestone is a command consumer and correct shader/texture execution for a
 captured real game frame, followed by live engine integration; the fixture is
 not a substitute for that milestone.
+
+
+## 2026-10-13 routing correction
+
+Explicit CPU mode previously bypassed the software-WebGPU selector. It now requests a verified fallback adapter through the existing complete renderer first, then tries the incomplete CPU subset. Unknown/hardware adapter types are rejected for explicit CPU mode. This fixes routing, not the missing full CPU/WebGL backend. No actual CPU-only GTA gameplay result is established. See LOW_END_OPTIMISATION.md.

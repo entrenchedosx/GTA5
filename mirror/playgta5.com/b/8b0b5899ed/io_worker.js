@@ -843,10 +843,11 @@ async function serve(slot) {
 const HINT_PAR = 96, LOW_PAR = 48, HINT_QUEUE_MAX = 2000;		// 96 in flight: a small read takes ~1.5 s whatever the link, so the speed is the number in flight (measured: 15 in flight = 1.3 MB/s)
 const hintQueue = [], lowQueue = [];
 let hintActive = 0, lowActive = 0, hintsSeen = 0, hintsFetched = 0;
+let queuedOnly = false, hintBudget = HINT_PAR;
 function pumpHints() {
 	for (;;) {
 		const low = !hintQueue.length;
-		if (hintActive + lowActive >= HINT_PAR || (low && (!lowQueue.length || lowActive >= LOW_PAR))) return;
+		if (hintActive + lowActive >= hintBudget || (low && (!lowQueue.length || lowActive >= LOW_PAR))) return;
 		const [id, off, len] = (low ? lowQueue : hintQueue).shift();
 		const f = files[id];
 		if (!f || off >= f.size) continue;
@@ -869,7 +870,10 @@ function drainHints(bell) {
 		const e = bell + ring + 4 * (tail % cap);
 		const raw = Atomics.load(HEAP32, e + 3);
 		if (!raw) break;		// claimed but not written yet: its writer rings the doorbell again when it is
-		(raw & 0x40000000 ? lowQueue : hintQueue).push([HEAP32[e], (HEAP32[e + 1] >>> 0) + (HEAP32[e + 2] >>> 0) * 4294967296, raw & 0x3fffffff]);
+		// Normal announcements are reads already queued by the engine (including
+		// visible texture streaming). Keep them in the conservative profile;
+		// discard speculative look-ahead instead of disabling both classes.
+		if (!queuedOnly || !(raw & 0x40000000)) (raw & 0x40000000 ? lowQueue : hintQueue).push([HEAP32[e], (HEAP32[e + 1] >>> 0) + (HEAP32[e + 2] >>> 0) * 4294967296, raw & 0x3fffffff]);
 		hintsSeen++;
 		Atomics.store(HEAP32, e + 3, 0);
 		tail = (tail + 1) >>> 0;
@@ -898,6 +902,8 @@ async function loop() {
 let ready = null, readErrorShown = false;
 async function init(m) {
 	base = m.base; bc = new BroadcastChannel('game-progress'); remoteLog = !!m.log; noHints = !!m.noHints;
+	queuedOnly = !!m.queuedOnly;
+	hintBudget = queuedOnly ? Math.max(1, Math.min(16, Number.isInteger(m.hintConcurrency) ? m.hintConcurrency : 4)) : HINT_PAR;
 	if (typeof Atomics.waitAsync !== 'function') throw new Error('This browser cannot run the data worker. Update Chrome or Edge.');
 	bc.postMessage({ label: 'Checking game data', io: { state: 'manifest' } });
 	let bootstrap = null;

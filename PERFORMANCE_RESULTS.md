@@ -618,3 +618,8 @@ FPS/frame percentiles, resident memory and sustained session duration are
 **unverified**. A13 native BC texture support and memory64/3 GiB requirements
 remain compatibility work, not a completed mobile port. No claim of 60 FPS or
 full CPU-only gameplay is made for this update.
+
+
+## 2026-10-13 low-end measurements
+
+See [the low-end update](LOW_END_OPTIMISATION.md) for confirmed request amplification, fixes, real launch resolutions, frame-time measurements, WABT findings and explicit physical-device limitations. Original native WASM and assets are unchanged; live resolution changes and iPhone/CPU-only gameplay are not established.

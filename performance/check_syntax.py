@@ -18,7 +18,7 @@ class Scripts(HTMLParser):
         if tag=='script' and self.active: self.scripts.append(''.join(self.current)); self.active=False
 
 count=0
-for name in ['loader.js','io_worker.js','wgpu_worker.js','performance-profiler.js','performance-page.js','geometry-buffer-arena.js', 'delivery-packs.js', 'delivery-page.js', 'delivery-audit.js', 'web-radio.js','cpu-rasterizer.js','cpu_worker.js','cpu-check-worker.js']:
+for name in ['quality-profile.js','loader.js','io_worker.js','wgpu_worker.js','performance-profiler.js','performance-page.js','geometry-buffer-arena.js', 'delivery-packs.js', 'delivery-page.js', 'delivery-audit.js', 'web-radio.js','cpu-rasterizer.js','cpu_worker.js','cpu-check-worker.js']:
     subprocess.run([str(node),'--check',str(build/name)],check=True); count+=1
 for page in [Path('mirror/playgta5.com/index.html'),Path('mirror/playgta5.com/cpu-renderer-check.html'),build/'geometry-arena-test.html',build/'fullscreen-test.html']:
     parser=Scripts(); parser.feed(page.read_text(encoding='utf-8'))

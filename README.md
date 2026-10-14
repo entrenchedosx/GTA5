@@ -74,3 +74,6 @@ On other operating systems, install the external data on Windows or copy an exis
 - **Fullscreen/windowed switches:** the game now keeps its desktop render resolution and fits the picture to the window, avoiding the compiled engine's resize crash. Borders preserve proportions when the window has a different shape. After updating, restart the local server and refresh the game; use Ctrl+Shift+R if an old page remains cached.
 - **Memory pressure:** test with a single game tab. The GTA VI scene still had active host paging after the allocation fix.
 - **Installer finds a differing asset:** use a new clone/destination or investigate the difference. It does not overwrite modified assets.
+# 2026-10-14 world streaming update
+
+See [WORLD_STREAMING_FIX.md](WORLD_STREAMING_FIX.md) for the reserved lane for blocking world-data reads, CPU binding-record reuse, actual measurements and remaining limits. Lower request counts and completed deployment do not establish stable 60 FPS or instant first-time world loading.

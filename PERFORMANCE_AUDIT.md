@@ -362,3 +362,6 @@ than GPU pass time in the tested scenes; no native binary speedup is claimed.
 ## Low-end profiles and streaming coverage
 
 See [the low-end update](LOW_END_OPTIMISATION.md) for confirmed request amplification, fixes, real launch resolutions, frame-time measurements, WABT findings and explicit physical-device limitations. Original native WASM and assets are unchanged; live resolution changes and iPhone/CPU-only gameplay are not established.
+# 2026-10-14 follow-up: delayed world and draw-binding preparation
+
+See `WORLD_STREAMING_FIX.md` for the confirmed pack-priority propagation defect, reserved demand lane, actual gameplay checks, two renderer A/B/A trials and their limitations. Missing terrain/buildings that eventually appear are a streaming/readiness symptom; the exact submitted spawn/cache state was not reproduced. No universal first-frame world-completion or repeatable overall FPS gain is claimed. The update preserves original game assets and native WASM.

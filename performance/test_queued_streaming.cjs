@@ -7,7 +7,7 @@ const ctx=vm.createContext({HEAP32:heap,Atomics,Math,BS:4096,sh:{},noHints:false
 vm.runInContext(slice+'\nglobalThis.api={drainHints,configure(queued,budget){queuedOnly=queued;hintBudget=budget;},counts(){return {hintActive,lowActive,hintQueue:hintQueue.length,lowQueue:lowQueue.length};}};',ctx);
 heap[2]=16;heap[3]=64;heap[4]=20;
 for(let i=0;i<20;i++){const e=16+4*i;heap[e]=0;heap[e+1]=i*4096;heap[e+3]=4096|(i%2?0x40000000:0);}
-ctx.api.configure(true,4);ctx.api.drainHints(0);assert.equal(heap[5],20);assert.equal(jobs.length,4);assert.equal(ctx.api.counts().lowQueue,0);assert.ok(jobs.every(j=>!j.low));
+ctx.api.configure(true,4);ctx.api.drainHints(0);assert.equal(heap[5],20);assert.equal(jobs.length,4);assert.equal(ctx.api.counts().lowQueue,0);assert.ok(jobs.every(j=>j.low),'announced reads must not consume the reserved demand lane');
 (async()=>{let finished=0;while(pending.length){pending.shift()();finished++;for(let i=0;i<4;i++)await Promise.resolve();assert.ok(ctx.api.counts().hintActive<=4);}
 assert.equal(finished,10,'all actual queued reads complete');assert.equal(jobs.length,10,'speculative half is skipped');
 heap[4]=21;heap[16+4*20+3]=4096;ctx.noHints=true;ctx.api.drainHints(0);assert.equal(heap[5],20,'explicit no-hints still disables consumption');

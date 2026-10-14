@@ -23,6 +23,8 @@ function scenario(optimized) {
     device = fakeDevice; bindingOptimizationEnabled = ${optimized}; profiler = { cacheStats: { packCalls: 0, packHits: 0, fastChecks: 0, fastHits: 0, resourceEpochMisses: 0, bgSlowPaths: 0, bgFastEntryAllocations: 0, resets: 0, packBytes: 0 } };
     globalThis.api = { S, objs, resetState, stageBG, ubo,
       invalidateResource() { gEpoch++; },
+      bindUav(id) { S.uav[2][0] = id; bindEpoch[2]++; },
+      nextEncoder() { encEpoch++; },
       packCalls() { return profiler.cacheStats.packCalls; },
       bind(id, first = 0, sampler = 20) { S.cb[0][0].buf = id; S.cb[0][0].first = first; S.smp[0][0] = sampler; bindEpoch[0]++; },
       snapshot(prog, result) {
@@ -58,10 +60,27 @@ function scenario(optimized) {
   assert.equal(snapshots.at(-1).offsets[0], 8 << 20, 'next frame uses its own ring slot');
   a.invalidateResource(); a.objs.delete(10); capture();
   assert.deepEqual(snapshots.at(-1).bytes, Array(16).fill(0), 'destroyed constants read zero');
-  assert.notEqual(records[0], records[1], 'binding state invalidation still rebuilds records');
-  return { snapshots, packCalls: a.packCalls() };
+  if (optimized) assert.equal(records[0], records[1], 'binding invalidation updates the reusable record');
+  else assert.notEqual(records[0], records[1], 'baseline invalidation rebuilds records');
+  // Programs without constants still need resource lifetime and dirty-proxy
+  // replay. Reusing a record must replace its arrays rather than keep old UAVs.
+  const t1 = {format:'rgba8unorm',tex:{createView(){return {id:'view1'};}},proxy_fdepth:{dirty:false}};
+  const t2 = {format:'rgba8unorm',tex:{createView(){return {id:'view2'};}},proxy_fdepth:{dirty:false}};
+  a.objs.set(30,t1); a.objs.set(31,t2);
+  a.objs.set(40,{res:30,a:0,views:new Map()}); a.objs.set(41,{res:31,a:0,views:new Map()});
+  const compute = {groupBindings:{0:[{kind:'storage-texture',binding:160,dim:'2d'}]},bgls:[{}]};
+  a.bindUav(40); const firstUav = a.stageBG(2,compute,0);
+  t1.proxy_fdepth.dirty=false; a.nextEncoder();
+  assert.equal(a.stageBG(2,compute,0),firstUav);
+  assert.equal(t1.proxy_fdepth.dirty,true,'cached UAV use dirties its proxy');
+  a.bindUav(41); const secondUav = a.stageBG(2,compute,0);
+  t1.proxy_fdepth.dirty=t2.proxy_fdepth.dirty=false; a.nextEncoder(); a.stageBG(2,compute,0);
+  assert.equal(t1.proxy_fdepth.dirty,false,'recycled record releases the previous UAV');
+  assert.equal(t2.proxy_fdepth.dirty,true,'recycled record replays the current UAV');
+  return { snapshots, packCalls: a.packCalls(), uavs:[firstUav.bg.entries[0].resource.id,secondUav.bg.entries[0].resource.id] };
 }
 const optimized = scenario(true), original = scenario(false);
 assert.deepEqual(optimized.snapshots, original.snapshots, 'removing the repeated lookup preserves consumed bindings and packed bytes');
+assert.deepEqual(optimized.uavs, original.uavs, 'recycling preserves storage texture views');
 assert.ok(optimized.packCalls < original.packCalls, 'the duplicate packing lookup is eliminated');
 console.log('PASS: binding/sampler changes, constant versions/ranges, zero bindings, reset, frame slots, destruction; original and optimized output match; duplicate lookups eliminated');

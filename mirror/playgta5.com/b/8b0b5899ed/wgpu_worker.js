@@ -43,7 +43,8 @@ let geometryArena = null;
 const profileEnabled = !isNode && new URLSearchParams(self.location.search).get('profile') === '1';
 if (profileEnabled) importScripts('performance-profiler.js?revision=' + encodeURIComponent(new URLSearchParams(self.location.search).get('revision') || '1'));
 let profiler = null;
-let bindingOptimizationEnabled = false;
+// Reuse per-program binding metadata; A/B/A diagnostics retain the old path.
+let bindingOptimizationEnabled = true;
 if (profileEnabled) new BroadcastChannel('game-performance-control').onmessage = ev => {
 	if (ev.data.capture && profiler) {
 		(logLine.captureBC || (logLine.captureBC = new BroadcastChannel('game-performance-capture'))).postMessage({ frames: profiler.frames, resources: profileResources() });
@@ -1631,6 +1632,26 @@ function idSources(prog, group) {
 function boundId(stage, k, x) { return k === 0 ? S.cb[stage][x].buf : k === 1 ? S.cb[stage][x].first : k === 2 ? S.smp[stage][x] : k === 3 ? S.srv[stage][x] : S.uav[stage][x]; }
 function readIds(stage, src) { const out = new Array(src.length >> 1); for (let i = 0; i < src.length; i += 2) out[i >> 1] = boundId(stage, src[i], src[i + 1]); return out; }
 function sameIds(stage, src, ids) { for (let i = 0; i < src.length; i += 2) if (boundId(stage, src[i], src[i + 1]) !== ids[i >> 1]) return false; return true; }
+function rememberStageBG(prog, stage, src, result, epoch, resourceEpoch) {
+	let e = prog.fast[stage];
+	if (!e) {
+		e = prog.fast[stage] = { objs: [], vers: [], used: [], dirty: [], ids: [] };
+		if (profiler) profiler.cacheStats.bgFastEntryAllocations++;
+	} else if (profiler) profiler.cacheStats.bgFastEntryReuses = (profiler.cacheStats.bgFastEntryReuses || 0) + 1;
+	e.epoch = epoch; e.gEpoch = resourceEpoch; e.frame = ubo.frame;
+	e.result = result; e.noFast = sawProxy;
+	e.chunkId = prog.pack && result.dyn.length === 1 ? result.chunkId || 0 : 0;
+	const members = prog.pack && prog.pack.members, count = members ? members.length : 0;
+	e.objs.length = e.vers.length = count;
+	for (let i = 0; i < count; i++) {
+		const c = S.cb[stage][members[i].binding], o = c.buf ? objs.get(c.buf) : null;
+		e.objs[i] = o; e.vers[i] = o ? o.version : -1;
+	}
+	e.ids.length = src.length >> 1;
+	for (let i = 0; i < src.length; i += 2) e.ids[i >> 1] = boundId(stage, src[i], src[i + 1]);
+	e.used.length = bgUsed.length; for (let i = 0; i < bgUsed.length; i++) e.used[i] = bgUsed[i];
+	e.dirty.length = bgDirty.length; for (let i = 0; i < bgDirty.length; i++) e.dirty[i] = bgDirty[i];
+}
 function stageBG(stage, prog, group) {
 	const e = prog.fast && prog.fast[stage];
 	if (profiler) { profiler.cacheStats.fastChecks++; if (e && e.gEpoch !== gEpoch) profiler.cacheStats.resourceEpochMisses++; }
@@ -1660,6 +1681,7 @@ function stageBG(stage, prog, group) {
 	if (profiler) profiler.cacheStats.bgSlowPaths++;
 	const result = stageBindGroup(stage, prog, group, prog.bgls[group] || (prog.bgls[group] = bindGroupLayoutFor(prog, group, group)));
 	if (!prog.fast) { prog.fast = []; progsWithFast.add(prog); }
+	if (bindingOptimizationEnabled && result) { rememberStageBG(prog, stage, src, result, epoch, g); return result; }
 	if (result && profiler) profiler.cacheStats.bgFastEntryAllocations++;
 	if (result && prog.pack && result.dyn.length === 1) {
 		const chunkId = bindingOptimizationEnabled ? result.chunkId : packCopy(prog, stage)?.chunk.id || 0;

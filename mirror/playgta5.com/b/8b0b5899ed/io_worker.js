@@ -67,7 +67,7 @@ if (new URLSearchParams(self.location.search).get('profile') === '1') {
 	const profileChannel = new BroadcastChannel('game-performance-io');
 	setInterval(() => profileChannel.postMessage({ timeMs: performance.now(), fetchedBytes: statTotal,
 		engineReads: netStat.demand, networkMisses: netStat.demandMiss, networkWaitMs: netStat.demandWaitMs,
-		fetches: netStat.started, activeFetches: netStat.active, activePackDownloads: packActive, queuedPacks: packQueue.length, persistentStore: !!sh,
+		fetches: netStat.started, activeFetches: netStat.active, activePackDownloads: packActive, queuedPacks: packQueue.length, packScheduling: { ...packScheduling }, persistentStore: !!sh,
 		rangeBatches: netStat.rangeBatches || 0, rangeRequestsSaved: netStat.rangeRequestsSaved || 0, packs: netStat.packs || 0, packFailures: netStat.packFailures || 0, packLoadAndValidationMs: netStat.packProcessingMs || 0, storeBytes: storeEnd, wasmBytes: mem ? mem.buffer.byteLength : 0, decompressionMs: null, note: 'HTTP body decompression is performed by the browser; archive decompression is inside WASM.' }), 2000);
 }
 function startNetStats() {
@@ -507,7 +507,7 @@ async function ensureBlocks(id, first, last, low) {
 			for (let k = Math.max(first, start / BS); k <= Math.min(last, Math.floor((start + n - 1) / BS)); k++) if (!index.has(id * 1048576 + k)) return true;
 			return false;
 		}));
-		await Promise.all(needed.map(pack => startPack(pack, false))); // rejected packs fail open to the original range path
+		await Promise.all(needed.map(pack => startPack(pack, !!low))); // preserve demand/background priority; rejected packs fail open
 	}
 	let runStart = -1;
 	if (untouched(id, f)) { first = 0; last = Math.ceil(f.size / BS) - 1; }
@@ -588,19 +588,39 @@ function readFromStore(id, off, len, dst) {
 // One pack fetch fills only missing blocks. Commit follows validation; failure
 // leaves the original range loader available and never poisons the journal.
 const packQueue = [];
+const packScheduling = { backgroundStarts: 0, demandStarts: 0, promoted: 0, demandQueueWaitMs: 0, maxDemandQueueWaitMs: 0 };
 let packActive = 0;
-function packSlot(low) {
+let packBackgroundActive = 0;
+const queuedPackSlots = new WeakMap();
+function promoteQueuedPack(pack) {
+	const job = queuedPackSlots.get(pack);
+	if (job && job.low) { job.low = false; packScheduling.promoted++; pumpPacks(); }
+}
+function packSlot(low, pack) {
 	return new Promise(resolve => {
-		const job = { low, resolve }; packQueue.push(job); packQueue.sort((a, b) => Number(a.low) - Number(b.low)); pumpPacks();
+		const job = { low, resolve, pack, queuedAt: performance.now() }; packQueue.push(job);
+		if (pack) queuedPackSlots.set(pack, job);
+		pumpPacks();
 	});
 }
 function pumpPacks() {
 	while (packActive < 4 && packQueue.length) {
-		packActive++; packQueue.shift().resolve(() => { packActive--; pumpPacks(); });
+		// Keep one lane free for the read currently blocking the engine. Queued
+		// world streaming must not occupy all four lanes with unrelated packs.
+		let at = packQueue.findIndex(job => !job.low);
+		if (at < 0) { if (packBackgroundActive >= 3) return; at = 0; }
+		const job = packQueue.splice(at, 1)[0], background = job.low;
+		if (background) packScheduling.backgroundStarts++;
+		else { const wait = performance.now() - job.queuedAt; packScheduling.demandStarts++; packScheduling.demandQueueWaitMs += wait; packScheduling.maxDemandQueueWaitMs = Math.max(packScheduling.maxDemandQueueWaitMs, wait); }
+		if (job.pack) queuedPackSlots.delete(job.pack);
+		packActive++; if (background) packBackgroundActive++;
+		let released = false;
+		const release = () => { if (released) return; released = true; packActive--; if (background) packBackgroundActive--; pumpPacks(); };
+		release.background = background; job.resolve(release);
 	}
 }
 function startPack(pack, low = true) {
-	if (packPromises.has(pack)) return packPromises.get(pack);
+	if (packPromises.has(pack)) { if (!low) promoteQueuedPack(pack); return packPromises.get(pack); }
 	if (deliveryPacks.failed.has(pack)) return Promise.resolve();
 	const jobs = [], owned = [];
 	for (const [id, start, length, source] of pack.runs) {
@@ -620,10 +640,10 @@ function startPack(pack, low = true) {
 	if (!jobs.length) return Promise.resolve();
 	const p = (async () => {
 		try {
-			const release = await packSlot(low);
+			const release = await packSlot(low, pack);
 			let bytes;
 			const t0 = performance.now();
-			try { bytes = await deliveryPacks.download(pack, (url, init) => fetchRetry(url, { ...init, priority: low ? 'low' : 'high' })); }
+			try { bytes = await deliveryPacks.download(pack, (url, init) => fetchRetry(url, { ...init, priority: release.background ? 'low' : 'high' })); }
 			finally { release(); }
 			netStat.packProcessingMs = (netStat.packProcessingMs || 0) + performance.now() - t0;
 			report(pack.encodedBytes);
@@ -857,7 +877,9 @@ function pumpHints() {
 		if (!need) continue;
 		if (low) lowActive++; else hintActive++;
 		hintsFetched++;
-		ensureBlocks(id, a, b, low).catch(() => {}).finally(() => { if (low) lowActive--; else hintActive--; pumpHints(); });
+		// Announced reads are useful background work; the synchronous engine
+		// reader gets demand priority when it actually needs those bytes.
+		ensureBlocks(id, a, b, true).catch(() => {}).finally(() => { if (low) lowActive--; else hintActive--; pumpHints(); });
 	}
 }
 function drainHints(bell) {

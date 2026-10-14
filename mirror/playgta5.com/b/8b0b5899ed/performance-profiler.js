@@ -20,7 +20,7 @@ class GamePerformanceProfiler {
     this.gpuErrors = 0;
     this.readbacks = [];
     this.sampledCpu = new Map();
-    this.cacheStats = { resets: 0, fastChecks: 0, fastHits: 0, resourceEpochMisses: 0, packCalls: 0, packHits: 0, packBytes: 0, bgSlowPaths: 0, bgFastEntryAllocations: 0 };
+    this.cacheStats = { resets: 0, fastChecks: 0, fastHits: 0, resourceEpochMisses: 0, packCalls: 0, packHits: 0, packBytes: 0, bgSlowPaths: 0, bgFastEntryAllocations: 0, bgFastEntryReuses: 0 };
     this.channel = new BroadcastChannel('game-performance');
     this.slots = device.features.has('timestamp-query') ? Array.from({ length: 3 }, () => ({
       query: device.createQuerySet({ type: 'timestamp', count: this.capacity }),

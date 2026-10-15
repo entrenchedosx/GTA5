@@ -2677,5 +2677,85 @@
       "Historical io.fetchedBytes represented decoded store writes; measurementVersion 2 corrects this"
     ],
     "candidateVersion": "edcb8634-7f78-4589-a521-ae347a7c0e4c"
+  },
+  "worldStartupRelease20261014": {
+    "version": "edcb8634-7f78-4589-a521-ae347a7c0e4c",
+    "implementationCommit": "579a3cb6d5056b239030208797d4d3bbaa4069da",
+    "deployedPercent": 100,
+    "runtime": "a73ab54d112708dc82010fd15d1b0a5bf609e0bfc3689f0b72dc1e37852a9076",
+    "publicWarmWorldReadyMs": {
+      "gta5": 17756.204999998212,
+      "gta6": 13863.29999999702
+    },
+    "gta6Observation": {
+      "frames": 1519,
+      "fps": 52.204452431475474,
+      "frameMs": {
+        "samples": 1519,
+        "mean": 19.155454246218145,
+        "median": 17.599999994039536,
+        "p95": 27.405000001192093,
+        "max": 45.57500000298023
+      },
+      "cpuMs": {
+        "samples": 1519,
+        "mean": 16.295516786644377,
+        "median": 15.935000017285347,
+        "p95": 19.394999980926514,
+        "max": 36.05000002682209
+      },
+      "gpuMs": {
+        "samples": 50,
+        "mean": 1.2150374400000015,
+        "median": 1.245184,
+        "p95": 1.31072,
+        "max": 1.31072
+      },
+      "framesOver100Ms": 0,
+      "memory": {
+        "wasmCapacityBytes": 3678470144,
+        "textureBytes": 2638223444,
+        "bufferBytes": 1242730388,
+        "proxyTextureBytes": 8294404,
+        "proxyTextures": 4,
+        "proxyTexturesCreated": 4,
+        "proxyTexturesDestroyed": 0,
+        "uniformRingBytes": 25165824,
+        "objectsAlive": 100668,
+        "objectTableLength": 162983,
+        "bindGroupCache": 1855
+      }
+    },
+    "environment": {
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "viewport": [
+        1280,
+        720
+      ],
+      "devicePixelRatio": 1,
+      "crossOriginIsolated": true,
+      "settings": {
+        "mode": "sandbox",
+        "map": "env_test",
+        "quality": "balanced",
+        "profile": "1",
+        "deliveryAudit": "1"
+      },
+      "visibility": "visible"
+    },
+    "packFailures": 0,
+    "capturedWarningsErrors": 0,
+    "previewDeliveryChecksPassed": 55,
+    "publicBodyIsolationChecksPassed": 27,
+    "publicStaticLabels": 26,
+    "strictPublicRoutingPassed": false,
+    "routingException": "Byte-identical io_worker.js retained cached HIT worker label after targeted purge; fresh query reports static. Original strict checks unchanged. Actual account billing unmeasured.",
+    "limitations": [
+      "Warm stores; not a loading-speed comparison",
+      "Short stationary gameplay observation, not sustained route performance",
+      "Stable 60 FPS not achieved",
+      "Neither physical iPhone nor Dell available",
+      "Estimated allocation counts are not resident GPU memory"
+    ]
   }
 }

@@ -42,7 +42,7 @@ self.onmessage = (ev) => {
 	const maybeStart = () => { if (!failed && !engineStarted && dataReady && graphicsReady) { engineStarted = true; start(); } };
 	const openData = () => {
 		if (failed || io) return;
-		io = new Worker(runtimeBase + '/io_worker.js?runtime=delivery-1' + (m.deliveryAudit ? '&deliveryAudit=1&role=io' : '') + (m.profile || m.deliveryAudit ? '&profile=1' : ''));
+		io = new Worker(runtimeBase + '/io_worker.js?runtime=delivery-1&ioSession=' + encodeURIComponent(m.ioSession || '') + (m.deliveryAudit ? '&deliveryAudit=1&role=io' : '') + (m.profile || m.deliveryAudit ? '&profile=1' : ''));
 		io.onmessage = (e) => {
 			if (failed || engineStarted) return;
 			if (e.data.error) { fail('Game data unavailable: ' + e.data.error); return; }

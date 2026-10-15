@@ -69,6 +69,7 @@ if (!await acquireGameLease(navigator.locks)) {
 // main() run and which may block); the page only owns the canvas, which is transferred to that worker and on to the GPU worker.
 // Query string: ?args=-flag1,-flag2=value (added to the engine command line), ?shot=N (screenshot of every N-th present to the dev server).
 const q = new URLSearchParams(location.search);
+const ioSession = crypto.randomUUID();
 // Safari does not expose deviceMemory. Treat touch-only devices conservatively;
 // explicit low/res/fps query settings remain available for matched benchmarks.
 const mobileProfile = navigator.maxTouchPoints > 0 && matchMedia('(pointer: coarse)').matches;
@@ -243,7 +244,7 @@ document.getElementById('startup-retry').addEventListener('click', () => locatio
 		if (m.error || m.gpuLost) {
 			failed = startupFailed = true; clearInterval(stallTimer); clearInterval(fineTick);
 			// Terminating the owner also stops its nested engine/GPU/IO workers.
-			try { new BroadcastChannel('game-io').postMessage('close'); } catch (e) {}
+			try { new BroadcastChannel('game-io-' + ioSession).postMessage('close'); } catch (e) {}
 			if (gameWorker) { gameWorker.terminate(); gameWorker = null; }
 			label.textContent = m.error || 'Graphics device lost: ' + m.gpuLost;
 			label.style.color = '#e66';
@@ -310,7 +311,7 @@ if (remoteLog) {
 	new BroadcastChannel('game-log').onmessage = (ev) => { queue.push(ev.data); if (queue.length > 20000) queue.splice(0, queue.length - 20000); pump(); };
 }
 // Release the io worker's exclusive storage handles as soon as this page goes away (a quick reload would otherwise find them locked and run without the store).
-addEventListener('pagehide', () => { try { new BroadcastChannel('game-io').postMessage('close'); } catch (e) {} });
+addEventListener('pagehide', () => { try { new BroadcastChannel('game-io-' + ioSession).postMessage('close'); } catch (e) {} });
 // Earlier versions cached the game data with a service worker (sw.js) and the Cache API: remove both, the io worker keeps its own store (io_worker.js).
 async function dropOldCache() {
 	try {
@@ -394,6 +395,7 @@ const worker = gameWorker = new Worker(RUNTIME + '/loader.js?runtime=delivery-1'
 		canvas: offscreen,
 		base: BASE,
 		runtimeBase: RUNTIME,
+		ioSession,
 		deliveryAudit: q.get('deliveryAudit') === '1',
 		cacheNamespace: q.get('deliveryAudit') === '1' ? q.get('cacheNamespace') : '',
 		packIndex: q.get('packs') === '0' ? '' : '/data/delivery.json',

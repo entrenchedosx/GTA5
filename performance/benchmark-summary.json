@@ -2676,6 +2676,6 @@
       "No FPS improvement established",
       "Historical io.fetchedBytes represented decoded store writes; measurementVersion 2 corrects this"
     ],
-    "candidateVersion": "5953abf5-e2f3-40d6-aee9-3bc5c8a594b1"
+    "candidateVersion": "edcb8634-7f78-4589-a521-ae347a7c0e4c"
   }
 }

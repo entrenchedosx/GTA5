@@ -978,7 +978,7 @@ async function init(m) {
 }
 
 // The page tells us when it is going away (pagehide): close the handles at once so the next load can take them.
-new BroadcastChannel('game-io').onmessage = (ev) => {
+new BroadcastChannel('game-io-' + (new URLSearchParams(self.location.search).get('ioSession') || '')).onmessage = (ev) => {
 	if (ev.data !== 'close') return;
 	if (flushTimer) { clearTimeout(flushTimer); flushTimer = 0; }
 	writeJournal();

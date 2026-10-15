@@ -77,3 +77,5 @@ On other operating systems, install the external data on Windows or copy an exis
 # 2026-10-14 world streaming update
 
 See [WORLD_STREAMING_FIX.md](WORLD_STREAMING_FIX.md) for the reserved lane for blocking world-data reads, CPU binding-record reuse, actual measurements and remaining limits. Lower request counts and completed deployment do not establish stable 60 FPS or instant first-time world loading.
+
+The startup overlay follow-up in `WORLD_STREAMING_FIX.md` reached the native GTA VI world-ready milestone in 95.31 and 91.02 seconds versus 192.07 seconds in the controlled original-catalogue run, using 27.4% fewer IO encoded body bytes. These were fresh asset stores with warm engine/compiler caches and 4 MiB/s per pack connection, not physical low-end hardware. The update also fixes a fixed 45-second pack timeout that aborted progressing downloads, and separates received-body progress from decoded store bytes. All 26 Node suites and ancillary checks passed locally; stable 60 FPS and full nearby-texture completion remain unestablished.

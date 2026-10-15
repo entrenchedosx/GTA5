@@ -65,9 +65,9 @@ const reqStats = { n: 0, bytes: 0, small: [0, 0], mid: [0, 0], big: [0, 0], head
 const netStat = { started: 0, active: 0, maxActive: 0, demand: 0, demandMiss: 0, demandWaitMs: 0, cold: 0, slowLogged: 0 };		// cold: reads that had to start their own fetch (nobody hinted them); the other misses joined a fetch in flight (hinted, but not finished yet)
 if (new URLSearchParams(self.location.search).get('profile') === '1') {
 	const profileChannel = new BroadcastChannel('game-performance-io');
-	setInterval(() => profileChannel.postMessage({ timeMs: performance.now(), fetchedBytes: statTotal,
+	setInterval(() => profileChannel.postMessage({ measurementVersion: 2, timeMs: performance.now(), fetchedBytes: observedResponseBytes, storedDecodedBytes: statTotal,
 		engineReads: netStat.demand, networkMisses: netStat.demandMiss, networkWaitMs: netStat.demandWaitMs,
-		fetches: netStat.started, activeFetches: netStat.active, activePackDownloads: packActive, queuedPacks: packQueue.length, packScheduling: { ...packScheduling }, persistentStore: !!sh,
+		fetches: netStat.started, activeFetches: netStat.active, activePackDownloads: packActive, queuedPacks: packQueue.length, packScheduling: { ...packScheduling }, packFailuresRecent: packFailuresRecent.slice(), persistentStore: !!sh,
 		rangeBatches: netStat.rangeBatches || 0, rangeRequestsSaved: netStat.rangeRequestsSaved || 0, packs: netStat.packs || 0, packFailures: netStat.packFailures || 0, packLoadAndValidationMs: netStat.packProcessingMs || 0, storeBytes: storeEnd, wasmBytes: mem ? mem.buffer.byteLength : 0, decompressionMs: null, note: 'HTTP body decompression is performed by the browser; archive decompression is inside WASM.' }), 2000);
 }
 function startNetStats() {
@@ -92,7 +92,9 @@ function noteRequest(off, len) {
 	const c = len <= 65536 ? r.small : len <= 1048576 ? r.mid : r.big; c[0]++; c[1] += len;
 	if (off < 1048576) { r.head[0]++; r.head[1] += len; }
 }
+let observedResponseBytes = 0;
 function report(n) {
+	observedResponseBytes += n;
 	pendingBytes += n;
 	scheduleProgress();
 }
@@ -588,6 +590,11 @@ function readFromStore(id, off, len, dst) {
 // One pack fetch fills only missing blocks. Commit follows validation; failure
 // leaves the original range loader available and never poisons the journal.
 const packQueue = [];
+const packFailuresRecent = [];
+function notePackFailure(pack, error) {
+	packFailuresRecent.push({ url: pack.url, reason: String(error && error.message || error).slice(0, 200), timeMs: performance.now() });
+	if (packFailuresRecent.length > 8) packFailuresRecent.shift();
+}
 const packScheduling = { backgroundStarts: 0, demandStarts: 0, promoted: 0, demandQueueWaitMs: 0, maxDemandQueueWaitMs: 0 };
 let packActive = 0;
 let packBackgroundActive = 0;
@@ -643,10 +650,9 @@ function startPack(pack, low = true) {
 			const release = await packSlot(low, pack);
 			let bytes;
 			const t0 = performance.now();
-			try { bytes = await deliveryPacks.download(pack, (url, init) => fetchRetry(url, { ...init, priority: release.background ? 'low' : 'high' })); }
+			try { bytes = await deliveryPacks.download(pack, (url, init) => fetchRetry(url, { ...init, priority: release.background ? 'low' : 'high' }), report); }
 			finally { release(); }
 			netStat.packProcessingMs = (netStat.packProcessingMs || 0) + performance.now() - t0;
-			report(pack.encodedBytes);
 			for (const r of jobs) {
 				storeWrite(bytes.subarray(r.source, r.source + r.length), r.offset);
 				tally(files[r.id], r.length);
@@ -659,6 +665,7 @@ function startPack(pack, low = true) {
 			netStat.packs = (netStat.packs || 0) + 1; scheduleFlush();
 		} catch (e) {
 			deliveryPacks.failed.add(pack); netStat.packFailures = (netStat.packFailures || 0) + 1;
+			notePackFailure(pack, e);
 			log('[io] pack failed: ' + e.message + '; using original file ranges');
 		} finally {
 			for (const key of owned) if (inflight.get(key) === p) inflight.delete(key);
@@ -737,8 +744,7 @@ function startMemPack(pack) {
 	const p = (async () => {
 		const release = await packSlot(false);
 		try {
-			const bytes = await deliveryPacks.download(pack, fetchRetry);
-			report(pack.encodedBytes);
+			const bytes = await deliveryPacks.download(pack, fetchRetry, report);
 			for (const [id,start,length,source] of pack.runs) {
 				for (let at=0; at<length; at+=BS) {
 					const key=id*1048576+(start+at)/BS;

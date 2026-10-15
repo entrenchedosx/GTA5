@@ -3,7 +3,7 @@
 (function () {
   const MAX_BYTES = 8 * 1048576, MAX_ENCODED = MAX_BYTES + 65536;
   const hash = async bytes => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), b => b.toString(16).padStart(2, '0')).join('');
-  async function bounded(stream, expected, maximum) {
+  async function bounded(stream, expected, maximum, onProgress) {
     const exact = expected !== null;
     if (exact && (!Number.isSafeInteger(expected) || expected < 0 || expected > maximum)) throw new Error('Invalid pack size');
     const capacity = exact ? expected : maximum;
@@ -12,6 +12,7 @@
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
+        if (onProgress) onProgress(value.length);
         if (at + value.length > capacity) throw new Error('Oversized pack');
         result.set(value, at); at += value.length;
       }
@@ -46,6 +47,12 @@
       }
     }
     forBlocks(id, first, last) {
+      // A fully covering small metadata pack avoids an unrelated 8 MiB world
+      // download. Larger reads retain the original path without double fetches.
+      if (this.startup) {
+        const r = (this.startup.byFile.get(id) || []).find(r => r.first <= first && r.last >= last && !this.failed.has(r.pack));
+        if (r) return [r.pack];
+      }
       const ranges = this.byFile.get(id) || [], selected = new Set();
       // A file normally has a few archive ranges. Binary search the first
       // intersecting range rather than scanning the entire world index.
@@ -62,17 +69,30 @@
       fill(cursor, last);
       return [...selected];
     }
-    async download(pack, fetchImpl) {
-      const controller = new AbortController(), timeout = setTimeout(() => controller.abort(), 45000);
+    async download(pack, fetchImpl, onProgress) {
+      const controller = new AbortController();
+      let idle, abortReason = '';
+      const abort = reason => { abortReason = reason; controller.abort(); };
+      const armIdle = (ms, reason) => { clearTimeout(idle); idle = setTimeout(() => abort(reason), ms); };
+      armIdle(45000, 'Pack response headers timed out');
+      // A healthy slow link must not lose an almost-finished multi-MiB pack.
+      // Still bound silent transfers and total lifetime independently.
+      const maximum = setTimeout(() => abort('Pack exceeded 180 s transfer limit'), 180000);
       try {
         const response = await fetchImpl(pack.url, { cache: 'force-cache', signal: controller.signal });
         if (!response.ok || !response.body) throw new Error('Pack HTTP ' + response.status);
-        const bytes = await bounded(response.body, pack.encodedBytes, MAX_ENCODED);
+        armIdle(30000, 'Pack response body stalled');
+        const bytes = await bounded(response.body, pack.encodedBytes, MAX_ENCODED, n => {
+          armIdle(30000, 'Pack response body stalled');
+          if (onProgress) onProgress(n);
+        });
+        clearTimeout(idle);
         if (await hash(bytes) !== pack.sha256) throw new Error('Corrupt pack hash');
         const decoded = await bounded(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip')), pack.bytes, MAX_BYTES);
         if (await hash(decoded) !== pack.decodedSha256) throw new Error('Corrupt decoded pack');
         return decoded;
-      } finally { clearTimeout(timeout); }
+      } catch (e) { if (abortReason) throw new Error(abortReason); throw e; }
+      finally { clearTimeout(idle); clearTimeout(maximum); }
     }
     static async validateIndex(index, version, manifestFiles) {
       const fingerprint = await hash(new TextEncoder().encode(JSON.stringify(manifestFiles.map(f => [f[0], f[1]]))));
@@ -94,6 +114,10 @@
         // Equal bodies/layouts share promise and failure identity even when
         // profile-specific prefetch flags differ in the JSON catalogue.
         for (const ranges of selected.fallback.byFile.values()) for (const range of ranges) range.pack = primary.get(key(range.pack)) || range.pack;
+      }
+      if (index.startupPacks !== undefined) {
+        selected.startup = new DeliveryPacks(index.startupPacks, files);
+        if (selected.startup.packs.some(p => p.bytes > 1048576)) throw new Error('Oversized startup pack');
       }
       return selected;
     }

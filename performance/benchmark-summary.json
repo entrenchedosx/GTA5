@@ -2638,5 +2638,44 @@
       "Nearby essential asset readiness is not separately measured"
     ],
     "runtime": "e81954ef7c79e2aa8bcacaead19183b355dd855b9a77e0ed977b3bbcc38acb8f"
+  },
+  "startupOverlay20261014": {
+    "environment": "Desktop Chromium, Balanced 1280x720; fresh OPFS; warm engine/shader compiler caches; 4 MiB/s per pack connection; HTTP IO cache reuse disabled",
+    "milestone": "native worldReady, not all visible textures ready",
+    "runs": [
+      {
+        "case": "original",
+        "worldReadyMs": 192066.89,
+        "ioEncodedBodyBytes": 797497459,
+        "storedDecodedBytes": 887532738,
+        "packAttempts": 111,
+        "engineReads": 9921
+      },
+      {
+        "case": "overlay",
+        "worldReadyMs": 95308.415,
+        "ioEncodedBodyBytes": 579358773,
+        "storedDecodedBytes": 660864194,
+        "packAttempts": 124,
+        "engineReads": 9905
+      },
+      {
+        "case": "overlay-repeat",
+        "worldReadyMs": 91018.405,
+        "ioEncodedBodyBytes": 579358773,
+        "storedDecodedBytes": 660864194,
+        "packAttempts": 124,
+        "engineReads": 9912
+      }
+    ],
+    "packFailures": 0,
+    "capturedErrors": 0,
+    "limitations": [
+      "Baseline once, candidate twice",
+      "No physical Dell or iPhone available",
+      "No FPS improvement established",
+      "Historical io.fetchedBytes represented decoded store writes; measurementVersion 2 corrects this"
+    ],
+    "candidateVersion": "5953abf5-e2f3-40d6-aee9-3bc5c8a594b1"
   }
 }
